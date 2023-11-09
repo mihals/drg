@@ -46,10 +46,13 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite
 
 class Bullets extends Phaser.Physics.Arcade.Group
 {
-    constructor (scene)
+    myScene: Phaser.Scene
+    blankShot:Phaser.Physics.Arcade.Sprite
+    constructor (scene:Phaser.Scene)
     {
         super(scene.physics.world, scene);
-
+        //this.myScene
+        
         this.createMultiple({
             frameQuantity: 5,
             key: 'bullet',
@@ -57,6 +60,18 @@ class Bullets extends Phaser.Physics.Arcade.Group
             visible: false,
             classType: Bullet
         });
+
+        let anim = scene.anims.create({
+            key: 'blankShoot',
+            frames: [
+                { key: 'empty' },
+                { key: 'blankShoot' },
+                { key: 'empty' }
+            ],
+            frameRate: 5,
+        });
+        //console.log(anim)
+        this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
     }
 
     fireBullet (x, y, velocityX)
@@ -68,19 +83,66 @@ class Bullets extends Phaser.Physics.Arcade.Group
             bullet.fire(x, y, velocityX);
         }
     }
+
+    fireBlank(x, y, velocityX){
+        this.blankShot.body.reset(x-3,y-10)
+        this.blankShot.play({key:'blankShoot',startFrame:0})
+        this.blankShot.setVelocityX(velocityX)
+    }
 }
 export default class Demo extends Phaser.Scene
 {
+    /** режимы и состояния игры: autoPilot - игра воспроизводится в режиме
+     * автопилота на основе сохранённых данных,
+     * waitAction - игра ожидает загрузки данных для воспроизведения в
+     * режиме автопилота, сбрасывается в false после загрузки, если массив
+     * инструкций непустой. Выставляется в true после выполнения всех
+     * инструкций в массиве keyActionArr
+     * needToSave - необходимо сохранить все ходы после окончания игры
+     * в ручном режиме
+     */
+    gameState: {autoPilot:boolean; waitAction:boolean; needToSave:boolean} 
     gameIsGone: boolean ;
     myCamera:Phaser.Cameras.Scene2D.Camera
     cursors:Phaser.Types.Input.Keyboard.CursorKeys
+    shooterGrp:Phaser.Physics.Arcade.Group
     shooter:Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     /**скорость стрелка по оси X */
     shooterVX:number
     virusOff:Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     bulletsGrp:Bullets
+    bigBulletsGrp:Phaser.Physics.Arcade.StaticGroup
     staticGrp:Phaser.Physics.Arcade.StaticGroup
     treeGrp:Phaser.Physics.Arcade.StaticGroup
+
+    actionObj: string[]
+    /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
+     *  клавиш 'up', 'left' или 'right' */
+    counterActionArr:number[]
+    /**показания часов в аргументе метода update time при воспроизведении
+     * фрейма с номером, указанным в массиве counterActionArr
+     */
+    timeActionArr:number[]
+    /**код клавиши, нажатой в соответствующем фрейме */
+    keyActionArr:string[]
+    /**скорость шутера в соответствующем фрейме */
+    vActionArr:number[]
+    /**x-координата шутера в соответствующем фрейме */
+    xActionArr:number[]
+    /**состояние шутера(стреляет или нет) в соответствующем фрейме */
+    shootActionArr:number[]
+
+    //isActionFetched:boolean = false;
+    /** номер фрейма, увеличивается при каждом вызове update, используется
+     * при фиксации действий пользователя - стрельбы и движения
+     */
+    updateCounter:number = 0;
+    /**номер индекса, по которому в counterActionArr находится номер очередного
+     * кадра, в котором в режиме автопилота должно быть совершено какое-либо
+     * действие - начата или закончена стрельба и(или)
+     * изменено направление движения
+    */
+    indCounterArr:number;
 
     // ovalBushGrp:Phaser.Physics.Arcade.StaticGroup
     // rogaBushGrp:Phaser.Physics.Arcade.StaticGroup
@@ -90,7 +152,14 @@ export default class Demo extends Phaser.Scene
      * счетчик - индекс наименьшего неиспользуемого объекта в bulettsArr
      */
     bulettCounter:number
-    shootOn:Boolean
+    /**
+     * количество пуль у стрелка
+     */
+    shootBullets:number
+    /**
+     * ведётся ли стрельба
+     */
+    shootOn:boolean
     /** счётчик срабатывания таймера checkBullets */
     delayChecker:number = 0;
     railway:any;
@@ -103,7 +172,9 @@ export default class Demo extends Phaser.Scene
     staticLayer:Phaser.GameObjects.Layer
     infoText:Phaser.GameObjects.Text
     fpsText:Phaser.GameObjects.Text
+    inputText:Phaser.GameObjects.Text
     numBullets:number = 0;
+    //blankShot:Phaser.GameObjects.Sprite
 
     /** Уровни для колонн и кустов */
     // lr20:Phaser.GameObjects.Layer;lr60:Phaser.GameObjects.Layer
@@ -115,15 +186,27 @@ export default class Demo extends Phaser.Scene
     constructor ()
     {
         super('demo');
+        this.shootBullets =100
+        this.gameState = {autoPilot: false,waitAction: false, needToSave:false}
         this.shootOn = false;
+        //this.actionArr = []
+        this.timeActionArr = []
+        this.counterActionArr = []
+        this.keyActionArr = []
+        this.vActionArr = []
+        this.xActionArr = []
+        this.shootActionArr = []
+        
     }    
 
     preload ()
     {
-        this.load.image('bg','assets/bg1.png')
-        this.load.image('railway','assets/railway4.png')
+        this.load.image('bg','assets/bg5.png')
+        this.load.image('railway','assets/railway4_B.png')
         this.load.image('gun','assets/gun1.png')
         this.load.image('bullet','assets/bullet0.png')
+        this.load.image('bigBullet','assets/bigBullet4.png')
+        this.load.image('bulletArs','assets/bulletArs.png')
         this.load.image('circleBullet','assets/circleBullet0.png')
         this.load.image('virusOff','assets/virusOff.png')
         this.load.image('walker0','assets/walker0b.png')
@@ -139,6 +222,7 @@ export default class Demo extends Phaser.Scene
         this.load.image('failed0','assets/failing0b.png')
         this.load.image('failed1','assets/fallen0b.png')
         this.load.image('granade','assets/granade0a.png')
+        
         this.load.image('bmp','assets/bmp.png')
         this.load.image('bmp1','assets/bmp1.png')
         this.load.image('bmp2','assets/bmp2.png')
@@ -172,11 +256,11 @@ export default class Demo extends Phaser.Scene
         this.load.image('explode21','assets/explode21.png')
         this.load.image('explode22','assets/explode22.png')
         this.load.image('explode23','assets/explode23.png')
-        this.load.image('bigTree','assets/bigTree.png')
-        this.load.image('midleTree','assets/midleTree.png')
-        this.load.image('rogaBush','assets/rogaBush.png')
-        this.load.image('rosaBush','assets/rosaBush.png')
-        this.load.image('ovalBush','assets/ovalBush.png')
+        this.load.image('bigTree','assets/bigTree_B.png')
+        this.load.image('midleTree','assets/midleTree_B.png')
+        this.load.image('rogaBush','assets/rogaBush_B.png')
+        this.load.image('rosaBush','assets/rosaBush_B.png')
+        this.load.image('ovalBush','assets/ovalBush_B.png')
         //this.load.image('scheben','assets/scheben.png')
         this.load.image('scheben1','assets/scheben10.png')
 
@@ -186,15 +270,81 @@ export default class Demo extends Phaser.Scene
         this.load.image('bulletStrike3','assets/bulletStrike3a.png')
         this.load.image('bulletStrike4','assets/bulletStrike4a.png')
         this.load.image('bulletStrike5','assets/bulletStrike5a.png')
+        this.load.image('blankShoot','assets/blankShoot.png')
+        
 
         this.load.image('empty','assets/empty.png')
     }
 
     create ()
     {
-        this.gameIsGone =true;
-        this.add.tileSprite(500,225,1000,450,'bg')
+        //this.blankShoot = this.add.sprite(400,250,'blankShoot').setDepth(12)
+        this.gameIsGone = true;
+        // let anim = this.anims.create({
+        //     key: 'blankShoot',
+        //     frames: [
+        //         { key: 'bulletStrike0' },
+        //         { key: 'bulletStrike5' },
+        //         { key: 'empty' }
+        //     ],
+        //     frameRate: 3,
+        //     repeat: -1
+        // });
+        this.input.on('pointerdown',(pointer)=>{
+                if(pointer.x <this.shooter.x -this.cameras.main.scrollX -50){
+                     this.shooter.setAcceleration(-60,0).setMaxVelocity(60)
+                     this.inputText.setText('left')
+                     return
+                }
+                if(pointer.x > this.shooter.x -this.cameras.main.scrollX +50){
+                    this.shooter.setAcceleration(60,0).setMaxVelocity(60) 
+                    this.inputText.setText('right')
+                    return
+                }
+                this.shootOn = !this.shootOn
+                this.inputText.setText('shootOn')
+        })
+
+        if (this.gameState.autoPilot) {
+            this.gameState.waitAction = true
+            let response = fetch('http://localhost/drgServer/get_actions.php',
+                {
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Origin': 'https://localhost/drg'
+                    },
+                    body: ('data=')
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                        //let reader = response.body.getReader()
+                        //reader.read().then(response =>{
+                        //    this.gameIsGone =false;
+                        //})
+
+                    }
+                }).then((data : {a_time:string, id:string, is_shoot:string,
+                    key_code:string, update_cntr:string, v:string,x:string}) => {
+                    this.timeActionArr = data.a_time.split(',').
+                        map((val)=>Number(val))
+                    this.counterActionArr = data.update_cntr.split(',').
+                        map((val)=>Number(val))
+                    this.keyActionArr = data.key_code.split(',')
+                    this.shootActionArr = data.is_shoot.split(',').
+                        map((val)=>Number(val))
+                    this.vActionArr = data.v.split(',').map((val)=>Number(val))
+                    this.xActionArr = data.x.split(',').map((val)=>Number(val))
+                    if(this.keyActionArr.length != 0){
+                        this.gameState.waitAction = false
+                        this.indCounterArr = 0
+                    }
+                    
+                    this.scene.resume()
+                })
+        }
         
+        this.add.tileSprite(500,225,1000,450,'bg')
         
         // this.lr20 = this.add.layer().setDepth(0)
         // this.lr60 = this.add.layer().setDepth(1)
@@ -210,6 +360,7 @@ export default class Demo extends Phaser.Scene
         
         this.infoText = this.add.text(50,0,'',{fill:'black'});
         this.fpsText = this.add.text(50,20,'',{fill:'black'});
+        this.inputText = this.add.text(50,40,'',{fill:'black'});
 
         this.anims.create({
             key: 'strike',
@@ -260,7 +411,7 @@ export default class Demo extends Phaser.Scene
         this.physics.add.collider(this.staticGrp,this.bulletsGrp,
             (stat:Phaser.Types.Physics.Arcade.GameObjectWithStaticBody,bullet:Bullet)=>{
                 this.add.sprite(stat.body.center.x,stat.body.bottom,'bulletStrike0').
-                    setDepth(8).anims.play({key:'strike', startFrame:0})
+                    setDepth(11).anims.play({key:'strike', startFrame:0})
                 bullet.body.reset(0,-32);
                 bullet.setActive(false).setVisible(false);
         })
@@ -271,7 +422,23 @@ export default class Demo extends Phaser.Scene
         this.shooter = this.physics.add.image(400,418,'gun');
         this.shooter.body.setCollideWorldBounds(true);
         this.shooter.body.setBoundsRectangle(new Phaser.Geom.Rectangle(90, 0, 910, 450))
-        
+
+        this.bigBulletsGrp = this.physics.add.staticGroup()
+        this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
+        this.bigBulletsGrp.create(790,426,'bigBullet').setData('isFull',true)
+
+        this.physics.add.overlap(this.shooter,this.bigBulletsGrp,
+            (shooter,bigBullet: Phaser.Types.Physics.Arcade.GameObjectWithStaticBody)=>{
+            if(this.shootBullets<=50 && bigBullet.getData('isFull')){
+                 this.shootBullets+=50
+                 bigBullet.setData('isFull',false)
+                 bigBullet.body.reset(-100,0)
+                 bigBullet.setActive(false)
+                 
+            }
+        })
+
+        //this.physics.world.co
         const { world } = this.physics;
         this.bulettCounter = 0;
         this.shootOn = false
@@ -318,36 +485,97 @@ export default class Demo extends Phaser.Scene
         this.add.tileSprite(500,438,1000,24,'scheben1')
         //this.add.tileSprite(500,442,1000,48,'scheben1')
         this.cameras.main.startFollow(this.shooter)
+        if(this.gameState.autoPilot) this.scene.pause()
     }
 
     update(time: number, delta: number): void {
         let deltaX:number =0;
-        let velocityX:number = 0
+        let velocityX:number = 0;
+        let boolToInt = this.shootOn? 1:0;
+        this.updateCounter++
 
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.up)){
-            this.shootOn = !this.shootOn
+        if (!this.gameState.autoPilot) {
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                this.shootOn = !this.shootOn
+                if(this.gameState.needToSave){
+                    this.timeActionArr.push(Math.round(time))
+                    this.counterActionArr.push(this.updateCounter)
+                    this.keyActionArr.push('u')
+                    this.vActionArr.push(this.shooter.body.velocity.x)
+                    this.xActionArr.push(this.shooter.body.x)
+                    this.shootActionArr.push(this.shootOn ? 1 : 0)
+                }
+            }
+
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
+                this.shooter.setAcceleration(-60, 0).setMaxVelocity(60)
+                if(this.gameState.needToSave){
+                    this.timeActionArr.push(Math.round(time))
+                    this.counterActionArr.push(this.updateCounter)
+                    this.keyActionArr.push('l')
+                    this.vActionArr.push(this.shooter.body.velocity.x)
+                    this.xActionArr.push(this.shooter.body.x)
+                    this.shootActionArr.push(this.shootOn ? 1 : 0)
+                }
+            }
+
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
+                this.shooter.setAcceleration(60, 0).setMaxVelocity(60)
+                if(this.gameState.needToSave){
+                    this.timeActionArr.push(Math.round(time))
+                    this.counterActionArr.push(this.updateCounter)
+                    this.keyActionArr.push('r')
+                    this.vActionArr.push(this.shooter.body.velocity.x)
+                    this.xActionArr.push(this.shooter.body.x)
+                    this.shootActionArr.push(this.shootOn ? 1 : 0)
+                }
+            }
+        }
+        else if(!this.gameState.waitAction){
+            // извлекаем номер очередного фрейма, в котором следует что-то совершить 
+            let numFrame = this.counterActionArr[this.indCounterArr]
+            if(numFrame == this.updateCounter){
+                // один и тот же номер фрейма может находится в соседних ячейках
+                // массива, если в момент воспроизведения этого фрейма была
+                // нажата не одна клавиша
+                while(numFrame == this.counterActionArr[this.indCounterArr]){
+                    switch(this.keyActionArr[this.indCounterArr]){
+                        case 'u':
+                            this.shootOn = this.shootActionArr[this.indCounterArr] == 1?
+                                true:false;
+                            break;
+                        case 'l':
+                            this.shooter.setAcceleration(-60, 0).setMaxVelocity(60)
+                            break;
+                        case 'r':
+                            this.shooter.setAcceleration(60, 0).setMaxVelocity(60)
+                            break;
+                    }
+                    if(this.indCounterArr+1 < this.counterActionArr.length){
+                        this.indCounterArr++;
+                    }else{
+                        this.gameState.waitAction = true
+                        break;
+                    }
+                }
+            }
         }
 
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)){
-            this.shooter.setAcceleration(-60,0).setMaxVelocity(60)
-        }
-
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.right)){
-            this.shooter.setAcceleration(60,0).setMaxVelocity(60)
-        }
-
-        this.infoText.setText(`num bullets: ${this.numBullets}`)
+        this.infoText.setText(`num bullets: ${this.shootBullets}`)
         this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
     }
 
-    // render(){
-    //     game.debug.text('FPS: ' + game.time.fps || 'FPS: --', 40, 40, "#00ff00");
-    // }
-
     checkBullet(){
         if(this.shootOn){
+            if(this.shootBullets>0){
             this.bulletsGrp.fireBullet(this.shooter.x,this.shooter.y-15,
                 this.shooter.body.velocity.x)
+            this.shootBullets--;
+            }else{
+                //this.blankShot.setPosition(this.shooter.x,this.shooter.y-15).play({key:'blankShoot',startFrame:0})
+                this.bulletsGrp.fireBlank(this.shooter.x,this.shooter.y-15,
+                    this.shooter.body.velocity.x)
+            }
         }
         this.delayChecker++;
         if(this.delayChecker ==10){
@@ -355,8 +583,25 @@ export default class Demo extends Phaser.Scene
         }
 
         // delayChecker до полного истребления всех диверсов первой волны
-        // досигалось 290, 300, 417,306 
+        // досигалось 290, 300, 417,306, после тренировок ~ 230 
         this.gameIsGone = this.enemies.handleUpdate();
+        if(!this.gameIsGone && this.gameState.needToSave){
+            let data:string[] = []
+            data.push(this.timeActionArr.join())
+            data.push(this.counterActionArr.join())
+            data.push(this.keyActionArr.join())
+            data.push(this.shootActionArr.join())
+            data.push(this.vActionArr.join())
+            data.push(this.xActionArr.join())
+            
+
+            saveActions(JSON.stringify(data))
+            this.gameState.needToSave = false
+            //this.isActionFetched = true
+            //if(res == true){
+
+            //}
+        }
         // if(!res && this.gameIsGone){
         //     this.gameIsGone = false;
         //     this.rwExplode.play({key:'rwExplode',startFrame:0});
@@ -367,11 +612,32 @@ export default class Demo extends Phaser.Scene
         //         })
         // }
     }
+
+    
+}
+
+function saveActions(data) {
+    // при получении данных с beget эта строчка должна быть раскомментирована
+    //let response = await fetch('https://galogame.ru/php/get_lvl_lead.php',
+    //C:\Server\data\htdocs\tutor1Server
+    //let data:string[]
+    //data.push(timeA)
+    let response = fetch('http://localhost/drgServer/set_actions.php',
+        {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Origin':'https://localhost/drg'
+            },
+            body: ('data=' + data)
+        }).then()
+    
+    //return false
 }
 
 const config = {
     
-    type: Phaser.AUTO,
+    type: Phaser.CANVAS,
     transparent: true,
     //backgroundColor: '#ffffff',
     width: 800,
@@ -380,7 +646,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
             gravity: { y: 0 }
         }
     },

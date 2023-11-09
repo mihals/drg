@@ -91,6 +91,7 @@ export class Enemies
 
     createGroup(kind: string, numEnemies: number, x: number, y: number) {
         if (kind == 'oneColumn') {
+            // 63 волкера
             // let column: OneColumn = new OneColumn(this.myScene, this.enemiesReserve,
             //      x, y, numEnemies).setVelocityX(-6)
             // this.oneColumnArr.push(column);
