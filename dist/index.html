@@ -5,23 +5,28 @@
     <meta http-equiv="Cache-Control" content="no-cache">
     <link href="styles.css" rel="stylesheet">
     <script src="game.js"></script>
-  </head>
+    
+    </head>
   <body>
+    <button id="starterBtn" disabled>Starter.</button>
       <div id="gameContainer"></div>
-      
-    <script>
-      // window.myEditor = null;
-      // async function loadEditor(){
-      //   let obj = await import("/assets/editor.js")//.default
-      //   let defObj = obj.default
-      //   window.myEditor = new defObj()
-      //   document.getElementById("virOnTd").addEventListener("click",window.myEditor)
-      //   document.getElementById("walkOnTd").addEventListener("click",window.myEditor)
-      //   document.getElementById("noneTd").addEventListener("click",window.myEditor)
-      //   document.getElementById("moveOn").addEventListener("click",window.myEditor)
-      //   let a = window.MyGame.scene
-      // }
-      // loadEditor()
-    </script>
+      <div id = 'loaderCont'></div>
+      <script>
+        MyGame.loadAtlas()
+        //import {loadAtlas} from './game'
+        //loadAtlas()
+        //MyGame()
+        let btnEl = document.getElementById("starterBtn")
+        btnEl.addEventListener('click', () => {
+          alert("btnCliked")
+        })
+        btnEl.disabled = false;
+        document.getElementById('loaderCont').addEventListener('assetLoaded',
+        () => {
+          MyGame.startGame()
+        })
+        //loadAtlas()
+      </script>
+      <!-- <div id="loaderCont"></div> -->
   </body>
 </html>

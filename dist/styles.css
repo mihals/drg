@@ -6,3 +6,4 @@ body {background-image: url('./assets/bg5.png'); background-repeat: repeat;
      padding: 0; margin: 0;} */
 /* body{background-color: rgb(184,183,8);padding: 0; margin: 0;}  */
 canvas {padding: 0; margin: 0;}
+#loaderCont {width: 1; height: 1; position: absolute; top:-10; left: -10;}

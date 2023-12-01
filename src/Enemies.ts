@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import Demo from './game';
+import {Demo} from './game';
 import { Bullet } from './game';
 
 /**класс, содержащий и управляющий группами диверсов и БМПешек */
@@ -13,8 +13,11 @@ export class Enemies
     oneColumnArr:Array<OneColumn>
     delayCounter:number = 0;
     rwExplode:Phaser.GameObjects.Sprite
+    /** первый добравшийся до ж\д станции диверсант */
+    firstWalker:Phaser.GameObjects.Sprite
     /**группа БМПешек */
     bmpGroup:Phaser.Physics.Arcade.Group
+    stayStrArray:Array<string>
 
     constructor(scene:Demo){
         this.myScene = scene;
@@ -82,6 +85,8 @@ export class Enemies
             ],
             frameRate: 5
         });
+
+        this.stayStrArray=['standStay','sitStay','handStay','stepStay','gunStay' ]
 
         this.enemiesReserve = new Reserve(scene);
         this.oneColumnArr = [];
@@ -185,7 +190,7 @@ export class Enemies
         let gameIsGone = this.myScene.gameIsGone;
         let locX;
         //locX =this.oneColumnArr[0].getChildren()[0].
-        this.oneColumnArr.forEach((item,index,array) => {
+        this.oneColumnArr.every((item,index,array) => {
             //item.incX(-4);
             // let prop;
             // try{(prop = item.getFirstAlive().x)}
@@ -201,57 +206,31 @@ export class Enemies
 
             //     }
             //}
-            if(gameIsGone && item.countActive()!=0 && item.getFirstAlive().x < 88){
+            if(gameIsGone && item.countActive()!=0 && item.getFirstAlive().x < 95){
+                this.firstWalker = item.getFirstAlive()
                 gameIsGone = false;
-                this.myScene.rwExplode.play({key:'rwExplode',startFrame:0});
-                this.myScene.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE,() =>{
-                this.myScene.railway.setTexture('blackRailway');
-                this.myScene.explodeTween.play();
-            })}
-
-            
-          
-        //     locX = this.bmpGroup.getChildren()[0].x++
-         //this.bmpGroup.incX(-0.1)
-        //this.bmpGroup.getChildren().forEach((item,index,array) => {
-
-            //if(item.state !=1) 
-            //(item as Phaser.Physics.Arcade.Sprite).x-=4
-        //});
-            
-        
-            //spr.setDebug(true)
-            //let x = spr.x;
-            //let grp = array[index];
-            //grp.incX(-2);
+                // this.myScene.rwExplode.play({key:'rwExplode',startFrame:0});
+                // this.myScene.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE,() =>{
+                // this.myScene.railway.setTexture('blackRailway');
+                // this.myScene.explodeTween.play();})
+                return false
+            }
+            return true
         })
-        // for(let i=0;i< this.oneColumnArr.length;i++){
-        //         if(this.oneColumnArr[i].countActive()==0){
-        //             this.oneColumnArr[i].destroy()
-        //             this.oneColumnArr.splice(i,1)
-        //         }
-        //     }
         return gameIsGone;
+    }
 
-        // this.delayCounter++;
-        // if(this.delayCounter==10){
-        //     //this.rwExplode.setTexture('virusOff');
-        //     this.myScene.rwExplode.play({key:'rwExplode',startFrame:0});
-        //     this.myScene.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE,() =>{
-        //         this.myScene.railway.setTexture('blackRailway');
-        //         this.myScene.explodeTween.play();
-        //     })
-            
-            //this.rwExplode.play({key:'rwExplode',startFrame:0});
-            //this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,600,200,5));
-
-        //if(this.delayCounter==26){
-            //this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,300,300,2));
-        //}
-
-        //if(this.delayCounter==36){
-            //this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,300,300,5));
-        //}
+    /**вызывается из update класса game как только gameIsGone становится false */
+    stopEnemies():Phaser.Geom.Point{
+        this.oneColumnArr.forEach((column,ind,arr) => {
+            column.getChildren().forEach((enemy:Phaser.GameObjects.Sprite,ind,arr) => {
+                enemy.anims.stop()
+                let num = Phaser.Math.RND.integerInRange(0,4)
+                enemy.setTexture(this.stayStrArray[num])
+            })
+        })
+        this.firstWalker.setTexture('granade')
+        return new Phaser.Geom.Point(this.firstWalker.x,this.firstWalker.y)
     }
 }
 
@@ -368,9 +347,6 @@ class BMP extends Phaser.Physics.Arcade.Sprite{
     constructor(scene:Demo, x:number, y:number){
         super(scene,x,y,'bmp')
         this.setState(4)
-        //this.setTexture('bmp')
-        //this.setBodySize(103,30)
-        //this.setPushable(false)
     }
     preUpdate (time, delta)
     {
