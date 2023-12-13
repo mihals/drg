@@ -13,7 +13,8 @@ import Walkers from './walkers';
 import { Walker } from './walkers';
 import { EnemyGrp } from './walkers';
 import { Enemies } from './Enemies';
-
+ 
+let glPreviewMode:boolean
 export class Bullet extends Phaser.Physics.Arcade.Sprite
 {
     constructor (scene, x, y)
@@ -213,7 +214,6 @@ export class Demo extends Phaser.Scene
     create ()
     {
         this.extractFromCache()
-        //this.blankShoot = this.add.sprite(400,250,'blankShoot').setDepth(12)
         this.gameIsGone = true;
         let bc:Phaser.Cache.BaseCache = (window as any).baseCache
         if (bc.exists("atlasImg") && bc.exists("atlasJson")) {
@@ -221,40 +221,8 @@ export class Demo extends Phaser.Scene
             this.textures.addAtlasJSONHash("atlas", bc.get("atlasImg"),
             bc.get("atlasJson"));
           }
-        // let anim = this.anims.create({
-        //     key: 'blankShoot',
-        //     frames: [
-        //         { key: 'bulletStrike0' },
-        //         { key: 'bulletStrike5' },
-        //         { key: 'empty' }
-        //     ],
-        //     frameRate: 3,
-        //     repeat: -1
-        // });
-        this.input.on('pointerdown',(pointer)=>{
-                // if(pointer.x <this.shooter.x -this.cameras.main.scrollX -50){
-                //      this.shooter.setAcceleration(-60,0).setMaxVelocity(60)
-                //      this.inputText.setText('left')
-                //      return
-                // }
-                // if(pointer.x > this.shooter.x -this.cameras.main.scrollX +50){
-                //     this.shooter.setAcceleration(60,0).setMaxVelocity(60) 
-                //     this.inputText.setText('right')
-                //     return
-                // }
-                if(pointer.x < this.shooterCont.x -this.cameras.main.scrollX -50){
-                    this.shooterContBody.body.setAcceleration(-60,0).setMaxVelocity(60)
-                    this.inputText.setText('left')
-                    return
-               }
-               if(pointer.x > this.shooterCont.x -this.cameras.main.scrollX + 50){
-                this.shooterContBody.body.setAcceleration(60,0).setMaxVelocity(60)
-                this.inputText.setText('right')
-                return
-                }
-                this.shootOn = !this.shootOn
-                this.inputText.setText('shootOn')
-        })
+        
+        
 
         if (this.gameState.autoPilot) {
             this.gameState.waitAction = true
@@ -269,11 +237,6 @@ export class Demo extends Phaser.Scene
                 }).then(response => {
                     if (response.ok) {
                         return response.json();
-                        //let reader = response.body.getReader()
-                        //reader.read().then(response =>{
-                        //    this.gameIsGone =false;
-                        //})
-
                     }
                 }).then((data : {a_time:string, id:string, is_shoot:string,
                     key_code:string, update_cntr:string, v:string,x:string}) => {
@@ -298,39 +261,17 @@ export class Demo extends Phaser.Scene
         this.add.tileSprite(500,225,1000,450,'bg')
 
         this.shooterCont = this.add.container(400,418);
-        //this.add.image(0,0,'gun')
         this.shooterCont.add(this.add.image(0,0,'gun'))
         
         this.leftBulletArs = this.add.image(-16,3,'bulletArs');
-        //this.leftBulletArs.setCrop(0,8,13,33)
         this.shooterCont.add(this.leftBulletArs)
         this.rightBulletArs = this.add.image(16,3,'bulletArs');
-        //this.rightBulletArs.setCrop(0,16,13,33)
         this.shooterCont.add(this.rightBulletArs)
         this.shooterCont.setSize(80,40)
         this.shooterContBody = this.physics.world.enableBody(this.shooterCont,
             Phaser.Physics.Arcade.DYNAMIC_BODY) as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
         this.shooterContBody.body.setCollideWorldBounds(true);
         this.shooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
-
-        //this.shooterCont = this.add.container(20,100)
-        //this.shooterCont.add(this.leftBulletArs)
-        //this.shooterCont.add([
-        //    this.leftBulletArs,this.rightBulletArs])
-        //this.add.image(500,418,'gun')
-        
-        
-        // this.lr20 = this.add.layer().setDepth(0)
-        // this.lr60 = this.add.layer().setDepth(1)
-        // this.lrTrees = this.add.layer().setDepth(2)
-        // this.lr100 = this.add.layer().setDepth(3)
-        // this.lr140 = this.add.layer().setDepth(4)
-        // this.lrOvalBush = this.add.layer().setDepth(5)
-        // this.lrRosaBush = this.add.layer().setDepth(6);
-        // this.lr180 = this.add.layer().setDepth(7)
-        // this.lrRogaBush = this.add.layer().setDepth(8);
-        // this.lr220 = this.add.layer().setDepth(9)
-
         
         this.infoText = this.add.text(50,0,'').setStyle({fill:'black'});
         this.fpsText = this.add.text(50,20,'').setStyle({fill:'black'});
@@ -351,7 +292,6 @@ export class Demo extends Phaser.Scene
             //repeat: -1
         });
 
-        //this.staticLayer = new Phaser.GameObjects.Layer(this)
         this.cameras.main.setBounds(0, 0, 1000, 225);
         this.physics.world.setBounds(0, 0, 1000, 450);
 
@@ -378,8 +318,6 @@ export class Demo extends Phaser.Scene
         this.staticGrp.create(621,50,'midleTree').
             setBodySize(92,60).setOffset(0,0).setDepth(5);
 
-        //this.staticLayer = this.add.layer(this.staticGrp.getChildren());
-
         this.bulletsGrp = new Bullets(this)
 
         this.physics.add.collider(this.staticGrp,this.bulletsGrp,
@@ -389,13 +327,6 @@ export class Demo extends Phaser.Scene
                 bullet.body.reset(0,-32);
                 bullet.setActive(false).setVisible(false);
         })
-
-        // this.add.rectangle(2400,200,24,24,0xff0000)
-        // this.add.rectangle(1200,200,24,24,0xff0000)
-        // this.add.rectangle(0,200,24,24,0xff0000)
-        // this.shooter = this.physics.add.image(500,418,'gun');
-        // this.shooter.body.setCollideWorldBounds(true);
-        // this.shooter.body.setBoundsRectangle(new Phaser.Geom.Rectangle(90, 0, 910, 450))
 
         this.bigBulletsGrp = this.physics.add.staticGroup()
         this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
@@ -416,38 +347,15 @@ export class Demo extends Phaser.Scene
                 }
             })
 
-        //this.physics.world.co
         const { world } = this.physics;
         this.bulettCounter = 0;
         this.shootOn = false
         
         this.enemies = new Enemies(this);
-        // временно закомментированные волкеры первого этапа (первой волны)
-        // this.enemies.createGroup('oneColumn',6,450,20);
-        // this.enemies.createGroup('oneColumn',5,550,60);
-        // this.enemies.createGroup('oneColumn',4,480,100);
-        // this.enemies.createGroup('oneColumn',3,530,140);
-        // this.enemies.createGroup('oneColumn',2,510,180);
-        // this.enemies.createGroup('oneColumn',1,420,220);
-
-        // this.enemies.createGroup('oneColumn',7,950,60);
-        // this.enemies.createGroup('oneColumn',6,880,100);
-        // this.enemies.createGroup('oneColumn',5,930,140);
-        // this.enemies.createGroup('oneColumn',4,910,180);
-        // this.enemies.createGroup('oneColumn',3,820,220);
-
-        // this.enemies.createGroup('oneColumn',4,1350,60);
-        // this.enemies.createGroup('oneColumn',4,1280,100);
-        // this.enemies.createGroup('oneColumn',4,1330,140);
-        // this.enemies.createGroup('oneColumn',5,1310,180);
-        // this.enemies.createGroup('oneColumn',4,120,220);
 
         this.enemies.createGroup('oneColumn',0,0,0)
 
         this.railway = this.physics.add.staticImage(44,225,'railway');
-        //this.add.image(0,422,'scheben')
-        //this.add.image(350,160,'treeOak');
-        //this.add.image(450,260,'treeOak2');
         
         this.cursors = this.input.keyboard.createCursorKeys();
         this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
@@ -475,13 +383,11 @@ export class Demo extends Phaser.Scene
         })
 
         this.add.tileSprite(500,438,1000,24,'scheben1')
-        //this.add.image(500,400,'sheben1')
-        //this.add.tileSprite(500,442,1000,48,'scheben1')
-        //this.cameras.main.startFollow(this.shooter)
+        
         this.cameras.main.startFollow(this.shooterCont)
         if(this.gameState.autoPilot) this.scene.pause()
-
-        //this.add.image(100,500,'atlas','explode1')
+        if(!glPreviewMode) this.turnOnInput()
+        else this.showPreview()
     }
 
     update(time: number, delta: number): void {
@@ -497,9 +403,8 @@ export class Demo extends Phaser.Scene
 
         let boolToInt = this.shootOn? 1:0;
         this.updateCounter++
-        //this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
 
-        if (!this.gameState.autoPilot) {
+        if (!glPreviewMode && !this.gameState.autoPilot) {
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.shootOn = !this.shootOn
                 if(this.gameState.needToSave){
@@ -514,7 +419,6 @@ export class Demo extends Phaser.Scene
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                //this.shooter.setAcceleration(-60, 0).setMaxVelocity(60)
                 if(this.gameState.needToSave){
                     this.timeActionArr.push(Math.round(time))
                     this.counterActionArr.push(this.updateCounter)
@@ -527,7 +431,6 @@ export class Demo extends Phaser.Scene
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
                 this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
-                //this.shooter.setAcceleration(60, 0).setMaxVelocity(60)
                 if(this.gameState.needToSave){
                     this.timeActionArr.push(Math.round(time))
                     this.counterActionArr.push(this.updateCounter)
@@ -538,7 +441,7 @@ export class Demo extends Phaser.Scene
                 }
             }
         }
-        else if(!this.gameState.waitAction){
+        else if(!glPreviewMode && !this.gameState.waitAction){
             // извлекаем номер очередного фрейма, в котором следует что-то совершить 
             let numFrame = this.counterActionArr[this.indCounterArr]
             if(numFrame == this.updateCounter){
@@ -572,14 +475,502 @@ export class Demo extends Phaser.Scene
         this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
     }
 
+    /** включается обработка управления с тачскрина, если игра не
+     * в режиме презентации
+     */
+    turnOnInput() {
+        this.input.on('pointerdown', (pointer) => {
+            if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
+                this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
+                this.inputText.setText('left')
+                return
+            }
+            if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
+                this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
+                this.inputText.setText('right')
+                return
+            }
+            this.shootOn = !this.shootOn
+            this.inputText.setText('shootOn')
+        })
+    }
+
+    showPreview(){
+        let bubble = this.add.graphics({x:0, y:0})
+        bubble.fillStyle(0x222222, 0.5);
+        bubble.fillRoundedRect(6, 6, 575, 48, 16);
+
+        //  Bubble color
+        bubble.fillStyle(0xffffff, 1);
+
+        //  Bubble outline line style
+        bubble.lineStyle(4, 0x565656, 1);
+
+        //  Bubble shape and outline
+        bubble.strokeRoundedRect(0, 0, 575,48, 16);
+        bubble.fillRoundedRect(0, 0, 575,48, 16);
+        bubble.generateTexture('captionBubble',582,54)
+        this.add.image(400,36,'captionBubble').setDepth(21)
+        bubble.clear()
+
+        let captionStyle:Phaser.Types.GameObjects.Text.TextStyle =
+            {fontFamily:"Roboto, Arial", fontSize: '30px', fontStyle: 'bold',
+            color: '#ff0000'}
+        let capTxt = this.add.text(200,16,'Управление на тачскрине:',captionStyle).setDepth(22);
+        capTxt.setShadow(1,1,'#000000')
+        capTxt.setDepth(22)
+        
+        bubble = this.add.graphics({x:0, y:0})
+        bubble.fillStyle(0x222222, 0.5);
+        bubble.fillRoundedRect(6, 6, 298, 128, 16);
+        //  Bubble color
+        bubble.fillStyle(0xffffff, 1);
+        //  Bubble outline line style
+        bubble.lineStyle(4, 0x565656, 1);
+        //  Bubble shape and outline
+        bubble.strokeRoundedRect(0, 0, 298, 128, 16);
+        bubble.fillRoundedRect(0, 0, 298, 128, 16);
+        bubble.generateTexture('bubble',305,135)
+        bubble.clear()
+
+        let rect = this.add.graphics({x:0,y:0})
+        rect.fillStyle(0x0000ff,0.3)
+        rect.fillRoundedRect(0,0,330,420,30)
+        rect.generateTexture('leftTouchRect',330,420)
+        rect.clear()
+        let leftToughtRect = this.add.image(188,228,'leftTouchRect').setAlpha(0)
+
+        rect.fillStyle(0x0000ff,0.3)
+        rect.fillRoundedRect(0,0,550,420,30)
+        rect.generateTexture('rightToughtRect',550,420)
+        rect.clear()
+        let rightToughtRect = this.add.image(532,228,'rightToughtRect').setAlpha(0)
+
+        rect.fillStyle(0x0000ff,0.3)
+        rect.fillRoundedRect(0,0,120,420,30)
+        rect.generateTexture('centerToughtRect',120,420)
+        rect.clear()
+        let centerToughtRect = this.add.image(400,228,'centerToughtRect').setAlpha(0)
+        
+        let hand = this.add.image(210,280,'hand').setAlpha(0)
+
+        const bubbleImg = this.add.image(186,148,'bubble').setDepth(21).setAlpha(0)
+        const leftBubbleTxt = this.add.text(0, 0, 'Жмите слева от орудия, чтобы двигаться влево.',
+          { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+        
+        let txtBnd = leftBubbleTxt.getBounds()
+        //console.log(txtBnd)
+        leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width/2 - 5,
+            bubbleImg.y - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
+
+        txtBnd = leftBubbleTxt.getBounds()
+        const rightBubbleTxt = this.add.text(0, 0, 'Жмите справа от орудия, чтобы двигаться вправо.',
+            { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+        rightBubbleTxt.setPosition(634 - rightBubbleTxt.width/2 - 5,
+            154 - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
+
+        const centerBubbleTxt = this.add.text(0, 0, 'Чтобы начать или закончить стрельбу, жмите над орудием.',
+        { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 }})
+        centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
+            154 - centerBubbleTxt.height/2 - 5).setDepth(22).setAlpha(0)
+
+        // цепочка для текста и подложек для него
+        this.tweens.chain({
+            // тыкаем слева от орудия
+            tweens:[
+            {
+                targets: bubbleImg,
+                props: {
+                    alpha: { value: 1 },
+                },
+                duration: 100
+            },
+            {
+                targets: leftBubbleTxt,
+                props: {
+                    alpha: { value: 1 },
+                },
+                duration: 300
+            },
+            {
+                targets: leftBubbleTxt,
+                props:{
+                    alpha:{value: 0}
+                },
+                duration: 300,
+                delay:3500
+            },
+            {
+                targets: bubbleImg,
+                props:{
+                    alpha:{value: 0}
+                },
+                duration: 100,
+                onComplete: () => {
+                    bubbleImg.setX(634)
+                    //bubbleImg.setAlpha(1)
+                },
+            },
+            {
+                targets: bubbleImg,
+                props:{
+                    alpha:{value: 1}
+                },
+                delay:1500,
+                duration: 100,
+            },
+            {
+                targets: rightBubbleTxt,
+                props: {
+                    alpha: { value: 1 },
+                },
+                duration: 300
+            },
+            {
+                 targets: rightToughtRect,
+                 props: {
+                     x: { value: 732 },
+                 },
+                 delay:1500,
+                 duration: 1500,
+            },
+        ]})
+
+        // цепочка твинов для hand
+        this.tweens.chain({
+            // тыкаем слева от орудия
+            tweens:[
+            {
+                targets: hand,
+                props: {
+                    alpha: { value: 1 },
+                },
+                duration: 100,
+                delay: 800
+            },
+            {
+                targets: hand,
+                props: {
+                    scale: { value: 0.6 },
+                    y: { value: 260 }
+                },
+                duration: 300,
+                delay: 400
+            },
+            {
+                targets: hand,
+                props: {
+                    alpha: { value: 0 },
+                },
+                duration: 200,
+                delay:800, 
+                onComplete: () => {
+                    hand.setAlpha(0)
+                    hand.setX(600)
+                    hand.setY(280)
+                    hand.setScale(1)
+                }
+            },
+            {
+                targets: hand,
+                props: {
+                    alpha: { value: 1 },
+                },
+                duration: 100,
+                delay:4000, 
+            },
+            {
+                targets: hand,
+                props: {
+                    scale: { value: 0.6 },
+                    y: { value: 260 }
+                },
+                duration: 300,
+                delay: 400
+            },
+            {
+                targets: hand,
+                props: {
+                    alpha: { value: 0 },
+                },
+                duration: 200,
+                delay:800, 
+                onComplete: () => {
+                    hand.setAlpha(0)
+                    hand.setX(400)
+                    hand.setY(280)
+                    hand.setScale(1)
+                }
+            },
+            
+        ]
+        })
+        
+        // появляется левая область-прямоугольник, эта область движется влево,
+        // появляется правая область-прямоугольник, левая область передвигается
+        // влево, левая область исчезает
+        this.tweens.chain({
+            tweens: [
+                {
+                    targets: leftToughtRect,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 300,
+                    delay:1200 
+                },
+                {
+                    targets: leftToughtRect,
+                    props: {
+                        x: {value: -12}
+                    },
+                    duration: 1500,
+                    delay:300 
+                },
+                {
+                    targets: rightToughtRect,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 300,
+                    delay:4200 
+                },
+                {
+                    targets: leftToughtRect,
+                    props: {
+                        x: {value: 188}
+                    },
+                    duration: 1500,
+                    //delay:4200 
+                },
+                {
+                    targets: leftToughtRect,
+                    props: {
+                        alpha: {value: 0}
+                    },
+                    duration: 300,
+                    delay:400 
+                },
+            ]
+        })
+
+        
+        // цепочка для каретки - каретка движется влево, движется вправо,
+        // появляется подложка справа, подложка справа исчезает и перемещается
+        // в центр, исчезает правая область-прямоугольник, в центре появляется
+        // подложка, на ней появляется текст, появляется hand, hand жмёт на
+        // центральную область, появляется центральная область-прямоугольник,
+        // исчезает hand, начинается стрельба, появляется hand, hand жмёт на
+        // центральную область, стрельба прекращается, hand исчезает
+        this.tweens.chain({
+            tweens: [
+                
+                {
+                    targets: this.shooterCont,
+                    props: {
+                        x:{value: 200}
+                    },
+                    duration: 1500,
+                    delay:1800 
+                },
+                {
+                    targets: this.shooterCont,
+                    props: {
+                        x:{value: 400}
+                    },
+                    duration: 1500,
+                    delay:4600 
+                },
+                {
+                    targets: rightBubbleTxt,
+                    props:{
+                        alpha:{value: 0}
+                    },
+                    duration: 300,
+                    //delay:3500
+                },
+                {
+                    targets: bubbleImg,
+                    props:{
+                        alpha:{value: 0}
+                    },
+                    duration: 100,
+                    onComplete: () => {
+                        bubbleImg.setX(400)
+                        bubbleImg.setAlpha(1)
+                        hand.setAlpha(1)
+                        centerBubbleTxt.setAlpha(1)
+                    },
+                },
+                {
+                    targets: rightToughtRect,
+                    props:{
+                        alpha: 0
+                    },
+                    duration: 300
+                },
+                {
+                    targets: bubbleImg,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 100
+                },
+                {
+                    targets: centerBubbleTxt,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 300
+                },
+                {
+                    targets: hand,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 100,
+                    delay: 400
+                },
+                {
+                    targets: hand,
+                    props: {
+                        scale: { value: 0.6 },
+                        y: { value: 260 }
+                    },
+                    duration: 300,
+                    delay: 400
+                },
+                {
+                    targets: centerToughtRect,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 300,
+                },
+                {
+                    targets: hand,
+                    props:{
+                        alpha: {value: 0}
+                    },
+                    duration:200,
+                    onComplete: () =>{
+                        hand.setScale(1)
+                        hand.setY(280)
+                        this.shootOn = true;
+                    }
+                },
+                {
+                    targets: hand,
+                    props: {
+                        alpha: { value: 1 },
+                    },
+                    duration: 100,
+                    delay: 2000
+                },
+                {
+                    targets: hand,
+                    props:{
+                        scale: { value: 0.6 },
+                        y: { value: 260 }
+                    },
+                    duration:200,
+                    onComplete: () =>{
+                        this.shootOn = false;
+                    }
+                },
+                {
+                    targets: hand,
+                    props:{
+                        alpha: {value:0}
+                    },
+                    duration:200
+                },
+                {
+                    targets: centerToughtRect,
+                    props: {
+                        alpha: {value: 0}
+                    },
+                    duration: 300,
+                },
+                {
+                    targets: centerBubbleTxt,
+                    props:{
+                        alpha:{value: 0}
+                    },
+                    duration: 300,
+                },
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:0}
+                    },
+                    duration:300,
+                    onComplete: () => {
+                        capTxt.setText("Управление с клавиатуры.")
+                    }
+                },
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:1}
+                    },
+                    duration:300,
+                    onComplete: () => {
+                        centerBubbleTxt.setText("Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево двигают орудие.")
+                        centerBubbleTxt.setFontSize('20px')
+                    }
+                },
+                {
+                    targets: centerBubbleTxt,
+                    props: {
+                        alpha: {value:1}
+                    },
+                    duration: 300
+                },
+                {
+                    targets:centerBubbleTxt,
+                    props:{
+                        alpha:{value:0}
+                    },
+                    duration: 300,
+                    delay:2200
+                },
+                {
+                    targets: bubbleImg,
+                    props:{
+                        alpha: {value:0}
+                    },
+                    duration: 100
+                },
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:0}
+                    },
+                    duration:300,
+                    onComplete: () => {
+                        capTxt.setText("Не дайте им пройти!")
+                    }
+                },
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:1}
+                    },
+                    duration:300
+                }
+            ]
+        })
+
+        return
+    }
+
     checkBullet() {
         if (!this.gameIsGone) return
         if (this.shootOn) {
             if (this.shootBullets > 0) {
                 this.bulletsGrp.fireBullet(this.shooterCont.x, this.shooterCont.y - 15,
                     this.shooterCont.body.velocity.x)
-                // this.bulletsGrp.fireBullet(this.shooter.x,this.shooter.y-15,
-                //     this.shooter.body.velocity.x)
                 this.shootBullets--;
                 if (this.shootBullets % 10 == 0) {
                     if (this.shootBullets >= 50) {
@@ -591,20 +982,16 @@ export class Demo extends Phaser.Scene
                     }
                 }
             } else {
-                //this.blankShot.setPosition(this.shooter.x,this.shooter.y-15).play({key:'blankShoot',startFrame:0})
-                // this.bulletsGrp.fireBlank(this.shooter.x,this.shooter.y-15,
-                //     this.shooter.body.velocity.x)
                 this.bulletsGrp.fireBlank(this.shooterCont.x, this.shooterCont.y - 15,
                     this.shooterCont.body.velocity.x)
             }
         }
         this.delayChecker++;
         if (this.delayChecker == 10) {
-            //this.physics.pause()
         }
 
         // delayChecker до полного истребления всех диверсов первой волны
-        // досигалось 290, 300, 417,306, после тренировок ~ 230 
+        // достигалось 290, 300, 417,306, после тренировок ~ 230 
         this.gameIsGone = this.enemies.handleUpdate();
         if (!this.gameIsGone && this.gameState.needToSave) {
             let data: string[] = []
@@ -622,7 +1009,6 @@ export class Demo extends Phaser.Scene
 
     extractFromCache() {
         const globalCache:Phaser.Cache.BaseCache = (window as any).baseCache
-        //scene.textures.addImage()
 
         this.textures.addImage('bg',globalCache.get('bg'))
         this.textures.addImage('railway',globalCache.get('railway'))
@@ -696,14 +1082,16 @@ export class Demo extends Phaser.Scene
         this.textures.addImage('bulletStrike5',globalCache.get('bulletStrike5'))
         this.textures.addImage('blankShoot',globalCache.get('blankShoot'))
         this.textures.addImage('scheben1',globalCache.get('scheben1'))
-        
 
         this.textures.addImage('empty',globalCache.get('empty'))
+        this.textures.addImage('hand',globalCache.get('hand'))
         return
     }
 }
 
-export function startGame(){
+export function startGame(previewMode:boolean){
+    glPreviewMode = previewMode;
+
     const config = {
     
         type: Phaser.CANVAS,
@@ -715,7 +1103,7 @@ export function startGame(){
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true,
+                debug: false,
             }
         },
         scale: {
@@ -749,9 +1137,40 @@ function saveActions(data) {
 
 (window as any).baseCache = new Phaser.Cache.BaseCache()
 
+// class Preview extends Phaser.Scene
+// {
+//     shooterCont:Phaser.GameObjects.Container
+//     leftBulletArs:Phaser.GameObjects.Image
+//     rightBulletArs:Phaser.GameObjects.Image
+//     railway:Phaser.GameObjects.Image
 
+//     constructor(){
+//         super("preview")
+//     }
 
- //const game = new Phaser.Game(config);
+//     create(){
+//         this.extractFromCache();
+//         this.shooterCont = this.add.container(400,418);
+//         this.add.tileSprite(500,225,1000,450,'bg')
+//         this.railway = this.physics.add.staticImage(44,225,'railway');
+//         this.shooterCont = this.add.container(400,418);
+//         this.shooterCont.add(this.add.image(0,0,'gun'))
+        
+//         this.leftBulletArs = this.add.image(-16,3,'bulletArs');
+//         this.shooterCont.add(this.leftBulletArs)
+//         this.rightBulletArs = this.add.image(16,3,'bulletArs');
+//         this.shooterCont.add(this.rightBulletArs)
+//         this.shooterCont.setSize(80,40)
+//     }
+
+//     extractFromCache(){
+//         const globalCache:Phaser.Cache.BaseCache = (window as any).baseCache
+//         this.textures.addImage('bg',globalCache.get('bg'))
+//         this.textures.addImage('gun',globalCache.get('gun'))
+//         this.textures.addImage('bulletArs',globalCache.get('bulletArs'))
+//         this.textures.addImage('railway',globalCache.get('railway'))
+//     }
+// }
 
 export function loadAtlas(){
     function preload(){
@@ -831,6 +1250,7 @@ export function loadAtlas(){
         this.load.image('blankShoot','assets/blankShoot.png')
 
         this.load.image('empty','assets/empty.png')
+        this.load.image('hand','assets/hand.png')
     }
 
     function create(){
@@ -913,6 +1333,7 @@ export function loadAtlas(){
         globalCache.add('blankShoot',this.game.textures.get('blankShoot').getSourceImage())
 
         globalCache.add('empty',this.game.textures.get('empty').getSourceImage())
+        globalCache.add('hand',this.game.textures.get('hand').getSourceImage())
         this.game.pause()
         document.getElementById('loaderCont').dispatchEvent(new Event('assetLoaded'))
         return

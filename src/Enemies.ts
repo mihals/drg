@@ -90,22 +90,10 @@ export class Enemies
 
         this.enemiesReserve = new Reserve(scene);
         this.oneColumnArr = [];
-        //this.rwExplode = scene.add.sprite(43,225,'explode1');
-        
     }
 
     createGroup(kind: string, numEnemies: number, x: number, y: number) {
         if (kind == 'oneColumn') {
-            // 63 волкера
-            // let column: OneColumn = new OneColumn(this.myScene, this.enemiesReserve,
-            //      x, y, numEnemies).setVelocityX(-6)
-            // this.oneColumnArr.push(column);
-            
-            // this.createGroup('oneColumn',4,1350,60);
-            // this.createGroup('oneColumn',4,1280,100);
-            // this.createGroup('oneColumn',4,1330,140);
-            // this.createGroup('oneColumn',5,1310,180);
-            // this.createGroup('oneColumn',4,120,220);
             
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,450,20,6).
                 setVelocityX(-6))
@@ -116,6 +104,8 @@ export class Enemies
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,530,140,3).
                 setVelocityX(-6))
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,510,180,2).
+                setVelocityX(-6))
+                this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,220,220,1).
                 setVelocityX(-6))
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,420,220,1).
                 setVelocityX(-6))
@@ -144,16 +134,6 @@ export class Enemies
         }
         if(kind == 'bmpGroup'){
             this.bmpGroup = this.myScene.physics.add.group()
-            // this.bmpGroup = this.myScene.physics.add.group({
-            //     key:'bmp',
-            //     frameQuantity: 3,
-            //     setXY:{x:300, y:50},
-            //     classType: BMP}
-            // )
-            // let spr = new Phaser.Physics.Arcade.Sprite(this.myScene,300,60,'bmp')
-            // spr.setTexture('bmp')
-            // this.bmpGroup.add(spr)
-            // this.bmpGroup.setVelocityX(-2)
             this.bmpGroup.create(700,24,'bmp').setDepth(2).setPushable(false).
                 setBodySize(103,24).setState(4)
             this.bmpGroup.create(950,104,'bmp').setDepth(5).setPushable(false).
@@ -173,7 +153,6 @@ export class Enemies
                         bmp.setTexture(txtr)
                     }
                     if(bmp.state == 1){
-                        //bmp.setImmovable()
                         bmp.body.reset(bmp.x,bmp.y)
                     }
                     
@@ -183,36 +162,16 @@ export class Enemies
     }
 
     /**обрабатывает событие таймера - перемещает группы, добавляет новые,
-     * проверяет закончена ли игра (если взорваны цисцерны) и, если закончена,
-     * возвращает false
+     * проверяет закончена ли игра (если какой-то волкер дошёл до цистерн) и,
+     * если закончена, возвращает false
      */
     handleUpdate():boolean{
         let gameIsGone = this.myScene.gameIsGone;
         let locX;
-        //locX =this.oneColumnArr[0].getChildren()[0].
         this.oneColumnArr.every((item,index,array) => {
-            //item.incX(-4);
-            // let prop;
-            // try{(prop = item.getFirstAlive().x)}
-            // catch(err){
-            //     prop = 0
-            // }
-            // if(item.countActive()==0){
-            //     try{
-            //         item.destroy()
-            //         array.splice(index,1)
-            //     }
-            //     catch(err){
-
-            //     }
-            //}
             if(gameIsGone && item.countActive()!=0 && item.getFirstAlive().x < 95){
                 this.firstWalker = item.getFirstAlive()
                 gameIsGone = false;
-                // this.myScene.rwExplode.play({key:'rwExplode',startFrame:0});
-                // this.myScene.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE,() =>{
-                // this.myScene.railway.setTexture('blackRailway');
-                // this.myScene.explodeTween.play();})
                 return false
             }
             return true
@@ -220,7 +179,10 @@ export class Enemies
         return gameIsGone;
     }
 
-    /**вызывается из update класса game как только gameIsGone становится false */
+    /**вызывается из update класса game как только gameIsGone становится false,
+     * останавливает анимацию волкеров, первый дошедший до цистерн волкер
+     * бросает гранату
+     */
     stopEnemies():Phaser.Geom.Point{
         this.oneColumnArr.forEach((column,ind,arr) => {
             column.getChildren().forEach((enemy:Phaser.GameObjects.Sprite,ind,arr) => {
