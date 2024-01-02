@@ -8,9 +8,27 @@
     
     </head>
   <body>
-    <button id="starterBtn" disabled>Starter.</button>
-      <div id="gameContainer"></div>
-      <div id = 'loaderCont'></div>
+    
+    <div id="gameContainer"></div>
+    <div id='loaderCont'></div>
+    <div id="modalContainer">
+      <div id="modalWnd">
+        <div id = "topModal">
+          <img src="assets/pogon.png" class="pogonImg">
+          <p>ljdf[aligjoaagj] kdsfpoeurypormh [pgkp[ajoipajt]a</p>
+        </div>
+        <div id = "bottomModal">
+        <div><button class="lvlBottom" id="tutorBtn" disabled>Обучалка.</button></div>
+        <div><button class="lvlBottom" id="aloneBtn" disabled onclick="MyGame.startGame(1)" >Одиночка.</button></div>
+        <div><button class="lvlBottom" id="twoGunBtn" disabled>В два ствола.</button></div>
+        <input type="button" class="lvlBottom"   value="Заглушка."  disabled>
+        <!-- <div><button class="lvlBottom" >Обучалка.</button></div>
+        <div><button class="lvlBottom" >Одиночка.</button></div>
+        <div><button class="lvlBottom" >В два ствола.</button></div> -->
+      </div>
+      </div>
+    </div>
+    <button id="starterBtn">Toggle.</button>
       <script>
         MyGame.loadAtlas()
         //import {loadAtlas} from './game'
@@ -18,14 +36,33 @@
         //MyGame()
         let btnEl = document.getElementById("starterBtn")
         btnEl.addEventListener('click', () => {
-          alert("btnCliked")
+          let modalContainer = document.getElementById("modalContainer");
+          if(modalContainer.style.visibility !== "visible"){
+            modalContainer.style.visibility="visible";
+            modalContainer.style.display="block"
+            return;
+          }
         })
-        btnEl.disabled = false;
+        let btnHide = document.getElementById("tutorBtn")
+        btnHide.addEventListener('click', () => {
+          let modalContainer = document.getElementById("modalContainer");
+          if(modalContainer.style.visibility == "visible"){
+            modalContainer.style.visibility="hidden";
+            modalContainer.style.display="none"
+            MyGame.startGame(1)
+          }
+          
+        })
+        //btnEl.disabled = false;previewBtn
         document.getElementById('loaderCont').addEventListener('assetLoaded',
         () => {
-          MyGame.startGame(false)
+          document.getElementById("tutorBtn").removeAttribute("disabled")
+          //document.getElement("tutorBtn").setD
+          //MyGame.startGame(1)
         })
         //loadAtlas()
+        //document.getElementById("modalContainer").style.visibility="visible"
+        //document.getElementById("modalContainer").style.display="block"
       </script>
       <!-- <div id="loaderCont"></div> -->
   </body>

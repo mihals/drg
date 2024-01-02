@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
 import {Demo} from './game';
 import { Bullet } from './game';
+import { GameState } from './game';
+//import { currentGameState } from './game';
 
 /**класс, содержащий и управляющий группами диверсов и БМПешек */
 export class Enemies
@@ -94,7 +96,6 @@ export class Enemies
 
     createGroup(kind: string, numEnemies: number, x: number, y: number) {
         if (kind == 'oneColumn') {
-            
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,450,20,6).
                 setVelocityX(-6))
             this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,550,60,5).
@@ -162,21 +163,31 @@ export class Enemies
     }
 
     /**обрабатывает событие таймера - перемещает группы, добавляет новые,
-     * проверяет закончена ли игра (если какой-то волкер дошёл до цистерн) и,
-     * если закончена, возвращает false
+     * проверяет закончена ли игра: если какой-то волкер дошёл до цистерн
+     * возвращает GameState.Lost, если уничтожены все диверсы GameState.Win
      */
-    handleUpdate():boolean{
-        let gameIsGone = this.myScene.gameIsGone;
-        let locX;
-        this.oneColumnArr.every((item,index,array) => {
-            if(gameIsGone && item.countActive()!=0 && item.getFirstAlive().x < 95){
-                this.firstWalker = item.getFirstAlive()
-                gameIsGone = false;
-                return false
+    handleUpdate(): GameState {
+        let ret: GameState = this.myScene.currentGameState;
+        if(this.enemiesReserve.countActive() == 0){
+            return GameState.Win
+        }
+
+        this.oneColumnArr.forEach((item, index, array) => {
+            console.log(index)
+            if (ret == GameState.Gone ||
+                ret == GameState.Preview) {
+                if (item.countActive() != 0) {
+                    let falX = item.getFirstAlive()
+                    console.log(falX.x)
+                    if (item.getFirstAlive().x < 95) {
+                        this.firstWalker = item.getFirstAlive()
+                        ret = GameState.Lost;
+                        return GameState.Lost
+                    }
+                }
             }
-            return true
         })
-        return gameIsGone;
+        return ret;
     }
 
     /**вызывается из update класса game как только gameIsGone становится false,
@@ -185,6 +196,7 @@ export class Enemies
      */
     stopEnemies():Phaser.Geom.Point{
         this.oneColumnArr.forEach((column,ind,arr) => {
+            column.setVelocityX(0)
             column.getChildren().forEach((enemy:Phaser.GameObjects.Sprite,ind,arr) => {
                 enemy.anims.stop()
                 let num = Phaser.Math.RND.integerInRange(0,4)
@@ -193,6 +205,23 @@ export class Enemies
         })
         this.firstWalker.setTexture('granade')
         return new Phaser.Geom.Point(this.firstWalker.x,this.firstWalker.y)
+    }
+
+    /** очищает всё поле от диверсов, удаляет коллайдеры  */
+    clearEnemies(){
+        this.oneColumnArr.forEach((oneColumn:OneColumn, ind:number, arr) =>{
+            //oneColumn.bulletEnemyCollider.destroy()
+            oneColumn.getChildren().forEach((enemy:Enemy, enemyInd:number) => {
+                enemy.body.reset(-100, 0);
+                enemy.setActive(false).setVisible(false);
+                enemy.state = '';
+                //oneColumn.remove(enemy);
+            })
+            oneColumn.clear()
+            //oneColumn.destroy()
+            //let cld = this.myScene.physics.world.colliders
+        })
+        this.oneColumnArr.length = 0
     }
 }
 
@@ -217,8 +246,11 @@ class Reserve extends Phaser.Physics.Arcade.Group
 /**Группа numEnemies диверсов, движущихся в одну колонну */
 class OneColumn extends Phaser.Physics.Arcade.Group
 {
+    //bulletEnemyCollider:Phaser.Physics.Arcade.Collider;
+
     constructor(scene:Demo,reserve:Reserve,x,y,numEnemies){
         super(scene.physics.world,scene);
+        
         let depth:number
         switch(y){
             case 20:
@@ -259,11 +291,12 @@ class OneColumn extends Phaser.Physics.Arcade.Group
                 this.add(enemy)
             }
         }
-        scene.physics.add.collider(this,scene.bulletsGrp,(enemy:Enemy, bullet:Bullet) => {
+        //this.bulletEnemyCollider = 
+        scene.physics.add.collider(this as Phaser.Types.Physics.Arcade.ArcadeColliderType,
+            scene.bulletsGrp as Phaser.Types.Physics.Arcade.ArcadeColliderType,(enemy:Enemy, bullet:Bullet) => {
             bullet.body.reset(0,-32);
             bullet.setActive(false).setVisible(false);
             if (enemy.state != 'falling') {
-                
                 enemy.state = 'falling'
                 enemy.play({ key: "fallen", startFrame: 0 });
                 enemy.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
@@ -271,6 +304,8 @@ class OneColumn extends Phaser.Physics.Arcade.Group
                     enemy.setActive(false).setVisible(false);
                     enemy.state = '';
                     this.remove(enemy);
+                    let hasActive = reserve.countActive()
+                    console.log(hasActive)
                 }, this);
             }
         })

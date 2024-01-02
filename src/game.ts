@@ -7,6 +7,13 @@
  из 10, на второй тропе - столько же, на третьей тропе выбивает 5-6 диверсов, столько
  же на 4,5 и 6-ой причём достигается стопроцентное попадание при равномерном движении
  шутера
+ checkBullet вызывается каждые полсекунды и выпускает пулю, если открыт огонь,
+ в этом же методе вызывается enemies.handleUpdate(), который проверяет не уничтожены
+ ли все диверсы, тогда метод возвращает GameState.Win, которое присваивается
+ переменной currentGameState, если какой-то диверс добрался до ж/д состава,
+ возвращается и присваивается GameState.Lost. В каждом вызове метода update()
+ проверяется значение currentGameState и в зависимости от этого значения выбирается
+ дальнейший ход приложения. 
 */
 import * as Phaser from 'phaser';
 import Walkers from './walkers';
@@ -14,7 +21,8 @@ import { Walker } from './walkers';
 import { EnemyGrp } from './walkers';
 import { Enemies } from './Enemies';
  
-let glPreviewMode:boolean
+//let glPreviewMode:boolean
+let glGameState: GameState = 0;
 export class Bullet extends Phaser.Physics.Arcade.Sprite
 {
     constructor (scene, x, y)
@@ -102,8 +110,15 @@ export class Demo extends Phaser.Scene
      * needToSave - необходимо сохранить все ходы после окончания игры
      * в ручном режиме
      */
-    gameState: {autoPilot:boolean; waitAction:boolean; needToSave:boolean} 
-    gameIsGone: boolean ;
+    gameState: {autoPilot:boolean; waitAction:boolean; needToSave:boolean}
+
+    /** true если игра не закончена(враг ещё не прошёл)  */ 
+    //gameIsGone: boolean ;
+    currentGameState:GameState;
+
+    /** true если диверсы не движутся, они останавливаются при завершении игры */
+    enemiesIsStoped:boolean;
+
     myCamera:Phaser.Cameras.Scene2D.Camera
     cursors:Phaser.Types.Input.Keyboard.CursorKeys
     shooterGrp:Phaser.Physics.Arcade.Group
@@ -203,7 +218,7 @@ export class Demo extends Phaser.Scene
         this.vActionArr = []
         this.xActionArr = []
         this.shootActionArr = []
-        
+        this.currentGameState = glGameState;
     }    
 
     preload ()
@@ -214,15 +229,13 @@ export class Demo extends Phaser.Scene
     create ()
     {
         this.extractFromCache()
-        this.gameIsGone = true;
+        //this.gameIsGone = true;
         let bc:Phaser.Cache.BaseCache = (window as any).baseCache
         if (bc.exists("atlasImg") && bc.exists("atlasJson")) {
             console.log("Create.Basecache has atlas");
             this.textures.addAtlasJSONHash("atlas", bc.get("atlasImg"),
             bc.get("atlasJson"));
           }
-        
-        
 
         if (this.gameState.autoPilot) {
             this.gameState.waitAction = true
@@ -360,51 +373,43 @@ export class Demo extends Phaser.Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
         this.rwExplode = this.add.sprite(43,225,'empty');
-        this.explodeTween = this.tweens.add({
-            targets: this.rwExplode,
-            alpha: 0,
-            duration: 2000,
-            persist: true,
-            paused: true,
-        });
 
         this.fireGranade =  this.add.image(-100,-100,'fireGranade')
-        this.flyingGranad = this.tweens.add({
-            targets : this.fireGranade,
-            x:50,
-            duration:1000,
-            paused:true,
-            onComplete: () =>{
-                this.rwExplode.play({key:'rwExplode',startFrame:0})
-                this.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE,() =>{
-                this.railway.setTexture('blackRailway');
-                this.explodeTween.play();
-            })}
-        })
 
         this.add.tileSprite(500,438,1000,24,'scheben1')
         
         this.cameras.main.startFollow(this.shooterCont)
         if(this.gameState.autoPilot) this.scene.pause()
-        if(!glPreviewMode) this.turnOnInput()
-        else this.showPreview()
+        if (this.currentGameState == GameState.Gone) {
+            this.turnOnInput(true)
+        } 
+        if(this.currentGameState == GameState.Preview){
+            this.showPreview()
+        }
+
+        this.enemiesIsStoped = false
     }
 
     update(time: number, delta: number): void {
         let deltaX:number =0;
         let velocityX:number = 0;
         
-        if(!this.gameIsGone && !this.physics.world.isPaused){
-            this.physics.pause()
+        if((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
+            && !this.enemiesIsStoped){
+            //this.physics.pause()
             let point = this.enemies.stopEnemies()
+            this.enemiesIsStoped = true
             this.fireGranade.setPosition(point.x-16,point.y-16)
-            this.flyingGranad.play()
+            //this.flyingGranad.play()
+            this.enemiesIsStoped = true;
+            this.playGransdExplodeTween()
+            //this.numBullets =100;
         }
 
         let boolToInt = this.shootOn? 1:0;
         this.updateCounter++
 
-        if (!glPreviewMode && !this.gameState.autoPilot) {
+        if ((this.currentGameState == GameState.Gone) && !this.gameState.autoPilot) {
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.shootOn = !this.shootOn
                 if(this.gameState.needToSave){
@@ -441,7 +446,7 @@ export class Demo extends Phaser.Scene
                 }
             }
         }
-        else if(!glPreviewMode && !this.gameState.waitAction){
+        else if((this.currentGameState != GameState.Gone) && !this.gameState.waitAction){
             // извлекаем номер очередного фрейма, в котором следует что-то совершить 
             let numFrame = this.counterActionArr[this.indCounterArr]
             if(numFrame == this.updateCounter){
@@ -472,17 +477,28 @@ export class Demo extends Phaser.Scene
         }
 
         this.infoText.setText(`num bullets: ${this.shootBullets}`)
-        this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
+        //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
+        this.fpsText.setText(` fps:  ${this.currentGameState}`)
     }
 
-    /** включается обработка управления с тачскрина, если игра не
+    /** включается/выключается обработка управления с тачскрина, если игра не
      * в режиме презентации
      */
-    turnOnInput() {
+    turnOnInput(on) {
+        this.fpsText.setText(' fps: '+'turnOnInput')
+        let ind = this.input.eventNames().indexOf("pointerdown")
+        if(!on){
+            this.input.off('pointerdown')
+            return;
+        }
+
+        if(ind != -1) return;
+
         this.input.on('pointerdown', (pointer) => {
             if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
                 this.inputText.setText('left')
+
                 return
             }
             if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
@@ -493,6 +509,57 @@ export class Demo extends Phaser.Scene
             this.shootOn = !this.shootOn
             this.inputText.setText('shootOn')
         })
+    }
+
+    playGransdExplodeTween() {
+        this.flyingGranad = this.tweens.add({
+            targets: this.fireGranade,
+            x: 50,
+            duration: 1000,
+            paused: true,
+            onComplete: () => {
+                this.rwExplode.play({ key: 'rwExplode', startFrame: 0 })
+                this.rwExplode.setAlpha(1)
+                this.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                    this.railway.setTexture('blackRailway');
+                    this.explodeTween = this.tweens.add({
+                        targets: this.rwExplode,
+                        alpha: 0,
+                        duration: 2000,
+                        persist: true,
+                        paused: true,
+                        onComplete: () => {
+                            this.enemies.clearEnemies()
+                            //this.physics.resume()
+                            this.enemies.createGroup("oneColumn", 0, 0, 0)
+                            
+                            //this.gameIsGone = true
+                            this.currentGameState = GameState.Gone
+                            this.turnOnInput(true)
+                            this.enemiesIsStoped = false
+                            this.fireGranade.setPosition(-100, -100)
+                            this.railway.setTexture('railway')
+                            this.shootBullets = 100;
+                            this.leftBulletArs.setCrop();
+                            (this.bigBulletsGrp.getChildren()[0] as 
+                                Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
+                                reset(94,426);
+                            this.bigBulletsGrp.getChildren()[0].setActive(true).
+                                setData('isFull',true);
+                            (this.bigBulletsGrp.getChildren()[1] as 
+                                Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
+                                reset(790,426);
+                            this.bigBulletsGrp.getChildren()[1].setActive(true).
+                                setData('isFull',true);
+                            this.leftBulletArs.setCrop();
+                            this.rightBulletArs.setCrop();
+                        }
+                    });
+                    this.explodeTween.play();
+                })
+            }
+        })
+        this.flyingGranad.play()
     }
 
     showPreview(){
@@ -510,7 +577,7 @@ export class Demo extends Phaser.Scene
         bubble.strokeRoundedRect(0, 0, 575,48, 16);
         bubble.fillRoundedRect(0, 0, 575,48, 16);
         bubble.generateTexture('captionBubble',582,54)
-        this.add.image(400,36,'captionBubble').setDepth(21)
+        let captionBubble = this.add.image(400,36,'captionBubble').setDepth(21)
         bubble.clear()
 
         let captionStyle:Phaser.Types.GameObjects.Text.TextStyle =
@@ -563,16 +630,17 @@ export class Demo extends Phaser.Scene
         leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width/2 - 5,
             bubbleImg.y - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
-        txtBnd = leftBubbleTxt.getBounds()
+        
         const rightBubbleTxt = this.add.text(0, 0, 'Жмите справа от орудия, чтобы двигаться вправо.',
             { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+        txtBnd = rightBubbleTxt.getBounds()
         rightBubbleTxt.setPosition(634 - rightBubbleTxt.width/2 - 5,
-            154 - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
+            148 - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
         const centerBubbleTxt = this.add.text(0, 0, 'Чтобы начать или закончить стрельбу, жмите над орудием.',
         { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 }})
         centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
-            154 - centerBubbleTxt.height/2 - 5).setDepth(22).setAlpha(0)
+            148 - centerBubbleTxt.height/2 - 5).setDepth(22).setAlpha(0)
 
         // цепочка для текста и подложек для него
         this.tweens.chain({
@@ -918,6 +986,8 @@ export class Demo extends Phaser.Scene
                     onComplete: () => {
                         centerBubbleTxt.setText("Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево двигают орудие.")
                         centerBubbleTxt.setFontSize('20px')
+                        centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
+                            148 - centerBubbleTxt.height/2 - 5)
                     }
                 },
                 {
@@ -935,6 +1005,47 @@ export class Demo extends Phaser.Scene
                     duration: 300,
                     delay:2200
                 },
+                
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:0}
+                    },
+                    duration:300,
+                    onComplete: () => {
+                        capTxt.setText("Не дайте им пройти!")
+                        capTxt.setX(captionBubble.x - capTxt.width/2 -5)
+                    }
+                },
+                {
+                    targets: capTxt,
+                    props:{
+                        alpha:{value:1}
+                    },
+                    duration:300,
+                    onComplete: () => {
+                        centerBubbleTxt.setText("Пополняйте по возможности запас патронов.")
+                        centerBubbleTxt.setFontSize('24px')
+                        centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
+                            148 - centerBubbleTxt.height/2 - 5)
+                    },
+                    
+                },
+                {
+                    targets: centerBubbleTxt,
+                    props:{
+                        alpha:{value:1}
+                    },
+                    duration:300
+                },
+                {
+                    targets: centerBubbleTxt,
+                    props:{
+                        alpha:{value:0}
+                    },
+                    delay:2000,
+                    duration:300
+                },
                 {
                     targets: bubbleImg,
                     props:{
@@ -947,17 +1058,19 @@ export class Demo extends Phaser.Scene
                     props:{
                         alpha:{value:0}
                     },
-                    duration:300,
-                    onComplete: () => {
-                        capTxt.setText("Не дайте им пройти!")
-                    }
+                    delay:200,
+                    duration:300
                 },
                 {
-                    targets: capTxt,
+                    targets: captionBubble,
                     props:{
-                        alpha:{value:1}
+                        alpha:{value:0}
                     },
-                    duration:300
+                    delay:200,
+                    duration:300,
+                    onComplete: () =>{
+                        //this.enemies.clearEnemies()
+                    }
                 }
             ]
         })
@@ -966,7 +1079,7 @@ export class Demo extends Phaser.Scene
     }
 
     checkBullet() {
-        if (!this.gameIsGone) return
+        //if (currentGameState != GameState.Gone) return
         if (this.shootOn) {
             if (this.shootBullets > 0) {
                 this.bulletsGrp.fireBullet(this.shooterCont.x, this.shooterCont.y - 15,
@@ -992,8 +1105,8 @@ export class Demo extends Phaser.Scene
 
         // delayChecker до полного истребления всех диверсов первой волны
         // достигалось 290, 300, 417,306, после тренировок ~ 230 
-        this.gameIsGone = this.enemies.handleUpdate();
-        if (!this.gameIsGone && this.gameState.needToSave) {
+        this.currentGameState = this.enemies.handleUpdate();
+        if ((this.currentGameState != GameState.Gone) && this.gameState.needToSave) {
             let data: string[] = []
             data.push(this.timeActionArr.join())
             data.push(this.counterActionArr.join())
@@ -1089,9 +1202,8 @@ export class Demo extends Phaser.Scene
     }
 }
 
-export function startGame(previewMode:boolean){
-    glPreviewMode = previewMode;
-
+export function startGame(state: GameState){
+    glGameState = state;
     const config = {
     
         type: Phaser.CANVAS,
@@ -1136,41 +1248,6 @@ function saveActions(data) {
 }
 
 (window as any).baseCache = new Phaser.Cache.BaseCache()
-
-// class Preview extends Phaser.Scene
-// {
-//     shooterCont:Phaser.GameObjects.Container
-//     leftBulletArs:Phaser.GameObjects.Image
-//     rightBulletArs:Phaser.GameObjects.Image
-//     railway:Phaser.GameObjects.Image
-
-//     constructor(){
-//         super("preview")
-//     }
-
-//     create(){
-//         this.extractFromCache();
-//         this.shooterCont = this.add.container(400,418);
-//         this.add.tileSprite(500,225,1000,450,'bg')
-//         this.railway = this.physics.add.staticImage(44,225,'railway');
-//         this.shooterCont = this.add.container(400,418);
-//         this.shooterCont.add(this.add.image(0,0,'gun'))
-        
-//         this.leftBulletArs = this.add.image(-16,3,'bulletArs');
-//         this.shooterCont.add(this.leftBulletArs)
-//         this.rightBulletArs = this.add.image(16,3,'bulletArs');
-//         this.shooterCont.add(this.rightBulletArs)
-//         this.shooterCont.setSize(80,40)
-//     }
-
-//     extractFromCache(){
-//         const globalCache:Phaser.Cache.BaseCache = (window as any).baseCache
-//         this.textures.addImage('bg',globalCache.get('bg'))
-//         this.textures.addImage('gun',globalCache.get('gun'))
-//         this.textures.addImage('bulletArs',globalCache.get('bulletArs'))
-//         this.textures.addImage('railway',globalCache.get('railway'))
-//     }
-// }
 
 export function loadAtlas(){
     function preload(){
@@ -1353,4 +1430,6 @@ export function loadAtlas(){
 
     const myGame = new Phaser.Game(config);
 }
+
+export enum GameState{Gone, Preview, Win, Lost}
 

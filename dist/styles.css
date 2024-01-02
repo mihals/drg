@@ -7,3 +7,61 @@ body {background-image: url('./assets/bg5.png'); background-repeat: repeat;
 /* body{background-color: rgb(184,183,8);padding: 0; margin: 0;}  */
 canvas {padding: 0; margin: 0;}
 #loaderCont {width: 1; height: 1; position: absolute; top:-10; left: -10;}
+#modalContainer {
+     display: none;
+     visibility: hidden;
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     z-index: 10;
+     align-content: center;
+}
+#modalWnd {
+     
+     height: 80%;
+     width: 50%;
+     /* border-radius: 5%; */
+     box-shadow: 5px 5px #00000055;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-around;
+     margin: 20px auto;
+     align-items: center;
+     background-color: #00000055;;
+     /* margin: 5% 25% 5% 25%;
+     padding: 15% 5% 15% 5%; */
+}
+#topModal{
+     background-color: #a99c7e;
+     width: 100%;
+     height: 50%;
+     /* border-radius: 10% 10% 0 0 ; */
+}
+#bottomModal{
+     display: flex;
+     background-color: #43463a;
+     width: 100%;
+     height: 50%;
+     flex-direction: column;
+     justify-content: space-around;
+     align-items: center;
+     /* border-radius: 0 0 10% 10%; */
+}
+.lvlBottom:enabled {
+   background-color: #213042;
+   border-color:  #c1a948 ;
+   color: #b5b5b5;
+   font-size: 1.2em;
+}
+.lvlBottom:disabled {
+     font-size: 1.2em;
+}
+.pogonImg{
+     float: left;
+     margin: 10px;
+     padding: 0;
+}
+
+
