@@ -11,25 +11,98 @@
     
     <div id="gameContainer"></div>
     <div id='loaderCont'></div>
-    <div id="modalContainer">
-      <div id="modalWnd">
-        <div id = "topModal">
-          <img src="assets/pogon.png" class="pogonImg">
-          <p>ljdf[aligjoaagj] kdsfpoeurypormh [pgkp[ajoipajt]a</p>
-        </div>
-        <div id = "bottomModal">
-        <div><button class="lvlBottom" id="tutorBtn" disabled>Обучалка.</button></div>
-        <div><button class="lvlBottom" id="aloneBtn" disabled onclick="MyGame.startGame(1)" >Одиночка.</button></div>
-        <div><button class="lvlBottom" id="twoGunBtn" disabled>В два ствола.</button></div>
-        <input type="button" class="lvlBottom"   value="Заглушка."  disabled>
-        <!-- <div><button class="lvlBottom" >Обучалка.</button></div>
-        <div><button class="lvlBottom" >Одиночка.</button></div>
-        <div><button class="lvlBottom" >В два ствола.</button></div> -->
-      </div>
-      </div>
-    </div>
+    <!-- <div id="modalContainer"></div> -->
     <button id="starterBtn">Toggle.</button>
-      <script>
+    <script>
+      // // isSDKInfo == -1, если sdk ещё не загрузилось, 0 если загрузилось с
+      //   // ошибкой, 1 если загрузилось корректно. Для  isGameAtlas -аналогично 
+      //   // при загрузке ассетов для игры
+      //   const loadings = {
+      //     'isSDKLoaded': -1, 'isGameAtlas': -1,
+      //     'isAdvFinish': -1, 'isPlayerData': -1
+      //   }
+
+      //   let lvlsData = [-1, -1, -1]
+      //   let myLang = "ru"
+
+      //   // устанавливает для загрузки name объекта loadings значение value
+      //   // value = -1, если загрузка ещё не закончилась, 0 если загрузка
+      //   // прошла с ошибкой или такой объект не существует, 1 если всё
+      //   // прошло штатно
+      //   function addLoading(name, value) {
+      //     // если ключа с таким именем нет, выходим 
+      //     if (!Object.keys(loadings).includes(name)) return;
+
+      //     loadings[name] = value;
+
+      //     if (!Object.values(loadings).includes(-1)) {
+
+      //     }
+      //   }
+
+      // временно закомментировано
+      /*
+      YaGames
+        .init()
+        .then(ysdk => {
+          console.log('Yandex SDK initialized');
+          window.myYsdk = ysdk;
+          addLoading('isSDKLoaded', 1)
+          ysdk.adv.showFullscreenAdv({
+            callbacks: {
+              onClose: (wasShown) => {
+                addLoading(isAdvFinish, 1)
+              },
+              onError: (error) => {
+                addLoading(isAdvFinish, 0)
+              },
+              onOffline: () => {
+                addLoading(isAdvFinish, 0)
+              }
+            }
+          })
+          ysdk.getPlayer().then(player => {
+            window.myPlayer = player;
+            player.getData().then(data => {
+              try {
+                window.lvlsData = data.lvlsData
+                addLoading('isPlayerData', 1)
+              } catch (err) {
+                addLoading('isPlayerData', 0)
+                window.lvlsData = [-1, -1, -1]
+              }
+            }).catch(err => {
+              addLoading('isPlayerData', 0)
+            })
+          }).catch(err => {
+            addLoading('isPlayerData', 0)
+          });
+          try{
+            window.myLang = ysdk.environment.i18n.lang
+          }catch(err){
+            window.myLang = "ru"
+          }
+        })
+        .cath(err => {
+          addLoading('isSDKLoaded', 0)
+          addLoading('isPlayerData', 0)
+          addLoading('isAdvFinish', 0)
+        });
+        */
+
+      let arr =[-1, -1, -1]
+      localStorage.setItem("lvlsData", JSON.stringify(arr) )
+      let newArr = JSON.parse(localStorage.getItem("lvlsData"))
+       
+      //MyGame.loadAtlas()
+      if(typeof(YaGames) !== "undefined"){
+        MyGame.initApp(YaGames)
+      }else{
+        MyGame.initApp(null)
+      }
+
+    </script>
+      <!-- <script>
         MyGame.loadAtlas()
         //import {loadAtlas} from './game'
         //loadAtlas()
@@ -45,13 +118,18 @@
         })
         let btnHide = document.getElementById("tutorBtn")
         btnHide.addEventListener('click', () => {
+          // let modalContainer = document.getElementById("modalContainer");
+          // let winModalWnd = document.getElementById("winModalWnd");
+          // modalContainer.style.visibility="hidden";
+          // modalContainer.style.display="none"
+          // winModalWnd.style.visibility="visible";
+          // winModalWnd.style.display="flex"
           let modalContainer = document.getElementById("modalContainer");
           if(modalContainer.style.visibility == "visible"){
             modalContainer.style.visibility="hidden";
             modalContainer.style.display="none"
-            MyGame.startGame(1)
+            MyGame.startGame("en", 0)
           }
-          
         })
         //btnEl.disabled = false;previewBtn
         document.getElementById('loaderCont').addEventListener('assetLoaded',
@@ -63,7 +141,7 @@
         //loadAtlas()
         //document.getElementById("modalContainer").style.visibility="visible"
         //document.getElementById("modalContainer").style.display="block"
-      </script>
+      </script> -->
       <!-- <div id="loaderCont"></div> -->
   </body>
 </html>

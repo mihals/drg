@@ -16,13 +16,57 @@
  дальнейший ход приложения. 
 */
 import * as Phaser from 'phaser';
-import Walkers from './walkers';
-import { Walker } from './walkers';
-import { EnemyGrp } from './walkers';
 import { Enemies } from './Enemies';
- 
+import { UIBlocks } from './uiblocks';
+import { numMsg } from './enums'
+import { GameState } from './enums';
+import { lvlNames } from './enums';
+
+
+
+
 //let glPreviewMode:boolean
+let myGame: Phaser.Game;
 let glGameState: GameState = 0;
+let isPreviewShow:boolean = false; 
+let currentLvl:lvlNames;
+let myUIBlocks : UIBlocks;  
+
+type LocTexts = {
+    touchControl: string
+    leftTap: string
+    rightTap: string
+    shooting: string
+    keyboard: string
+    arrow: string
+    dontLet: string
+    replanish: string
+    ammo:string
+}
+const enTexts:LocTexts = {
+    touchControl: "Control on the touchscreen:",
+    leftTap: "Tap to the left of the gun to move to the left.",
+    rightTap: "Tap to the right of the gun to move to the right.",
+    shooting: "To start or finish shooting, click on(above) the gun.",
+    keyboard: "Keyboard control.",
+    arrow: "The Up arrow key starts or ends shooting, the Right and Left arrows move the gun.",
+    dontLet: "Don't let them pass!",
+    replanish: "Replenish your ammo supply whenever possible.",
+    ammo:"Ammo"
+}
+const ruTexts:LocTexts = {
+    touchControl: "Управление на тачскрине:",
+    leftTap: "Жмите слева от орудия, чтобы двигаться влево.",
+    rightTap: "Жмите справа от орудия, чтобы двигаться вправо.",
+    shooting: "Чтобы начать или закончить стрельбу, жмите над орудием.",
+    keyboard: "Управление с клавиатуры.",
+    arrow: "Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево двигают орудие.",
+    dontLet: "Не дайте им пройти!",
+    replanish: "Пополняйте по возможности запас патронов.",
+    ammo:"Патронов"
+}
+let currentTexts:LocTexts;
+let lvlsAchives : Array<number>
 export class Bullet extends Phaser.Physics.Arcade.Sprite
 {
     constructor (scene, x, y)
@@ -75,9 +119,10 @@ class Bullets extends Phaser.Physics.Arcade.Group
             frames: [
                 { key: 'empty' },
                 { key: 'blankShoot' },
+                { key: 'blankShoot2' },
                 { key: 'empty' }
             ],
-            frameRate: 5,
+            frameRate: 10,
         });
         //console.log(anim)
         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
@@ -112,12 +157,16 @@ export class Demo extends Phaser.Scene
      */
     gameState: {autoPilot:boolean; waitAction:boolean; needToSave:boolean}
 
+
     /** true если игра не закончена(враг ещё не прошёл)  */ 
     //gameIsGone: boolean ;
     currentGameState:GameState;
 
     /** true если диверсы не движутся, они останавливаются при завершении игры */
     enemiesIsStoped:boolean;
+
+    /** включает и отключает управление клавишами и тапами */
+    pointerDownOn:boolean;
 
     myCamera:Phaser.Cameras.Scene2D.Camera
     cursors:Phaser.Types.Input.Keyboard.CursorKeys
@@ -190,6 +239,7 @@ export class Demo extends Phaser.Scene
     infoText:Phaser.GameObjects.Text
     fpsText:Phaser.GameObjects.Text
     inputText:Phaser.GameObjects.Text
+    inputText2:Phaser.GameObjects.Text
     numBullets:number = 0;
     shooterCont:Phaser.GameObjects.Container
     shooterContBody:Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
@@ -219,6 +269,7 @@ export class Demo extends Phaser.Scene
         this.xActionArr = []
         this.shootActionArr = []
         this.currentGameState = glGameState;
+        this.pointerDownOn = false;
     }    
 
     preload ()
@@ -232,7 +283,7 @@ export class Demo extends Phaser.Scene
         //this.gameIsGone = true;
         let bc:Phaser.Cache.BaseCache = (window as any).baseCache
         if (bc.exists("atlasImg") && bc.exists("atlasJson")) {
-            console.log("Create.Basecache has atlas");
+            //console.log("Create.Basecache has atlas");
             this.textures.addAtlasJSONHash("atlas", bc.get("atlasImg"),
             bc.get("atlasJson"));
           }
@@ -286,9 +337,29 @@ export class Demo extends Phaser.Scene
         this.shooterContBody.body.setCollideWorldBounds(true);
         this.shooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
         
-        this.infoText = this.add.text(50,0,'').setStyle({fill:'black'});
-        this.fpsText = this.add.text(50,20,'').setStyle({fill:'black'});
-        this.inputText = this.add.text(50,40,'').setStyle({fill:'black'});
+        let bubble = this.add.graphics({x:0, y:0})
+        bubble.fillStyle(0x222222, 0.5);
+        bubble.fillRoundedRect(4, 4, 100, 20, 4);
+
+        //  Bubble color
+        bubble.fillStyle(0xffffff, 1);
+
+        //  Bubble outline line style
+        bubble.lineStyle(2, 0x565656, 1);
+
+        //  Bubble shape and outline
+        bubble.strokeRoundedRect(0, 0, 100,20, 4);
+        bubble.fillRoundedRect(0, 0, 100,20, 4);
+        bubble.generateTexture('numBulletsBubble',120,24)
+        let numBulletsBubble = this.add.image(748,14,'numBulletsBubble').setDepth(21)
+        bubble.clear()
+
+        //{ fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center',
+        this.infoText = this.add.text(694,4,'').setStyle({fontFamily: 'Arial, Roboto',
+            fill:'black', fontSize: '14px'}).setDepth(21);
+        this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
+        this.inputText = this.add.text(150,40,'').setStyle({fill:'black'});
+        this.inputText2 = this.add.text(150,60,'').setStyle({fill:'black'});
 
         this.anims.create({
             key: 'strike',
@@ -330,6 +401,8 @@ export class Demo extends Phaser.Scene
             setBodySize(94,60).setOffset(0,0).setDepth(8);
         this.staticGrp.create(621,50,'midleTree').
             setBodySize(92,60).setOffset(0,0).setDepth(5);
+        this.staticGrp.create(945,250,'rectBush').
+            setBodySize(42,16).setOffset(0,0).setDepth(5);
 
         this.bulletsGrp = new Bullets(this)
 
@@ -380,39 +453,85 @@ export class Demo extends Phaser.Scene
         
         this.cameras.main.startFollow(this.shooterCont)
         if(this.gameState.autoPilot) this.scene.pause()
-        if (this.currentGameState == GameState.Gone) {
-            this.turnOnInput(true)
-        } 
-        if(this.currentGameState == GameState.Preview){
+        
+        if(currentLvl == lvlNames.Preview){
             this.showPreview()
         }
 
         this.enemiesIsStoped = false
+        this.input.addPointer(2)
+
+        this.input.on('pointerdown', (pointer) => {
+            if(!this.pointerDownOn) return;
+            if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
+                this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
+                this.inputText.setText('left')
+                return
+            }
+            else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
+                this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
+                //this.inputText.setText('right')
+                return
+            }
+
+            if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
+                (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
+                this.shootOn = !this.shootOn
+                if (this.shootOn) this.inputText.setText('shootOn')
+                else this.inputText.setText('shootOff')
+            }
+        })
+
     }
 
     update(time: number, delta: number): void {
         let deltaX:number =0;
         let velocityX:number = 0;
-        
-        if((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
-            && !this.enemiesIsStoped){
-            //this.physics.pause()
-            let point = this.enemies.stopEnemies()
+
+        let nLst = this.input.listeners('pointerdown')
+        console.log("numListeners "+this.input.listenerCount("pointerdown"))
+
+        // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
+        // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
+        if ((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
+            && !this.enemiesIsStoped) {
+            this.pointerDownOn = false;
+            
             this.enemiesIsStoped = true
-            this.fireGranade.setPosition(point.x-16,point.y-16)
-            //this.flyingGranad.play()
-            this.enemiesIsStoped = true;
-            this.playGransdExplodeTween()
-            //this.numBullets =100;
+            if (this.currentGameState == GameState.Lost) {
+                let point = this.enemies.stopEnemies(GameState.Lost)
+                this.fireGranade.setPosition(point.x - 16, point.y - 16)
+                this.enemiesIsStoped = true;
+                
+                
+                this.cameras.main.stopFollow()
+                this.cameras.main.pan(400,225,300);
+                (this.shooterCont as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody).
+                    body.reset(400,398)
+                this.shooterCont.setY(418)
+                this.playGransdExplodeTween()
+            }
+            if (this.currentGameState == GameState.Win) {
+                this.enemies.stopEnemies(GameState.Win)
+                /** номер сообщения, которое зависит от результата и достижений игрока */
+                let numMsg;
+                if(lvlsData[0] == -1){
+                    numMsg = 0
+                } 
+                myUIBlocks.showSummary(200 - this.shootBullets, 68, 
+                    GameState.Win, numMsg)
+            }
+            this.enemiesIsStoped = true
         }
 
-        let boolToInt = this.shootOn? 1:0;
-        this.updateCounter++
-
-        if ((this.currentGameState == GameState.Gone) && !this.gameState.autoPilot) {
+        // при демонстрации Preview и при завершении игры, управление 
+        // отключается (pointerDownOn=false)?, если управление не отключено,
+        // то обрабатываем события
+        if (this.pointerDownOn) {
+            this.updateCounter++;
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.shootOn = !this.shootOn
-                if(this.gameState.needToSave){
+                if (this.gameState.needToSave) {
                     this.timeActionArr.push(Math.round(time))
                     this.counterActionArr.push(this.updateCounter)
                     this.keyActionArr.push('u')
@@ -424,7 +543,7 @@ export class Demo extends Phaser.Scene
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                if(this.gameState.needToSave){
+                if (this.gameState.needToSave) {
                     this.timeActionArr.push(Math.round(time))
                     this.counterActionArr.push(this.updateCounter)
                     this.keyActionArr.push('l')
@@ -436,7 +555,7 @@ export class Demo extends Phaser.Scene
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
                 this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
-                if(this.gameState.needToSave){
+                if (this.gameState.needToSave) {
                     this.timeActionArr.push(Math.round(time))
                     this.counterActionArr.push(this.updateCounter)
                     this.keyActionArr.push('r')
@@ -476,94 +595,111 @@ export class Demo extends Phaser.Scene
             }
         }
 
-        this.infoText.setText(`num bullets: ${this.shootBullets}`)
+        this.infoText.setText(currentTexts.ammo +`: ${this.shootBullets}`)
         //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
-        this.fpsText.setText(` fps:  ${this.currentGameState}`)
+        this.fpsText.setText(` Num listeners:  ${this.input.listenerCount("pointerdown")}`)
     }
 
-    /** включается/выключается обработка управления с тачскрина, если игра не
-     * в режиме презентации
-     */
-    turnOnInput(on) {
-        this.fpsText.setText(' fps: '+'turnOnInput')
-        let ind = this.input.eventNames().indexOf("pointerdown")
-        if(!on){
-            this.input.off('pointerdown')
-            return;
-        }
-
-        if(ind != -1) return;
-
-        this.input.on('pointerdown', (pointer) => {
-            if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
-                this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                this.inputText.setText('left')
-
-                return
-            }
-            if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
-                this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
-                this.inputText.setText('right')
-                return
-            }
-            this.shootOn = !this.shootOn
-            this.inputText.setText('shootOn')
-        })
-    }
-
+    // метод создающий твин летящей гранаты, после которого начинается
+    // анимация взрыва, после которой текстура ж-д станции заменяется на
+    // сгоревшую и стартует твин, делающий облако взрыва прозрачным, по
+    // окончании его в зависимости от того была ли это презентация или
+    // взрыв произошёл в реальной игре либо выводится окно с итогами, либо
+    // стартует уровень 
     playGransdExplodeTween() {
-        this.flyingGranad = this.tweens.add({
+        let flyingGranad = this.tweens.add({
             targets: this.fireGranade,
             x: 50,
             duration: 1000,
+            persist: false,
             paused: true,
             onComplete: () => {
                 this.rwExplode.play({ key: 'rwExplode', startFrame: 0 })
                 this.rwExplode.setAlpha(1)
-                this.rwExplode.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                this.rwExplode.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
                     this.railway.setTexture('blackRailway');
                     this.explodeTween = this.tweens.add({
                         targets: this.rwExplode,
                         alpha: 0,
                         duration: 2000,
-                        persist: true,
+                        persist: false,
                         paused: true,
                         onComplete: () => {
-                            this.enemies.clearEnemies()
-                            //this.physics.resume()
-                            this.enemies.createGroup("oneColumn", 0, 0, 0)
-                            
-                            //this.gameIsGone = true
-                            this.currentGameState = GameState.Gone
-                            this.turnOnInput(true)
-                            this.enemiesIsStoped = false
-                            this.fireGranade.setPosition(-100, -100)
-                            this.railway.setTexture('railway')
-                            this.shootBullets = 100;
-                            this.leftBulletArs.setCrop();
-                            (this.bigBulletsGrp.getChildren()[0] as 
-                                Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
-                                reset(94,426);
-                            this.bigBulletsGrp.getChildren()[0].setActive(true).
-                                setData('isFull',true);
-                            (this.bigBulletsGrp.getChildren()[1] as 
-                                Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
-                                reset(790,426);
-                            this.bigBulletsGrp.getChildren()[1].setActive(true).
-                                setData('isFull',true);
-                            this.leftBulletArs.setCrop();
-                            this.rightBulletArs.setCrop();
+                            if(isPreviewShow){
+                                isPreviewShow = false;
+                                this.playLevel(lvlNames.Alone)
+                            }
+                            else {
+                                this.scene.pause("demo")
+                                let numRemBullets = 0;
+                                // считаем сколько осталось патронов в игре
+                                this.bigBulletsGrp.getChildren().forEach((child) =>{
+                                    if(child.getData("isFull")) numRemBullets += 50;
+                                })
+                                numRemBullets += this.shootBullets;
+                                if(lvlsData[currentLvl] == -1) lvlsData[currentLvl] = 0;
+                                let msg:numMsg;
+                                if(lvlsData[currentLvl] == -1){
+                                    if(currentLvl == lvlNames.Preview) msg = numMsg.AloneLost;
+                                    msg =0;
+                                }
+                                myUIBlocks.showSummary(200 - numRemBullets,
+                                    this.enemies.getNumKilledEnemies(),GameState.Lost,
+                                    msg)
+                            }
                         }
                     });
                     this.explodeTween.play();
                 })
             }
         })
-        this.flyingGranad.play()
+        flyingGranad.play()
+    }
+
+    playLevel(level: lvlNames) {
+        this.enemies.clearEnemies()
+        this.enemies.createGroup("oneColumn", 0, 0, 0)
+        this.currentGameState = GameState.Gone
+        //this.turnOnInput(true)
+        
+        this.enemiesIsStoped = false
+        this.fireGranade.setPosition(-100, -100)
+        this.railway.setTexture('railway')
+        this.shootBullets = 100;
+        this.leftBulletArs.setCrop();
+        (this.bigBulletsGrp.getChildren()[0] as
+            Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
+            reset(94, 426);
+        this.bigBulletsGrp.getChildren()[0].setActive(true).
+            setData('isFull', true);
+        (this.bigBulletsGrp.getChildren()[1] as
+            Phaser.Types.Physics.Arcade.ImageWithStaticBody).body.
+            reset(790, 426);
+        this.bigBulletsGrp.getChildren()[1].setActive(true).
+            setData('isFull', true);
+        this.leftBulletArs.setCrop();
+        this.rightBulletArs.setCrop();
+        this.shooterContBody.body.reset(400,
+            this.shooterCont.y)
+        
+        this.pointerDownOn = true;
+        currentLvl = level;
+        if(level == lvlNames.Preview){
+            isPreviewShow = true;
+            this.pointerDownOn = false;
+            //this.turnOnInput(false)
+            this.showPreview();
+        }
+        
+        this.scene.resume("demo")
+        //this.turnOnInput(true)
     }
 
     showPreview(){
-        let bubble = this.add.graphics({x:0, y:0})
+        this.pointerDownOn = false;
+        let bubble;
+        let captionBubble;
+        bubble = this.add.graphics({x:0, y:0})
         bubble.fillStyle(0x222222, 0.5);
         bubble.fillRoundedRect(6, 6, 575, 48, 16);
 
@@ -577,13 +713,13 @@ export class Demo extends Phaser.Scene
         bubble.strokeRoundedRect(0, 0, 575,48, 16);
         bubble.fillRoundedRect(0, 0, 575,48, 16);
         bubble.generateTexture('captionBubble',582,54)
-        let captionBubble = this.add.image(400,36,'captionBubble').setDepth(21)
+        captionBubble = this.add.image(400,36,'captionBubble').setDepth(21)
         bubble.clear()
 
         let captionStyle:Phaser.Types.GameObjects.Text.TextStyle =
             {fontFamily:"Roboto, Arial", fontSize: '30px', fontStyle: 'bold',
             color: '#ff0000'}
-        let capTxt = this.add.text(200,16,'Управление на тачскрине:',captionStyle).setDepth(22);
+        let capTxt = this.add.text(200,16,currentTexts.touchControl ,captionStyle).setDepth(22);
         capTxt.setShadow(1,1,'#000000')
         capTxt.setDepth(22)
         
@@ -622,7 +758,7 @@ export class Demo extends Phaser.Scene
         let hand = this.add.image(210,280,'hand').setAlpha(0)
 
         const bubbleImg = this.add.image(186,148,'bubble').setDepth(21).setAlpha(0)
-        const leftBubbleTxt = this.add.text(0, 0, 'Жмите слева от орудия, чтобы двигаться влево.',
+        const leftBubbleTxt = this.add.text(0, 0, currentTexts.leftTap,
           { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
         
         let txtBnd = leftBubbleTxt.getBounds()
@@ -631,19 +767,20 @@ export class Demo extends Phaser.Scene
             bubbleImg.y - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
         
-        const rightBubbleTxt = this.add.text(0, 0, 'Жмите справа от орудия, чтобы двигаться вправо.',
+        const rightBubbleTxt = this.add.text(0, 0, currentTexts.rightTap,
             { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
         txtBnd = rightBubbleTxt.getBounds()
         rightBubbleTxt.setPosition(634 - rightBubbleTxt.width/2 - 5,
             148 - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
-        const centerBubbleTxt = this.add.text(0, 0, 'Чтобы начать или закончить стрельбу, жмите над орудием.',
+        const centerBubbleTxt = this.add.text(0, 0, currentTexts.shooting,
         { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 }})
         centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
             148 - centerBubbleTxt.height/2 - 5).setDepth(22).setAlpha(0)
 
         // цепочка для текста и подложек для него
         this.tweens.chain({
+            persist:false,
             // тыкаем слева от орудия
             tweens:[
             {
@@ -706,6 +843,7 @@ export class Demo extends Phaser.Scene
 
         // цепочка твинов для hand
         this.tweens.chain({
+            persist:false,
             // тыкаем слева от орудия
             tweens:[
             {
@@ -778,6 +916,7 @@ export class Demo extends Phaser.Scene
         // появляется правая область-прямоугольник, левая область передвигается
         // влево, левая область исчезает
         this.tweens.chain({
+            persist:false,
             tweens: [
                 {
                     targets: leftToughtRect,
@@ -831,6 +970,7 @@ export class Demo extends Phaser.Scene
         // исчезает hand, начинается стрельба, появляется hand, hand жмёт на
         // центральную область, стрельба прекращается, hand исчезает
         this.tweens.chain({
+            persist:false,
             tweens: [
                 
                 {
@@ -974,7 +1114,7 @@ export class Demo extends Phaser.Scene
                     },
                     duration:300,
                     onComplete: () => {
-                        capTxt.setText("Управление с клавиатуры.")
+                        capTxt.setText(currentTexts.keyboard)
                     }
                 },
                 {
@@ -984,7 +1124,7 @@ export class Demo extends Phaser.Scene
                     },
                     duration:300,
                     onComplete: () => {
-                        centerBubbleTxt.setText("Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево двигают орудие.")
+                        centerBubbleTxt.setText( currentTexts.arrow)
                         centerBubbleTxt.setFontSize('20px')
                         centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
                             148 - centerBubbleTxt.height/2 - 5)
@@ -1013,7 +1153,7 @@ export class Demo extends Phaser.Scene
                     },
                     duration:300,
                     onComplete: () => {
-                        capTxt.setText("Не дайте им пройти!")
+                        capTxt.setText(currentTexts.dontLet)
                         capTxt.setX(captionBubble.x - capTxt.width/2 -5)
                     }
                 },
@@ -1024,7 +1164,7 @@ export class Demo extends Phaser.Scene
                     },
                     duration:300,
                     onComplete: () => {
-                        centerBubbleTxt.setText("Пополняйте по возможности запас патронов.")
+                        centerBubbleTxt.setText(currentTexts.replanish)
                         centerBubbleTxt.setFontSize('24px')
                         centerBubbleTxt.setPosition(400 - centerBubbleTxt.width/2 - 5,
                             148 - centerBubbleTxt.height/2 - 5)
@@ -1069,7 +1209,11 @@ export class Demo extends Phaser.Scene
                     delay:200,
                     duration:300,
                     onComplete: () =>{
-                        //this.enemies.clearEnemies()
+                        this.textures.remove("leftTouchRect")
+                        this.textures.remove("rightToughtRect")
+                        this.textures.remove("centerToughtRect")
+                        this.textures.remove("bubble")
+                        this.textures.remove("captionBubble")
                     }
                 }
             ]
@@ -1079,7 +1223,7 @@ export class Demo extends Phaser.Scene
     }
 
     checkBullet() {
-        //if (currentGameState != GameState.Gone) return
+        if (this.enemiesIsStoped) return
         if (this.shootOn) {
             if (this.shootBullets > 0) {
                 this.bulletsGrp.fireBullet(this.shooterCont.x, this.shooterCont.y - 15,
@@ -1186,6 +1330,7 @@ export class Demo extends Phaser.Scene
         this.textures.addImage('rogaBush',globalCache.get('rogaBush'))
         this.textures.addImage('rosaBush',globalCache.get('rosaBush'))
         this.textures.addImage('ovalBush',globalCache.get('ovalBush'))
+        this.textures.addImage('rectBush',globalCache.get('rectBush'))
 
         this.textures.addImage('bulletStrike0',globalCache.get('bulletStrike0'))
         this.textures.addImage('bulletStrike1',globalCache.get('bulletStrike1'))
@@ -1194,6 +1339,7 @@ export class Demo extends Phaser.Scene
         this.textures.addImage('bulletStrike4',globalCache.get('bulletStrike4'))
         this.textures.addImage('bulletStrike5',globalCache.get('bulletStrike5'))
         this.textures.addImage('blankShoot',globalCache.get('blankShoot'))
+        this.textures.addImage('blankShoot2',globalCache.get('blankShoot2'))
         this.textures.addImage('scheben1',globalCache.get('scheben1'))
 
         this.textures.addImage('empty',globalCache.get('empty'))
@@ -1202,8 +1348,14 @@ export class Demo extends Phaser.Scene
     }
 }
 
-export function startGame(state: GameState){
-    glGameState = state;
+export function startGame(){
+    if(lvlsData[0] == -1){
+        isPreviewShow = true
+    }
+    //if(lang !== "ru") currentTexts = enTexts;
+    //else currentTexts = ruTexts;
+
+    //glGameState = state;
     const config = {
     
         type: Phaser.CANVAS,
@@ -1225,7 +1377,7 @@ export function startGame(state: GameState){
         scene: Demo,
         //render :render,
     };
-    const game = new Phaser.Game(config);
+    myGame = new Phaser.Game(config);
 }
 
 function saveActions(data) {
@@ -1316,6 +1468,7 @@ export function loadAtlas(){
         this.load.image('rogaBush','assets/rogaBush_B.png')
         this.load.image('rosaBush','assets/rosaBush_B.png')
         this.load.image('ovalBush','assets/ovalBush_B.png')
+        this.load.image('rectBush','assets/rectBush.png')
         this.load.image('scheben1','assets/scheben11.png')
 
         this.load.image('bulletStrike0','assets/bulletStrike0a.png')
@@ -1325,6 +1478,7 @@ export function loadAtlas(){
         this.load.image('bulletStrike4','assets/bulletStrike4a.png')
         this.load.image('bulletStrike5','assets/bulletStrike5a.png')
         this.load.image('blankShoot','assets/blankShoot.png')
+        this.load.image('blankShoot2','assets/blankShoot2.png')
 
         this.load.image('empty','assets/empty.png')
         this.load.image('hand','assets/hand.png')
@@ -1397,6 +1551,7 @@ export function loadAtlas(){
         globalCache.add('rogaBush',this.game.textures.get('rogaBush').getSourceImage())
         globalCache.add('rosaBush',this.game.textures.get('rosaBush').getSourceImage())
         globalCache.add('ovalBush',this.game.textures.get('ovalBush').getSourceImage())
+        globalCache.add('rectBush',this.game.textures.get('rectBush').getSourceImage())
         let a = this.game.textures.get('scheben1')
         let b = a.getSourceImage()
         globalCache.add('scheben1',this.game.textures.get('scheben1').getSourceImage())
@@ -1408,11 +1563,12 @@ export function loadAtlas(){
         globalCache.add('bulletStrike4',this.game.textures.get('bulletStrike4').getSourceImage())
         globalCache.add('bulletStrike5',this.game.textures.get('bulletStrike5').getSourceImage())
         globalCache.add('blankShoot',this.game.textures.get('blankShoot').getSourceImage())
+        globalCache.add('blankShoot2',this.game.textures.get('blankShoot2').getSourceImage())
 
         globalCache.add('empty',this.game.textures.get('empty').getSourceImage())
         globalCache.add('hand',this.game.textures.get('hand').getSourceImage())
         this.game.pause()
-        document.getElementById('loaderCont').dispatchEvent(new Event('assetLoaded'))
+        addLoading("isGameAtlas",1)
         return
     }
 
@@ -1428,8 +1584,192 @@ export function loadAtlas(){
         }
     }
 
-    const myGame = new Phaser.Game(config);
+    let game = new Phaser.Game(config);
 }
 
-export enum GameState{Gone, Preview, Win, Lost}
+
+
+/** если уровень Учебка ещё не проходился (lvlsAchives[0] == -1),
+ * запускаем игру с GameState.Preview, в противном случае вызываем
+ * myUIBlocks.showLevelsMenu(lang, data), который выводит окно для
+ * выбора уровня
+ */
+type gameDataType = {
+    lang : string,
+    lvlsData : Array<number>
+}
+
+/** массив с достижениями: -1 - уровень ещё не проходился,
+ *  0 - уровень проходился, но неудачно, 1 - уровень пройден
+ */
+let lvlsData:Array<number> = [-1, -1, -1]
+let myLang:string = "ru"
+let myYsdk
+let myPlayer
+
+/** вызывается из index.html при завершении загрузки ассетов, 
+ * sdk и данных об игроке, устанавливает значения для языка среды и
+ * информацию о пройденных уровнях и запускает саму игру 
+ **/
+// export function startApp(){
+//     if(myLang === "ru"){
+//         currentTexts = ruTexts
+//     }else{
+//         currentTexts = enTexts
+//     }
+    
+//     //lvlsAchives = gameData.lvlsData
+
+//     if(lvlsData[0] == -1) startGame(lvlName.Preview)
+// }
+
+// isSDKInfo == -1, если sdk ещё не загрузилось, 0 если загрузилось с
+// ошибкой, 1 если загрузилось корректно. Для  isGameAtlas -аналогично 
+// при загрузке ассетов для игры
+const loadings = {
+    'isSDKLoaded': -1, 'isGameAtlas': -1,
+    'isAdvFinish': -1, 'isPlayerData': -1
+}
+
+// устанавливает для загрузки name объекта loadings значение value
+// value = -1, если загрузка ещё не закончилась, 0 если загрузка
+// прошла с ошибкой или такой объект не существует, 1 если всё
+// прошло штатно
+function addLoading(name, value) {
+    // если ключа с таким именем нет, выходим 
+    if (!Object.keys(loadings).includes(name)) return;
+
+    loadings[name] = value;
+
+    // если загрузка всех необходимых компонентов удачно или нет завершилась,
+    // заносим данные игрока в массив lvlsData 
+    if (!Object.values(loadings).includes(-1)) {
+        let locLvlsData = []
+        // если не удалось загрузить yaSdK, пробуем достать данные из 
+        // localStorage, если и это не удалось, присваиваем начальные данные
+        // по умолчанию как для нового игрока
+        if(loadings.isSDKLoaded == 0){
+            if(localStorage.getItem("lvlsData") !== null){
+                try{
+                    // удалить на продакшене эту строку 
+                    throw("err")
+                    locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
+                    currentTexts = ruTexts
+                }catch(err){
+                    locLvlsData =[-1, -1, -1]
+                    currentTexts = ruTexts
+                }
+            }
+            //lvlsData = [-1, -1, -1]
+            //myLang = "ru"
+        }else 
+        // если YaSDK загружены, а данные игрока нет, сначала пробуем
+        // достать их из localStorage и в случае неудачи присваиваем
+        // данные как для нового игрока
+        if(loadings.isPlayerData == 0){
+            try{
+                locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
+                currentTexts = ruTexts
+            }catch(err){
+                locLvlsData =[-1, -1, -1]
+                currentTexts = ruTexts
+            }
+        }else{
+            try{
+                locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
+            }catch(err){
+                locLvlsData =[-1, -1, -1]
+                currentTexts = ruTexts
+            }
+        }
+        for(let i = 0; i < locLvlsData.length; i++){
+            if(locLvlsData[i] > lvlsData[i]){
+                lvlsData = locLvlsData;
+                break;
+            }
+        }
+        if(lvlsData[0] == -1){
+            currentLvl = lvlNames.Preview;
+            isPreviewShow = true;
+        } 
+        myUIBlocks = new UIBlocks(myLang)
+        startGame()
+    }
+}
+
+export function initApp(YaGames) {
+    // myUIBlocks = new UIBlocks("ru")
+    // myUIBlocks.showSummary(10,0,GameState.Lost,0)
+    // return
+
+    loadAtlas()
+
+    if (YaGames === null) {
+        lvlsData = [-1, -1, -1]
+        myLang = "ru"
+        addLoading('isSDKLoaded', 0)
+        addLoading('isPlayerData', 0)
+        addLoading('isAdvFinish', 0)
+        return
+    }
+
+    YaGames
+        .init()
+        .then(ysdk => {
+            console.log('Yandex SDK initialized');
+            myYsdk = ysdk;
+            addLoading('isSDKLoaded', 1)
+            // ysdk.adv.showFullscreenAdv({
+            //     callbacks: {
+            //         onClose: (wasShown) => {
+            //             addLoading('isAdvFinish', 1)
+            //         },
+            //         onError: (error) => {
+            //             addLoading('isAdvFinish', 0)
+            //         },
+            //         onOffline: () => {
+            //             addLoading('isAdvFinish', 0)
+            //         }
+            //     }
+            // })
+            addLoading('isAdvFinish', 1)
+            ysdk.getPlayer().then(player => {
+                myPlayer = player;
+                player.getData().then(data => {
+                    try {
+                        lvlsData = JSON.parse(data.lvlsData)
+                        addLoading('isPlayerData', 1)
+                    } catch (err) {
+                        lvlsData = [-1, -1, -1]
+                        addLoading('isPlayerData', 0)
+                    }
+                }).catch(err => {
+                    lvlsData = [-1, -1, -1]
+                    addLoading('isPlayerData', 0)
+                })
+            }).catch(err => {
+                lvlsData = [-1, -1, -1]
+                addLoading('isPlayerData', 0)
+            });
+            try {
+                myLang = ysdk.environment.i18n.lang
+            } catch (err) {
+                myLang = "ru"
+            }
+        })
+        .cath(err => {
+            addLoading('isSDKLoaded', 0)
+            addLoading('isPlayerData', 0)
+            addLoading('isAdvFinish', 0)
+            lvlsData = [-1, -1, -1]
+            myLang = "ru"
+        });
+}
+
+export function hideModal(level:lvlNames){
+
+    myUIBlocks.hideModal();
+    (myGame.scene.getScene("demo") as Demo).playLevel(level)
+};
+
 

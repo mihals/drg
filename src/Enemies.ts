@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
 import {Demo} from './game';
 import { Bullet } from './game';
-import { GameState } from './game';
+import { GameState } from './enums';
 //import { currentGameState } from './game';
 
 /**класс, содержащий и управляющий группами диверсов и БМПешек */
@@ -147,7 +147,7 @@ export class Enemies
                 this.bmpGroup,(bullet:Bullet, bmp:BMP) =>{
                     bullet.body.reset(0,-32);
                     bullet.setActive(false).setVisible(false);
-                    if(bmp.state>1){
+                    if(bmp.state > 1){
                         let state = (bmp.state as number) - 1;
                         let txtr = 'bmp'+state
                         bmp.setState(state)
@@ -173,12 +173,11 @@ export class Enemies
         }
 
         this.oneColumnArr.forEach((item, index, array) => {
-            console.log(index)
-            if (ret == GameState.Gone ||
-                ret == GameState.Preview) {
+            //console.log(index)
+            if (ret == GameState.Gone) {
                 if (item.countActive() != 0) {
                     let falX = item.getFirstAlive()
-                    console.log(falX.x)
+                    //console.log(falX.x)
                     if (item.getFirstAlive().x < 95) {
                         this.firstWalker = item.getFirstAlive()
                         ret = GameState.Lost;
@@ -194,17 +193,22 @@ export class Enemies
      * останавливает анимацию волкеров, первый дошедший до цистерн волкер
      * бросает гранату
      */
-    stopEnemies():Phaser.Geom.Point{
-        this.oneColumnArr.forEach((column,ind,arr) => {
-            column.setVelocityX(0)
-            column.getChildren().forEach((enemy:Phaser.GameObjects.Sprite,ind,arr) => {
-                enemy.anims.stop()
-                let num = Phaser.Math.RND.integerInRange(0,4)
-                enemy.setTexture(this.stayStrArray[num])
+    stopEnemies(result: GameState): Phaser.Geom.Point {
+        if (result == GameState.Lost) {
+            this.oneColumnArr.forEach((column, ind, arr) => {
+                column.setVelocityX(0)
+                column.getChildren().forEach((enemy: Phaser.GameObjects.Sprite, ind, arr) => {
+                    enemy.anims.stop()
+                    let num = Phaser.Math.RND.integerInRange(0, 4)
+                    enemy.setTexture(this.stayStrArray[num])
+                })
             })
-        })
-        this.firstWalker.setTexture('granade')
-        return new Phaser.Geom.Point(this.firstWalker.x,this.firstWalker.y)
+            this.firstWalker.setTexture('granade')
+            return new Phaser.Geom.Point(this.firstWalker.x, this.firstWalker.y)
+        }
+        if (result == GameState.Win){
+            return null;
+        }
     }
 
     /** очищает всё поле от диверсов, удаляет коллайдеры  */
@@ -222,6 +226,11 @@ export class Enemies
             //let cld = this.myScene.physics.world.colliders
         })
         this.oneColumnArr.length = 0
+    }
+
+    getNumKilledEnemies(){
+        console.log("killedEnemies " + this.enemiesReserve.countActive())
+        return (68 - this.enemiesReserve.countActive())
     }
 }
 

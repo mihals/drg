@@ -8,8 +8,8 @@ body {background-image: url('./assets/bg5.png'); background-repeat: repeat;
 canvas {padding: 0; margin: 0;}
 #loaderCont {width: 1; height: 1; position: absolute; top:-10; left: -10;}
 #modalContainer {
-     display: none;
-     visibility: hidden;
+     /* display: none;
+     visibility: hidden; */
      position: fixed;
      top: 0;
      left: 0;
@@ -18,8 +18,7 @@ canvas {padding: 0; margin: 0;}
      z-index: 10;
      align-content: center;
 }
-#modalWnd {
-     
+#levelWnd {
      height: 80%;
      width: 50%;
      /* border-radius: 5%; */
@@ -33,13 +32,13 @@ canvas {padding: 0; margin: 0;}
      /* margin: 5% 25% 5% 25%;
      padding: 15% 5% 15% 5%; */
 }
-#topModal{
+#topLevelWnd{
      background-color: #a99c7e;
      width: 100%;
      height: 50%;
      /* border-radius: 10% 10% 0 0 ; */
 }
-#bottomModal{
+#bottomLevelWnd{
      display: flex;
      background-color: #43463a;
      width: 100%;
@@ -54,14 +53,74 @@ canvas {padding: 0; margin: 0;}
    border-color:  #c1a948 ;
    color: #b5b5b5;
    font-size: 1.2em;
+   align-self: center;
+   margin-top: 10px;
+   margin-bottom: 10px;
 }
 .lvlBottom:disabled {
      font-size: 1.2em;
+     align-self: center;
 }
 .pogonImg{
-     float: left;
-     margin: 10px;
+     /* float: left; */
+     /* margin: 10px; */
      padding: 0;
 }
+#modalWnd {
+     height: 80%;
+     width: 50%;
+     /* border-radius: 5%; */
+     box-shadow: 5px 5px #00000055;
+     /* display: none;
+     visibility: hidden; */
+     display: flex;
+     flex-direction: column;
+     justify-content: start;
+     margin: 20px auto;
+     align-items: stretch;
+     /* background-color: #a99c7e; */
+     background-color: #f0edde;
+     overflow-y: auto;
+     /* margin: 5% 25% 5% 25%;
+     padding: 15% 5% 15% 5%; */
+}
+#topModal{
+    background-color: #a99c7e;
+}
+#resultLst{
+     list-style-type: none;
+}
 
+#summaryTop{
+     margin: 0;
+     padding: 0;
+     background-color: #a99c7e;
+}
+#summaryTop p {
+     font-size: 28px;
+     font-weight: bold;
+     color:  #650207;
+     text-align: center;
+}
+#summaryResult{
+     display: flex;
+     align-items: center;
+     flex-direction: row;
+     justify-content: start;
+}
+#summaryResult ul{
+     color: #222c41;
+     font-weight: bold;
+     font-size: 20px;
+     list-style-type: none;
+}
+#summaryMsg{
+     background-color: #f0edde;
+}
+#summaryMsg p{
+     text-align: center;
+     padding: 5px;
+     margin: 5px;
+     font-size: 20px;
+}
 
