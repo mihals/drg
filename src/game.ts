@@ -18,12 +18,12 @@
 import * as Phaser from 'phaser';
 import { Enemies } from './Enemies';
 import { UIBlocks } from './uiblocks';
-import { numMsg } from './enums'
+import { LvlState, numMsg } from './enums'
 import { GameState } from './enums';
 import { lvlNames } from './enums';
-
-
-
+import { Bullet } from './bullets';
+import { Bullets } from './bullets';
+import { Loner } from './loner';
 
 //let glPreviewMode:boolean
 let myGame: Phaser.Game;
@@ -67,83 +67,85 @@ const ruTexts:LocTexts = {
 }
 let currentTexts:LocTexts;
 let lvlsAchives : Array<number>
-export class Bullet extends Phaser.Physics.Arcade.Sprite
-{
-    constructor (scene, x, y)
-    {
-        super(scene, x, y, 'bullet');
-    }
+// export class Bullet extends Phaser.Physics.Arcade.Sprite
+// {
+//     constructor (scene, x, y)
+//     {
+//         super(scene, x, y, 'bullet');
+//     }
 
-    fire (x, y, velocityX)
-    {
-        this.body.reset(x, y);
+//     fire (x, y, velocityX)
+//     {
+//         this.body.reset(x, y);
 
-        this.setActive(true);
-        this.setVisible(true);
+//         this.setActive(true);
+//         this.setVisible(true);
 
-        this.setVelocity(velocityX, -300);
-        (this.scene as Demo).numBullets++
-    }
+//         this.setVelocity(velocityX, -300);
+//         //(this.scene as Demo).numBullets++
+//     }
 
-    preUpdate (time, delta)
-    {
-        super.preUpdate(time, delta);
+//     preUpdate (time, delta)
+//     {
+//         super.preUpdate(time, delta);
 
-        if (this.y <= -32)
-        {
-            this.setActive(false);
-            this.setVisible(false);
-        }
-    }
-}
+//         if (this.y <= -32)
+//         {
+//             this.setActive(false);
+//             this.setVisible(false);
+//         }
+//     }
+// }
 
-class Bullets extends Phaser.Physics.Arcade.Group
-{
-    myScene: Phaser.Scene
-    blankShot:Phaser.Physics.Arcade.Sprite
-    constructor (scene:Phaser.Scene)
-    {
-        super(scene.physics.world, scene);
-        //this.myScene
+// class Bullets extends Phaser.Physics.Arcade.Group
+// {
+//     myScene: Phaser.Scene
+//     blankShot:Phaser.Physics.Arcade.Sprite
+//     constructor (scene:Phaser.Scene)
+//     {
+//         super(scene.physics.world, scene);
+//         //this.myScene
         
-        this.createMultiple({
-            frameQuantity: 5,
-            key: 'bullet',
-            active: false,
-            visible: false,
-            classType: Bullet
-        });
+//         this.createMultiple({
+//             frameQuantity: 5,
+//             key: 'bullet',
+//             active: false,
+//             visible: false,
+//             classType: Bullet
+//         });
 
-        let anim = scene.anims.create({
-            key: 'blankShoot',
-            frames: [
-                { key: 'empty' },
-                { key: 'blankShoot' },
-                { key: 'blankShoot2' },
-                { key: 'empty' }
-            ],
-            frameRate: 10,
-        });
-        //console.log(anim)
-        this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
-    }
+//         let anim = scene.anims.create({
+//             key: 'blankShoot',
+//             frames: [
+//                 { key: 'empty' },
+//                 { key: 'blankShoot' },
+//                 { key: 'blankShoot2' },
+//                 { key: 'empty' }
+//             ],
+//             frameRate: 10,
+//         });
+//         //console.log(anim)
+//         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
+//     }
 
-    fireBullet (x, y, velocityX)
-    {
-        const bullet = this.getFirstDead(false);
+//     fireBullet (x, y, velocityX)
+//     {
+//         const bullet = this.getFirstDead(false);
 
-        if (bullet)
-        {
-            bullet.fire(x, y, velocityX);
-        }
-    }
+//         if (bullet)
+//         {
+//             bullet.fire(x, y, velocityX);
+//         }
+//     }
 
-    fireBlank(x, y, velocityX){
-        this.blankShot.body.reset(x-3,y-10)
-        this.blankShot.play({key:'blankShoot',startFrame:0})
-        this.blankShot.setVelocityX(velocityX)
-    }
-}
+//     fireBlank(x, y, velocityX){
+//         this.blankShot.body.reset(x-3,y-10)
+//         this.blankShot.play({key:'blankShoot',startFrame:0})
+//         this.blankShot.setVelocityX(velocityX)
+//     }
+// }
+
+//globalThis.helloMessage = "5";
 export class Demo extends Phaser.Scene
 {
     /** режимы и состояния игры: autoPilot - игра воспроизводится в режиме
@@ -247,6 +249,8 @@ export class Demo extends Phaser.Scene
     rightBulletArs:Phaser.GameObjects.Image
     blankShot:Phaser.GameObjects.Sprite
     fireGranade:Phaser.GameObjects.Image
+    /** во время обучалки = true */
+    isPreview:boolean
 
     /** Уровни для колонн и кустов */
     // lr20:Phaser.GameObjects.Layer;lr60:Phaser.GameObjects.Layer
@@ -270,7 +274,12 @@ export class Demo extends Phaser.Scene
         this.shootActionArr = []
         this.currentGameState = glGameState;
         this.pointerDownOn = false;
-    }    
+        this.isPreview = true;
+        globalThis.currentScene = this;
+        globalThis.currentSceneName = "demo";
+    }  
+    
+    
 
     preload ()
     {
@@ -279,15 +288,9 @@ export class Demo extends Phaser.Scene
 
     create ()
     {
-        this.extractFromCache()
-        //this.gameIsGone = true;
-        let bc:Phaser.Cache.BaseCache = (window as any).baseCache
-        if (bc.exists("atlasImg") && bc.exists("atlasJson")) {
-            //console.log("Create.Basecache has atlas");
-            this.textures.addAtlasJSONHash("atlas", bc.get("atlasImg"),
-            bc.get("atlasJson"));
-          }
-
+        globalThis.currentScene = this;
+        globalThis.currentSceneName = "demo";
+        
         if (this.gameState.autoPilot) {
             this.gameState.waitAction = true
             let response = fetch('http://localhost/drgServer/get_actions.php',
@@ -437,9 +440,9 @@ export class Demo extends Phaser.Scene
         this.bulettCounter = 0;
         this.shootOn = false
         
-        this.enemies = new Enemies(this);
+        this.enemies = new Enemies(this.bulletsGrp);
 
-        this.enemies.createGroup('oneColumn',0,0,0)
+        this.enemies.createGroup('demo',0,0,0)
 
         this.railway = this.physics.add.staticImage(44,225,'railway');
         
@@ -454,9 +457,9 @@ export class Demo extends Phaser.Scene
         this.cameras.main.startFollow(this.shooterCont)
         if(this.gameState.autoPilot) this.scene.pause()
         
-        if(currentLvl == lvlNames.Preview){
+        //if(currentLvl == lvlNames.Preview){
             this.showPreview()
-        }
+        //}
 
         this.enemiesIsStoped = false
         this.input.addPointer(2)
@@ -482,6 +485,10 @@ export class Demo extends Phaser.Scene
             }
         })
 
+        this.shootBullets = 100;
+        globalThis.currentResult = GameState.Gone
+        this.currentGameState = GameState.Gone
+        this.isPreview =true
     }
 
     update(time: number, delta: number): void {
@@ -489,7 +496,7 @@ export class Demo extends Phaser.Scene
         let velocityX:number = 0;
 
         let nLst = this.input.listeners('pointerdown')
-        console.log("numListeners "+this.input.listenerCount("pointerdown"))
+        //console.log("numListeners "+this.input.listenerCount("pointerdown"))
 
         // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
         // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
@@ -513,13 +520,16 @@ export class Demo extends Phaser.Scene
             }
             if (this.currentGameState == GameState.Win) {
                 this.enemies.stopEnemies(GameState.Win)
+                this.scene.pause("demo")
+                let numRemBullets = 0;
+                // считаем сколько осталось патронов в игре
+                this.bigBulletsGrp.getChildren().forEach((child) => {
+                    if (child.getData("isFull")) numRemBullets += 50;
+                })
+                numRemBullets += this.shootBullets;
+                
                 /** номер сообщения, которое зависит от результата и достижений игрока */
-                let numMsg;
-                if(lvlsData[0] == -1){
-                    numMsg = 0
-                } 
-                myUIBlocks.showSummary(200 - this.shootBullets, 68, 
-                    GameState.Win, numMsg)
+                globalThis.myUIBlocks.showSummary(200 - numRemBullets, 7, GameState.Win)
             }
             this.enemiesIsStoped = true
         }
@@ -625,9 +635,9 @@ export class Demo extends Phaser.Scene
                         persist: false,
                         paused: true,
                         onComplete: () => {
-                            if(isPreviewShow){
-                                isPreviewShow = false;
-                                this.playLevel(lvlNames.Alone)
+                            if(this.isPreview){
+                                this.isPreview = false;
+                                this.playLevel()
                             }
                             else {
                                 this.scene.pause("demo")
@@ -637,15 +647,15 @@ export class Demo extends Phaser.Scene
                                     if(child.getData("isFull")) numRemBullets += 50;
                                 })
                                 numRemBullets += this.shootBullets;
-                                if(lvlsData[currentLvl] == -1) lvlsData[currentLvl] = 0;
-                                let msg:numMsg;
-                                if(lvlsData[currentLvl] == -1){
-                                    if(currentLvl == lvlNames.Preview) msg = numMsg.AloneLost;
-                                    msg =0;
-                                }
-                                myUIBlocks.showSummary(200 - numRemBullets,
-                                    this.enemies.getNumKilledEnemies(),GameState.Lost,
-                                    msg)
+                                // if(lvlsData[currentLvl] == -1) lvlsData[currentLvl] = 0;
+                                // let msg:numMsg;
+                                // if(lvlsData[currentLvl] == -1){
+                                //     if(currentLvl == lvlNames.Demo) msg = numMsg.AloneLost;
+                                //     msg =0;
+                                // }
+                                //this.playLevel(lvlNames.Loner)
+                                globalThis.myUIBlocks.showSummary(200 - numRemBullets,
+                                     this.enemies.getNumKilledEnemies(),GameState.Lost)
                             }
                         }
                     });
@@ -656,10 +666,9 @@ export class Demo extends Phaser.Scene
         flyingGranad.play()
     }
 
-    playLevel(level: lvlNames) {
+    playLevel() {
         this.enemies.clearEnemies()
-        this.enemies.createGroup("oneColumn", 0, 0, 0)
-        this.currentGameState = GameState.Gone
+        this.enemies.createGroup("demo", 0, 0, 0)
         //this.turnOnInput(true)
         
         this.enemiesIsStoped = false
@@ -683,14 +692,13 @@ export class Demo extends Phaser.Scene
             this.shooterCont.y)
         
         this.pointerDownOn = true;
-        currentLvl = level;
-        if(level == lvlNames.Preview){
-            isPreviewShow = true;
-            this.pointerDownOn = false;
-            //this.turnOnInput(false)
-            this.showPreview();
-        }
-        
+        // if(level == lvlNames.Demo){
+        //     isPreviewShow = true;
+        //     this.pointerDownOn = false;
+        //     //this.turnOnInput(false)
+        //     this.showPreview();
+        // }
+        this.currentGameState = GameState.Gone;
         this.scene.resume("demo")
         //this.turnOnInput(true)
     }
@@ -1263,99 +1271,11 @@ export class Demo extends Phaser.Scene
             this.gameState.needToSave = false
         }
     }
-
-    extractFromCache() {
-        const globalCache:Phaser.Cache.BaseCache = (window as any).baseCache
-
-        this.textures.addImage('bg',globalCache.get('bg'))
-        this.textures.addImage('railway',globalCache.get('railway'))
-        this.textures.addImage('gun',globalCache.get('gun'))
-        this.textures.addImage('bullet',globalCache.get('bullet'))
-        this.textures.addImage('bigBullet',globalCache.get('bigBullet'))
-        this.textures.addImage('bulletArs',globalCache.get('bulletArs'))
-        this.textures.addImage('circleBullet',globalCache.get('circleBullet'))
-        this.textures.addImage('fireGranade',globalCache.get('fireGranade'))
-        this.textures.addImage('virusOff',globalCache.get('virusOff'))
-        this.textures.addImage('walker0',globalCache.get('walker0'))
-        this.textures.addImage('walker1',globalCache.get('walker1'))
-        this.textures.addImage('walker2',globalCache.get('walker2'))
-        this.textures.addImage('walker3',globalCache.get('walker3'))
-        this.textures.addImage('walker4',globalCache.get('walker4'))
-        this.textures.addImage('runner0',globalCache.get('runner0'))
-        this.textures.addImage('runner1',globalCache.get('runner1'))
-        this.textures.addImage('runner2',globalCache.get('runner2'))
-        this.textures.addImage('runner3',globalCache.get('runner3'))
-        this.textures.addImage('runner4',globalCache.get('runner4'))
-        this.textures.addImage('failed0',globalCache.get('failed0'))
-        this.textures.addImage('failed1',globalCache.get('failed1'))
-        this.textures.addImage('granade',globalCache.get('granade'))
-        this.textures.addImage('standStay',globalCache.get('standStay'))
-        this.textures.addImage('sitStay',globalCache.get('sitStay'))
-        this.textures.addImage('handStay',globalCache.get('handStay'))
-        this.textures.addImage('stepStay',globalCache.get('stepStay'))
-        this.textures.addImage('gunStay',globalCache.get('gunStay'))
-
-        // this.textures.addImage('bmp',globalCache.get('bmp'))
-        // this.textures.addImage('bmp1',globalCache.get('bmp1'))
-        // this.textures.addImage('bmp2',globalCache.get('bmp2'))
-        // this.textures.addImage('bmp3',globalCache.get('bmp3'))
-
-        this.textures.addImage('blackRailway',globalCache.get('blackRailway'))
-        this.textures.addImage('explode1',globalCache.get('explode1'))
-        this.textures.addImage('explode2',globalCache.get('explode2'))
-        this.textures.addImage('explode3',globalCache.get('explode3'))
-        this.textures.addImage('explode4',globalCache.get('explode4'))
-        this.textures.addImage('explode5',globalCache.get('explode5'))
-        this.textures.addImage('explode6',globalCache.get('explode6'))
-        this.textures.addImage('explode7',globalCache.get('explode7'))
-        this.textures.addImage('explode8',globalCache.get('explode8'))
-        this.textures.addImage('explode9',globalCache.get('explode9'))
-        this.textures.addImage('explode10',globalCache.get('explode10'))
-        this.textures.addImage('explode11',globalCache.get('explode11'))
-        this.textures.addImage('explode12',globalCache.get('explode12'))
-        this.textures.addImage('explode13',globalCache.get('explode13'))
-        this.textures.addImage('explode14',globalCache.get('explode14'))
-        this.textures.addImage('explode15',globalCache.get('explode15'))
-        this.textures.addImage('explode16',globalCache.get('explode16'))
-        this.textures.addImage('explode17',globalCache.get('explode17'))
-        this.textures.addImage('explode18',globalCache.get('explode18'))
-        this.textures.addImage('explode19',globalCache.get('explode19'))
-        this.textures.addImage('explode20',globalCache.get('explode20'))
-        this.textures.addImage('explode21',globalCache.get('explode21'))
-        this.textures.addImage('explode22',globalCache.get('explode22'))
-        this.textures.addImage('explode23',globalCache.get('explode23'))
-
-        this.textures.addImage('bigTree',globalCache.get('bigTree'))
-        this.textures.addImage('midleTree',globalCache.get('midleTree'))
-        this.textures.addImage('rogaBush',globalCache.get('rogaBush'))
-        this.textures.addImage('rosaBush',globalCache.get('rosaBush'))
-        this.textures.addImage('ovalBush',globalCache.get('ovalBush'))
-        this.textures.addImage('rectBush',globalCache.get('rectBush'))
-
-        this.textures.addImage('bulletStrike0',globalCache.get('bulletStrike0'))
-        this.textures.addImage('bulletStrike1',globalCache.get('bulletStrike1'))
-        this.textures.addImage('bulletStrike2',globalCache.get('bulletStrike2'))
-        this.textures.addImage('bulletStrike3',globalCache.get('bulletStrike3'))
-        this.textures.addImage('bulletStrike4',globalCache.get('bulletStrike4'))
-        this.textures.addImage('bulletStrike5',globalCache.get('bulletStrike5'))
-        this.textures.addImage('blankShoot',globalCache.get('blankShoot'))
-        this.textures.addImage('blankShoot2',globalCache.get('blankShoot2'))
-        this.textures.addImage('scheben1',globalCache.get('scheben1'))
-
-        this.textures.addImage('empty',globalCache.get('empty'))
-        this.textures.addImage('hand',globalCache.get('hand'))
-        return
-    }
 }
 
+/** запускаем игру и загружаем ассеты в сцене Preload */
 export function startGame(){
-    if(lvlsData[0] == -1){
-        isPreviewShow = true
-    }
-    //if(lang !== "ru") currentTexts = enTexts;
-    //else currentTexts = ruTexts;
-
-    //glGameState = state;
+    
     const config = {
     
         type: Phaser.CANVAS,
@@ -1374,10 +1294,22 @@ export function startGame(){
             autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
             mode: Phaser.Scale.FIT
           },
-        scene: Demo,
+        scene: [Preloader, Demo, Loner],
         //render :render,
     };
     myGame = new Phaser.Game(config);
+}
+
+export function startLevel(levelName:lvlNames){
+    globalThis.myUIBlocks.hideModal();
+    globalThis.currentScene.scene.start(levelName)
+    return;
+    if(globalThis.currentLevel == levelName){
+        myGame.scene.getScene("loner").scene.start()
+        //myGame.scene.restart(levelName)
+    }else{
+        myGame.scene.start(levelName)
+    }
 }
 
 function saveActions(data) {
@@ -1399,13 +1331,192 @@ function saveActions(data) {
     //return false
 }
 
-(window as any).baseCache = new Phaser.Cache.BaseCache()
 
-export function loadAtlas(){
-    function preload(){
-        // this.load.atlas('atlas','assets/atlas.png','assets/atlas.json')
-        // this.load.json("json", 'assets/atlas.json')
+/** если уровень Учебка ещё не проходился (lvlsAchives[0] == -1),
+ * запускаем игру с GameState.Preview, в противном случае вызываем
+ * myUIBlocks.showLevelsMenu(lang, data), который выводит окно для
+ * выбора уровня
+ */
+type gameDataType = {
+    lang : string,
+    lvlsData : Array<number>
+}
 
+/** массив с достижениями: -1 - уровень ещё не проходился,
+ *  0 - уровень проходился, но неудачно, 1 - уровень пройден
+ */
+let lvlsData:Array<number> = [-1, -1, -1]
+
+/** вызывается из index.html при завершении загрузки ассетов, 
+ * sdk и данных об игроке, устанавливает значения для языка среды и
+ * информацию о пройденных уровнях и запускает саму игру 
+ **/
+// export function startApp(){
+//     if(myLang === "ru"){
+//         currentTexts = ruTexts
+//     }else{
+//         currentTexts = enTexts
+//     }
+    
+//     //lvlsAchives = gameData.lvlsData
+
+//     if(lvlsData[0] == -1) startGame(lvlName.Preview)
+// }
+
+// isSDKInfo == -1, если sdk ещё не загрузилось, 0 если загрузилось с
+// ошибкой, 1 если загрузилось корректно. Для  isGameAtlas -аналогично 
+// при загрузке ассетов для игры
+const loadings = {
+    'isSDKLoaded': -1, 'isGameAtlas': -1,
+    'isAdvFinish': -1, 'isPlayerData': -1
+}
+
+// устанавливает для загрузки name объекта loadings значение value
+// value = -1, если загрузка ещё не закончилась, 0 если загрузка
+// прошла с ошибкой или такой объект не существует, 1 если всё
+// прошло штатно
+function addLoading(name, value) {
+    loadings[name] = value;
+    // если ключа с таким именем нет, выходим 
+    if (!Object.keys(loadings).includes(name)) return;
+
+    // если загрузка всех необходимых компонентов удачно или нет завершилась,
+    // начинаем игру 
+    if (!Object.values(loadings).includes(-1)) {
+        globalThis.myUIBlocks = new UIBlocks()
+
+        let locAchievments:Array<number>
+
+        try{
+            locAchievments = JSON.parse(localStorage.getItem("lvlsData"))
+        }
+        catch(err){
+            locAchievments = [-1,-1,-1]
+        }
+
+        for( let i=0; i < locAchievments.length; i++){
+            if(locAchievments[i] > globalThis.achievments[i]){
+                globalThis.achievments = locAchievments;
+                try{
+                    globalThis.gPlayer.setData({
+                        lvlsData:JSON.stringify(globalThis.achievments)})
+                }
+                catch(err){
+                    
+                } 
+                break;
+            }
+        }
+
+        // если нулевой уровень (учебка) ещё не проходился, запускаем его
+        if (globalThis.achievments[0] == LvlState.NonAttempted) {
+            globalThis.currentLevel = lvlNames.Demo;
+            myGame.scene.start("demo")
+        }
+    }
+}
+
+export function initApp(YaGames) {
+    /** данные о достижениях игрока из localStorage  */
+    let locAchievments:Array<number>;
+    /** данные о достижениях игрока из объекта player из yasdk  */
+    //let remotecAchievments:Array<number>;
+    // значение по умолчанию
+    globalThis.lang = "ru";
+    globalThis.achievments =[-1,-1,-1];
+    currentTexts = ruTexts;
+    
+    // запускаем игру и загружаем ассеты в сцене Preload
+    startGame();
+
+    if (YaGames === null) {
+        globalThis.lang = "ru"
+        currentTexts = ruTexts;
+        addLoading('isSDKLoaded', 0)
+        addLoading('isPlayerData', 0)
+        addLoading('isAdvFinish', 0)
+        return
+    }
+
+    YaGames
+        .init()
+        .then(ysdk => {
+            console.log('Yandex SDK initialized');
+            globalThis.gYsdk = ysdk;
+            try {
+                globalThis.lang = ysdk.environment.i18n.lang
+                if(globalThis.lang == "en"){
+                    currentTexts = enTexts;
+                }else{
+                    globalThis.lang == "ru"
+                    currentTexts =ruTexts;
+                }
+            } catch (err) {
+                globalThis.lang = "ru"
+                currentTexts =ruTexts;
+            }
+            addLoading('isSDKLoaded', 1)
+            // ysdk.adv.showFullscreenAdv({
+            //     callbacks: {
+            //         onClose: (wasShown) => {
+            //             addLoading('isAdvFinish', 1)
+            //         },
+            //         onError: (error) => {
+            //             addLoading('isAdvFinish', 0)
+            //         },
+            //         onOffline: () => {
+            //             addLoading('isAdvFinish', 0)
+            //         }
+            //     }
+            // })
+            addLoading('isAdvFinish', 1)
+            ysdk.getPlayer().then(player => {
+                globalThis.gPlayer = player;
+                player.getData().then(data => {
+                    try {
+                        globalThis.achievments = JSON.parse(data.lvlsData)
+                        addLoading('isPlayerData', 1)
+                    } catch (err) {
+                        globalThis.achievments = [-1, -1, -1]
+                        addLoading('isPlayerData', 0)
+                    }
+                }).catch(err => {
+                    globalThis.achievments = [-1, -1, -1]
+                    addLoading('isPlayerData', 0)
+                })
+            }).catch(err => {
+                globalThis.achievments = [-1, -1, -1]
+                addLoading('isPlayerData', 0)
+            });
+            
+        })
+        .cath(err => {
+            addLoading('isSDKLoaded', 0)
+            addLoading('isPlayerData', 0)
+            addLoading('isAdvFinish', 0)
+            globalThis.achievments = [-1, -1, -1]
+            globalThis.lang = "ru"
+            currentTexts =ruTexts;
+        });
+
+        
+}
+
+export function hideModal(level:lvlNames){
+
+    globalThis.myUIBlocks.hideModal();
+    //(myGame.scene.getScene("demo") as Demo).playLevel(level)
+    myGame.scene.getScene("demo").scene.remove("demo");
+    myGame.scene.add("demo",Demo,true);
+};
+
+class Preloader extends Phaser.Scene
+{
+    constructor(){
+        super("preloader")
+    }
+
+    preload(){
         this.load.image('bg','assets/bg5.png')
         this.load.image('railway','assets/railway4.png')
         this.load.image('gun','assets/gun1.png')
@@ -1433,11 +1544,6 @@ export function loadAtlas(){
         this.load.image('handStay','assets/handStay.png')
         this.load.image('stepStay','assets/stepStay.png')
         this.load.image('gunStay','assets/gunStay.png')
-        
-        // this.load.image('bmp','assets/bmp.png')
-        // this.load.image('bmp1','assets/bmp1.png')
-        // this.load.image('bmp2','assets/bmp2.png')
-        // this.load.image('bmp3','assets/bmp3.png')
 
         this.load.image('blackRailway','assets/blackRailway1.png')
         this.load.image('explode1','assets/explode1.png')
@@ -1484,292 +1590,11 @@ export function loadAtlas(){
         this.load.image('hand','assets/hand.png')
     }
 
-    function create(){
-        const globalCache:Phaser.Cache.BaseCache = (window as any).baseCache
-
-        globalCache.add('railway',this.game.textures.get('railway').getSourceImage())
-        globalCache.add('bg',this.game.textures.get('bg').getSourceImage())
-        globalCache.add('gun',this.game.textures.get('gun').getSourceImage())
-        //this.game.pause()
-
-        globalCache.add('bullet',this.game.textures.get('bullet').getSourceImage())
-        globalCache.add('bigBullet',this.game.textures.get('bigBullet').getSourceImage())
-        globalCache.add('bulletArs',this.game.textures.get('bulletArs').getSourceImage())
-        globalCache.add('circleBullet',this.game.textures.get('circleBullet').getSourceImage())
-        globalCache.add('fireGranade',this.game.textures.get('fireGranade').getSourceImage())
-        globalCache.add('virusOff',this.game.textures.get('virusOff').getSourceImage())
-        globalCache.add('walker0',this.game.textures.get('walker0').getSourceImage())
-        globalCache.add('walker1',this.game.textures.get('walker1').getSourceImage())
-        globalCache.add('walker2',this.game.textures.get('walker2').getSourceImage())
-        globalCache.add('walker3',this.game.textures.get('walker3').getSourceImage())
-        globalCache.add('walker4',this.game.textures.get('walker4').getSourceImage())
-        globalCache.add('runner0',this.game.textures.get('runner0').getSourceImage())
-        globalCache.add('runner1',this.game.textures.get('runner1').getSourceImage())
-        globalCache.add('runner2',this.game.textures.get('runner2').getSourceImage())
-        globalCache.add('runner3',this.game.textures.get('runner3').getSourceImage())
-        globalCache.add('runner4',this.game.textures.get('runner4').getSourceImage())
-        globalCache.add('failed0',this.game.textures.get('failed0').getSourceImage())
-        globalCache.add('failed1',this.game.textures.get('failed1').getSourceImage())
-        globalCache.add('granade',this.game.textures.get('granade').getSourceImage())
-        globalCache.add('standStay',this.game.textures.get('standStay').getSourceImage())
-        globalCache.add('sitStay',this.game.textures.get('sitStay').getSourceImage())
-        globalCache.add('handStay',this.game.textures.get('handStay').getSourceImage())
-        globalCache.add('stepStay',this.game.textures.get('stepStay').getSourceImage())
-        globalCache.add('gunStay',this.game.textures.get('gunStay').getSourceImage())
-        
-        // globalCache.add('bmp',this.game.textures.get('bmp').getSourceImage())
-        // globalCache.add('bmp1',this.game.textures.get('bmp1').getSourceImage())
-        // globalCache.add('bmp2',this.game.textures.get('bmp2').getSourceImage())
-        // globalCache.add('bmp3',this.game.textures.get('bmp3').getSourceImage())
-
-        globalCache.add('blackRailway',this.game.textures.get('blackRailway').getSourceImage())
-        globalCache.add('explode1',this.game.textures.get('explode1').getSourceImage())
-        globalCache.add('explode2',this.game.textures.get('explode2').getSourceImage())
-        globalCache.add('explode3',this.game.textures.get('explode3').getSourceImage())
-        globalCache.add('explode4',this.game.textures.get('explode4').getSourceImage())
-        globalCache.add('explode5',this.game.textures.get('explode5').getSourceImage())
-        globalCache.add('explode6',this.game.textures.get('explode6').getSourceImage())
-        globalCache.add('explode7',this.game.textures.get('explode7').getSourceImage())
-        globalCache.add('explode8',this.game.textures.get('explode8').getSourceImage())
-        globalCache.add('explode9',this.game.textures.get('explode9').getSourceImage())
-        globalCache.add('explode10',this.game.textures.get('explode10').getSourceImage())
-        globalCache.add('explode11',this.game.textures.get('explode11').getSourceImage())
-        globalCache.add('explode12',this.game.textures.get('explode12').getSourceImage())
-        globalCache.add('explode13',this.game.textures.get('explode13').getSourceImage())
-        globalCache.add('explode14',this.game.textures.get('explode14').getSourceImage())
-        globalCache.add('explode15',this.game.textures.get('explode15').getSourceImage())
-        globalCache.add('explode16',this.game.textures.get('explode16').getSourceImage())
-        globalCache.add('explode17',this.game.textures.get('explode17').getSourceImage())
-        globalCache.add('explode18',this.game.textures.get('explode18').getSourceImage())
-        globalCache.add('explode19',this.game.textures.get('explode19').getSourceImage())
-        globalCache.add('explode20',this.game.textures.get('explode20').getSourceImage())
-        globalCache.add('explode21',this.game.textures.get('explode21').getSourceImage())
-        globalCache.add('explode22',this.game.textures.get('explode22').getSourceImage())
-        globalCache.add('explode23',this.game.textures.get('explode23').getSourceImage())
-        globalCache.add('bigTree',this.game.textures.get('bigTree').getSourceImage())
-        globalCache.add('midleTree',this.game.textures.get('midleTree').getSourceImage())
-        globalCache.add('rogaBush',this.game.textures.get('rogaBush').getSourceImage())
-        globalCache.add('rosaBush',this.game.textures.get('rosaBush').getSourceImage())
-        globalCache.add('ovalBush',this.game.textures.get('ovalBush').getSourceImage())
-        globalCache.add('rectBush',this.game.textures.get('rectBush').getSourceImage())
-        let a = this.game.textures.get('scheben1')
-        let b = a.getSourceImage()
-        globalCache.add('scheben1',this.game.textures.get('scheben1').getSourceImage())
-
-        globalCache.add('bulletStrike0',this.game.textures.get('bulletStrike0').getSourceImage())
-        globalCache.add('bulletStrike1',this.game.textures.get('bulletStrike1').getSourceImage())
-        globalCache.add('bulletStrike2',this.game.textures.get('bulletStrike2').getSourceImage())
-        globalCache.add('bulletStrike3',this.game.textures.get('bulletStrike3').getSourceImage())
-        globalCache.add('bulletStrike4',this.game.textures.get('bulletStrike4').getSourceImage())
-        globalCache.add('bulletStrike5',this.game.textures.get('bulletStrike5').getSourceImage())
-        globalCache.add('blankShoot',this.game.textures.get('blankShoot').getSourceImage())
-        globalCache.add('blankShoot2',this.game.textures.get('blankShoot2').getSourceImage())
-
-        globalCache.add('empty',this.game.textures.get('empty').getSourceImage())
-        globalCache.add('hand',this.game.textures.get('hand').getSourceImage())
-        this.game.pause()
-        addLoading("isGameAtlas",1)
-        return
-    }
-
-    const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.CANVAS,
-        width: 0,
-        height: 0,
-        parent: 'loaderCont',
-        backgroundColor: '#5accff',
-        scene: {
-            preload:preload,
-            create:create
-        }
-    }
-
-    let game = new Phaser.Game(config);
-}
-
-
-
-/** если уровень Учебка ещё не проходился (lvlsAchives[0] == -1),
- * запускаем игру с GameState.Preview, в противном случае вызываем
- * myUIBlocks.showLevelsMenu(lang, data), который выводит окно для
- * выбора уровня
- */
-type gameDataType = {
-    lang : string,
-    lvlsData : Array<number>
-}
-
-/** массив с достижениями: -1 - уровень ещё не проходился,
- *  0 - уровень проходился, но неудачно, 1 - уровень пройден
- */
-let lvlsData:Array<number> = [-1, -1, -1]
-let myLang:string = "ru"
-let myYsdk
-let myPlayer
-
-/** вызывается из index.html при завершении загрузки ассетов, 
- * sdk и данных об игроке, устанавливает значения для языка среды и
- * информацию о пройденных уровнях и запускает саму игру 
- **/
-// export function startApp(){
-//     if(myLang === "ru"){
-//         currentTexts = ruTexts
-//     }else{
-//         currentTexts = enTexts
-//     }
-    
-//     //lvlsAchives = gameData.lvlsData
-
-//     if(lvlsData[0] == -1) startGame(lvlName.Preview)
-// }
-
-// isSDKInfo == -1, если sdk ещё не загрузилось, 0 если загрузилось с
-// ошибкой, 1 если загрузилось корректно. Для  isGameAtlas -аналогично 
-// при загрузке ассетов для игры
-const loadings = {
-    'isSDKLoaded': -1, 'isGameAtlas': -1,
-    'isAdvFinish': -1, 'isPlayerData': -1
-}
-
-// устанавливает для загрузки name объекта loadings значение value
-// value = -1, если загрузка ещё не закончилась, 0 если загрузка
-// прошла с ошибкой или такой объект не существует, 1 если всё
-// прошло штатно
-function addLoading(name, value) {
-    // если ключа с таким именем нет, выходим 
-    if (!Object.keys(loadings).includes(name)) return;
-
-    loadings[name] = value;
-
-    // если загрузка всех необходимых компонентов удачно или нет завершилась,
-    // заносим данные игрока в массив lvlsData 
-    if (!Object.values(loadings).includes(-1)) {
-        let locLvlsData = []
-        // если не удалось загрузить yaSdK, пробуем достать данные из 
-        // localStorage, если и это не удалось, присваиваем начальные данные
-        // по умолчанию как для нового игрока
-        if(loadings.isSDKLoaded == 0){
-            if(localStorage.getItem("lvlsData") !== null){
-                try{
-                    // удалить на продакшене эту строку 
-                    throw("err")
-                    locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
-                    currentTexts = ruTexts
-                }catch(err){
-                    locLvlsData =[-1, -1, -1]
-                    currentTexts = ruTexts
-                }
-            }
-            //lvlsData = [-1, -1, -1]
-            //myLang = "ru"
-        }else 
-        // если YaSDK загружены, а данные игрока нет, сначала пробуем
-        // достать их из localStorage и в случае неудачи присваиваем
-        // данные как для нового игрока
-        if(loadings.isPlayerData == 0){
-            try{
-                locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
-                currentTexts = ruTexts
-            }catch(err){
-                locLvlsData =[-1, -1, -1]
-                currentTexts = ruTexts
-            }
-        }else{
-            try{
-                locLvlsData = JSON.parse(localStorage.getItem("lvlsData"))
-            }catch(err){
-                locLvlsData =[-1, -1, -1]
-                currentTexts = ruTexts
-            }
-        }
-        for(let i = 0; i < locLvlsData.length; i++){
-            if(locLvlsData[i] > lvlsData[i]){
-                lvlsData = locLvlsData;
-                break;
-            }
-        }
-        if(lvlsData[0] == -1){
-            currentLvl = lvlNames.Preview;
-            isPreviewShow = true;
-        } 
-        myUIBlocks = new UIBlocks(myLang)
-        startGame()
+    create(){
+        addLoading("isGameAtlas",1);
     }
 }
 
-export function initApp(YaGames) {
-    // myUIBlocks = new UIBlocks("ru")
-    // myUIBlocks.showSummary(10,0,GameState.Lost,0)
-    // return
 
-    loadAtlas()
-
-    if (YaGames === null) {
-        lvlsData = [-1, -1, -1]
-        myLang = "ru"
-        addLoading('isSDKLoaded', 0)
-        addLoading('isPlayerData', 0)
-        addLoading('isAdvFinish', 0)
-        return
-    }
-
-    YaGames
-        .init()
-        .then(ysdk => {
-            console.log('Yandex SDK initialized');
-            myYsdk = ysdk;
-            addLoading('isSDKLoaded', 1)
-            // ysdk.adv.showFullscreenAdv({
-            //     callbacks: {
-            //         onClose: (wasShown) => {
-            //             addLoading('isAdvFinish', 1)
-            //         },
-            //         onError: (error) => {
-            //             addLoading('isAdvFinish', 0)
-            //         },
-            //         onOffline: () => {
-            //             addLoading('isAdvFinish', 0)
-            //         }
-            //     }
-            // })
-            addLoading('isAdvFinish', 1)
-            ysdk.getPlayer().then(player => {
-                myPlayer = player;
-                player.getData().then(data => {
-                    try {
-                        lvlsData = JSON.parse(data.lvlsData)
-                        addLoading('isPlayerData', 1)
-                    } catch (err) {
-                        lvlsData = [-1, -1, -1]
-                        addLoading('isPlayerData', 0)
-                    }
-                }).catch(err => {
-                    lvlsData = [-1, -1, -1]
-                    addLoading('isPlayerData', 0)
-                })
-            }).catch(err => {
-                lvlsData = [-1, -1, -1]
-                addLoading('isPlayerData', 0)
-            });
-            try {
-                myLang = ysdk.environment.i18n.lang
-            } catch (err) {
-                myLang = "ru"
-            }
-        })
-        .cath(err => {
-            addLoading('isSDKLoaded', 0)
-            addLoading('isPlayerData', 0)
-            addLoading('isAdvFinish', 0)
-            lvlsData = [-1, -1, -1]
-            myLang = "ru"
-        });
-}
-
-export function hideModal(level:lvlNames){
-
-    myUIBlocks.hideModal();
-    (myGame.scene.getScene("demo") as Demo).playLevel(level)
-};
 
 

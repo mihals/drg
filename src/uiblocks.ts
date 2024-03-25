@@ -3,6 +3,8 @@ import { GameState } from "./enums";
 import { numMsg } from "./enums";
 
 type phrases = {
+    tutorWinFirstTime : string,
+    tutorWinAnother : string,
     capSummaryWin : string,
     capSummaryLost,
     bodySummary : string,
@@ -13,10 +15,16 @@ type phrases = {
     demoBtn : string,
     lonerBtn : string,
     twoGunsBtn : string,
-    bodyContent : Array<string> 
+    bodyContent : Array<string>,
+    bodyMsg :{
+        tutorWinFirstTime:string,
+        tutorWinAnother:string
+    } 
 }
 
 const ruPhrases : phrases = {
+    tutorWinFirstTime: "Отлично! Вы прошли уровень 'Учебка'.",
+    tutorWinAnother: "Вы прошли уровень 'Учебка'.",
     capSummaryWin : "Враг уничтожен полностью!",
     capSummaryLost : "Враг прорвался...",
     bodySummary: "Если Вам непонятны правила или управление, жмите кнопку 'Учебка.', " +
@@ -50,10 +58,20 @@ const ruPhrases : phrases = {
     " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола'. Удачи!"+
     " Бот будет пытаться повторять все ваши действия на пройденном уровне.",
     " Немного не повезло. Но если Вы хотите заменить своего бота, Вам придётся пройти"+
-    " этот уровень ещё раз. Удачи!"]
+    " этот уровень ещё раз. Удачи!"],
+    bodyMsg :{
+        //** сообщение при впервые пройденной Учебке */
+        tutorWinFirstTime : "Пройдите уровень 'Одиночка.' чтобы получить свою первую "+
+        "звезду, и у вас появится напарник - Чёрный Бот для игры 'В два ствола'. Удачи!",
+        //** сообщение при повторно пройденной Учебке */
+        tutorWinAnother : "Если Вам нужно заменить Чёрного Бота, пройдите уровень "+
+        "'Одиночка.' ещё раз и у Вас появится другой напарник."
+    }
 } 
 
 const enPhrases : phrases = {
+    tutorWinFirstTime: "Congratulation! Level 'Tutorial' completed.",
+    tutorWinAnother: "Level 'Tutorial' completed.",
     capSummaryWin : "The enemy has been completely terminated!",
     capSummaryLost : "The enemy has passed...",
     bodySummary: "If you do not understand the rules or control, click the 'Tutorial.' "+
@@ -86,18 +104,24 @@ const enPhrases : phrases = {
     "your first star, and you will have a partner-a bot for the game 'Two gun'. Good luck!"+
     " The bot will try to repeat all your actions at the completed level.",
     "A little unlucky. But if you want to replace your bot, you will have to go through the "+
-    " this level again. Good luck!"]
+    " this level again. Good luck!"],
+    bodyMsg :{
+        tutorWinFirstTime : "Click 'Loner' to go through it to get your first star, " +
+        "and you will have a Black Bot partner for a two-gun level. Good luck!",
+        tutorWinAnother : "If you need to replace the Black Bot, complete the "+
+        " 'Loner' level one more time and you'll have another partner."
+    }
 } 
 
 export class UIBlocks {
     lang: string;
     myPhrases: phrases;
 
-    constructor(lang: string) {
-        if (lang == "ru") {
-            this.myPhrases = ruPhrases;
+    constructor() {
+        if (globalThis.lang == "en") {
+            this.myPhrases = enPhrases;
         } else {
-            this.myPhrases = enPhrases
+            this.myPhrases = ruPhrases
         }
     }
 
@@ -159,15 +183,46 @@ export class UIBlocks {
      * @result результат игры
      * @numMsg номер сообщения в окне
      */
-    showSummary(numBullets: number, numEnemies: number,
-        result: GameState, numMsg: number) {
+    showSummary(numBullets: number, numEnemies: number, result: GameState) {
         let content;
         let bodySummary;
-        if(numMsg == 0){
-            bodySummary = this.myPhrases.bodySummary;
-        } 
-        let summaryTopTxt = (result == GameState.Win)? this.myPhrases.capSummaryWin :
-            this.myPhrases.capSummaryLost;
+        /** текст в заголовке */
+        let summaryTopTxt:string;
+        switch(globalThis.currentSceneName){
+            case "demo":
+                if(result == GameState.Win){
+                    // если уровень пройден впервые
+                    if(globalThis.achievments[0] != 1){
+                        let lvlsDataStr = JSON.stringify(globalThis.achievments)
+                        globalThis.achievments[0] = 1;
+                        summaryTopTxt = this.myPhrases.tutorWinFirstTime;
+                        bodySummary = this.myPhrases.bodyMsg.tutorWinFirstTime;
+                        try{
+                            globalThis.gPlayer.setData({lvlsData : lvlsDataStr}).
+                            then(() =>{});
+                        }catch(err){}
+                        
+                        try{
+                            localStorage.setItem("lvlsData",lvlsDataStr)
+                        }catch(err){}
+                    }
+                    // если уровень уже был пройден, то ничего не меняем в lvlsData
+                    else{
+                        summaryTopTxt = this.myPhrases.tutorWinAnother;
+                        if(achievments[1] !=1 ){
+                            bodySummary = this.myPhrases.bodyMsg.tutorWinFirstTime;
+                        }else{
+                            bodySummary = this.myPhrases.bodyMsg.tutorWinAnother;
+                        }
+                    }
+                }else{
+                    
+                }
+                break;
+        }
+        
+        // let summaryTopTxt = (result == GameState.Win)? this.myPhrases.capSummaryWin :
+        //     this.myPhrases.capSummaryLost;
         let replanish = (numEnemies == 0) ? 0 : Math.round(numBullets * 100 / numEnemies) / 100;
         content =
             `<div id="modalContainer">
@@ -193,10 +248,10 @@ export class UIBlocks {
                     <p>${bodySummary}</p>
                 </div>
                 <div style="align-self: center;">
-                    <button class="lvlBottom" onclick="MyGame.hideModal(0)">
+                    <button class="lvlBottom" onclick="MyGame.startLevel('demo')">
                     ${this.myPhrases.demoBtn}</button></div>
                 <div style="align-self: center;">
-                    <button class="lvlBottom" onclick="MyGame.hideModal(1)">
+                    <button class="lvlBottom" onclick="MyGame.startLevel('loner')">
                     ${this.myPhrases.lonerBtn}</button></div>
                 </div>
             </div></div>`
