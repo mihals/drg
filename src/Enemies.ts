@@ -1,14 +1,16 @@
 import * as Phaser from 'phaser';
 import {Demo} from './game';
-import { Bullet } from './game';
+import { Bullet } from './bullets';
 import { GameState } from './enums';
+import { Bullets } from './bullets';
 //import { currentGameState } from './game';
 
 /**класс, содержащий и управляющий группами диверсов и БМПешек */
 export class Enemies
 {
-    myScene:Demo; 
+    myScene:Phaser.Scene; 
     enemiesReserve:Reserve;
+    bulletsGrp:Bullets;
     /** массив, каждый элемент которого - Phaser.Group, содержащий группу
      * диверсов, движущихся в одну колонну 
      */
@@ -21,10 +23,11 @@ export class Enemies
     bmpGroup:Phaser.Physics.Arcade.Group
     stayStrArray:Array<string>
 
-    constructor(scene:Demo){
-        this.myScene = scene;
+    constructor(bulletsGrp:Bullets){
+        this.myScene = globalThis.currentScene;
+        this.bulletsGrp = bulletsGrp;
 
-        scene.anims.create({
+        this.myScene.anims.create({
             key: 'rwExplode',
             frames: [
                 { key: 'explode1' },
@@ -54,7 +57,7 @@ export class Enemies
             frameRate: 5,
         });
 
-        scene.anims.create({
+        this.myScene.anims.create({
             key: 'walk',
             frames: [
                 { key: 'walker0' },
@@ -66,7 +69,7 @@ export class Enemies
             frameRate: 5,
             repeat: -1
         });
-        scene.anims.create({
+        this.myScene.anims.create({
             key: 'run',
             frames: [
                 { key: 'runner0' },
@@ -78,7 +81,7 @@ export class Enemies
             frameRate: 5,
             repeat: -1
         });
-        scene.anims.create({
+        this.myScene.anims.create({
             key: 'fallen',
             frames: [
                 { key: 'failed0' },
@@ -90,75 +93,56 @@ export class Enemies
 
         this.stayStrArray=['standStay','sitStay','handStay','stepStay','gunStay' ]
 
-        this.enemiesReserve = new Reserve(scene);
+        this.enemiesReserve = new Reserve(this.myScene);
         this.oneColumnArr = [];
     }
 
     createGroup(kind: string, numEnemies: number, x: number, y: number) {
-        if (kind == 'oneColumn') {
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,450,20,6).
+        if (kind == 'loner') {
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp, this.enemiesReserve,450,20,6).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,550,60,5).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,550,60,5).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,480,100,4).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,480,100,4).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,530,140,3).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,530,140,3).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,510,180,2).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,510,180,2).
                 setVelocityX(-6))
-                this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,220,220,1).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,220,220,1).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,420,220,1).
-                setVelocityX(-6))
-
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,950,60,7).
-                setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,880,100,6).
-                setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,930,140,5).
-                setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,910,180,4).
-                setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,820,220,3).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,420,220,1).
                 setVelocityX(-6))
 
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,1350,60,4).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,950,60,7).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,1280,100,4).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,880,100,6).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,1330,140,4).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,930,140,5).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,1310,180,5).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,910,180,4).
                 setVelocityX(-6))
-            this.oneColumnArr.push(new OneColumn(this.myScene,this.enemiesReserve,1320,20,4).
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,820,220,3).
+                setVelocityX(-6))
+
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,1350,60,4).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,1280,100,4).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,1330,140,4).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,1310,180,5).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,1320,20,4).
                 setVelocityX(-6))
         }
-        if(kind == 'bmpGroup'){
-            this.bmpGroup = this.myScene.physics.add.group()
-            this.bmpGroup.create(700,24,'bmp').setDepth(2).setPushable(false).
-                setBodySize(103,24).setState(4)
-            this.bmpGroup.create(950,104,'bmp').setDepth(5).setPushable(false).
-                setBodySize(103,24).setState(4)
-            this.bmpGroup.create(700,104,'bmp').setDepth(9).setPushable(false).
-                setBodySize(103,24).setState(4)
-            this.bmpGroup.add(new BMP(this.myScene,500,104),true)
-
-            this.myScene.physics.add.collider(this.myScene.bulletsGrp,
-                this.bmpGroup,(bullet:Bullet, bmp:BMP) =>{
-                    bullet.body.reset(0,-32);
-                    bullet.setActive(false).setVisible(false);
-                    if(bmp.state > 1){
-                        let state = (bmp.state as number) - 1;
-                        let txtr = 'bmp'+state
-                        bmp.setState(state)
-                        bmp.setTexture(txtr)
-                    }
-                    if(bmp.state == 1){
-                        bmp.body.reset(bmp.x,bmp.y)
-                    }
-                    
-                })
-            this.bmpGroup.setVelocityX(-10)
+        if(kind == "demo"){
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,510,180,2).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,220,220,1).
+                setVelocityX(-6))
+            this.oneColumnArr.push(new OneColumn(this.myScene, this.bulletsGrp,this.enemiesReserve,440,220,4).
+                setVelocityX(-6))
         }
     }
 
@@ -167,7 +151,7 @@ export class Enemies
      * возвращает GameState.Lost, если уничтожены все диверсы GameState.Win
      */
     handleUpdate(): GameState {
-        let ret: GameState = this.myScene.currentGameState;
+        let ret: GameState = GameState.Gone;
         if(this.enemiesReserve.countActive() == 0){
             return GameState.Win
         }
@@ -257,8 +241,11 @@ class OneColumn extends Phaser.Physics.Arcade.Group
 {
     //bulletEnemyCollider:Phaser.Physics.Arcade.Collider;
 
-    constructor(scene:Demo,reserve:Reserve,x,y,numEnemies){
+    //bulletsGrp:Bullets;
+
+    constructor(scene:Phaser.Scene, bulletsGrp:Bullets, reserve:Reserve,x,y,numEnemies){
         super(scene.physics.world,scene);
+        //this.bulletsGrp = bulletsGrp;
         
         let depth:number
         switch(y){
@@ -302,7 +289,7 @@ class OneColumn extends Phaser.Physics.Arcade.Group
         }
         //this.bulletEnemyCollider = 
         scene.physics.add.collider(this as Phaser.Types.Physics.Arcade.ArcadeColliderType,
-            scene.bulletsGrp as Phaser.Types.Physics.Arcade.ArcadeColliderType,(enemy:Enemy, bullet:Bullet) => {
+            bulletsGrp as Phaser.Types.Physics.Arcade.ArcadeColliderType,(enemy:Enemy, bullet:Bullet) => {
             bullet.body.reset(0,-32);
             bullet.setActive(false).setVisible(false);
             if (enemy.state != 'falling') {
