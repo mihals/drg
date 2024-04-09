@@ -7,6 +7,7 @@ declare global{
      var gYsdk;
      var gPlayer;
      var lang: string;
+     
      var currentLevel: lvlNames;
      var currentResult: GameState;
      var achievments: Array<LvlState>;

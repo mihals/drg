@@ -14,7 +14,8 @@ export enum numMsg {
     AnotherAloneLost
 }
 
-export enum lvlNames {Demo = "demo", Loner = "loner", TwoGuns = "twoGuns"}
+export enum lvlNames {Demo = "demo", Loner = "loner", TwoGuns = "twoGuns",
+    Forest = "forest"}
 
 export  enum GameState{Gone, Win, Lost}
 

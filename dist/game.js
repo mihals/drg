@@ -241540,14 +241540,15 @@ var MyGame = (function (exports) {
 
   })();
   var __webpack_exports__Animations = __webpack_exports__.FK;
-  var __webpack_exports__CANVAS = __webpack_exports__.Wk;
   var __webpack_exports__Game = __webpack_exports__.lA;
+  var __webpack_exports__GameObjects = __webpack_exports__.hi;
   var __webpack_exports__Geom = __webpack_exports__.v6;
   var __webpack_exports__Input = __webpack_exports__.II;
   var __webpack_exports__Math = __webpack_exports__.ZX;
   var __webpack_exports__Physics = __webpack_exports__.wI;
   var __webpack_exports__Scale = __webpack_exports__.Ci;
   var __webpack_exports__Scene = __webpack_exports__.xs;
+  var __webpack_exports__WEBGL = __webpack_exports__.$z;
 
   /** сообщения, которые выводятся по окончании игры */
   var numMsg;
@@ -241570,6 +241571,7 @@ var MyGame = (function (exports) {
       lvlNames["Demo"] = "demo";
       lvlNames["Loner"] = "loner";
       lvlNames["TwoGuns"] = "twoGuns";
+      lvlNames["Forest"] = "forest";
   })(lvlNames || (lvlNames = {}));
   var GameState;
   (function (GameState) {
@@ -242096,12 +242098,14 @@ var MyGame = (function (exports) {
                 <div id="summaryMsg" >
                     <p>${bodySummary}</p>
                 </div>
+                <div style="display: flex; flex-direction: row; justify-content: space-around;">
                 <div style="align-self: center;">
                     <button class="lvlBottom" onclick="MyGame.startLevel('demo')">
                     ${this.myPhrases.demoBtn}</button></div>
                 <div style="align-self: center;">
                     <button class="lvlBottom" onclick="MyGame.startLevel('loner')">
                     ${this.myPhrases.lonerBtn}</button></div>
+                </div>
                 </div>
             </div></div>`;
           let div = document.createElement('div');
@@ -242169,12 +242173,69 @@ var MyGame = (function (exports) {
           this.blankShot.setVelocityX(velocityX);
       }
   }
+  class BulletF extends __webpack_exports__Physics.Arcade.Sprite {
+      constructor(scene, x, y) {
+          super(scene, x, y, 'bulletF');
+      }
+      fire(x, y, velocityX, velocityY) {
+          this.body.reset(x, y);
+          this.setActive(true);
+          this.setVisible(true);
+          this.setVelocity(velocityX, velocityY);
+          //(this.scene as Demo).numBullets++
+      }
+      preUpdate(time, delta) {
+          super.preUpdate(time, delta);
+          if ((this.y <= -32) || (this.x <= -32)) {
+              this.setActive(false);
+              this.setVisible(false);
+          }
+      }
+  }
+  class BulletsF extends __webpack_exports__Physics.Arcade.Group {
+      constructor(scene) {
+          super(scene.physics.world, scene);
+          //this.myScene
+          this.createMultiple({
+              frameQuantity: 50,
+              key: 'bulletF',
+              setXY: { x: 0, y: -100 },
+              setDepth: { value: 5 },
+              active: false,
+              visible: false,
+              classType: BulletF
+          });
+          scene.anims.create({
+              key: 'blankShoot',
+              frames: [
+                  { key: 'empty' },
+                  { key: 'blankShoot' },
+                  { key: 'blankShoot2' },
+                  { key: 'empty' }
+              ],
+              frameRate: 10,
+          });
+          //console.log(anim)
+          this.blankShot = scene.physics.add.sprite(-100, -100, 'empty').setDepth(12);
+      }
+      fireBullet(x, y, velocityX, velocityY) {
+          const bullet = this.getFirstDead(false);
+          if (bullet) {
+              bullet.fire(x, y, velocityX, velocityY);
+          }
+      }
+      fireBlank(x, y, velocityX) {
+          this.blankShot.body.reset(x - 3, y - 10);
+          this.blankShot.play({ key: 'blankShoot', startFrame: 0 });
+          this.blankShot.setVelocityX(velocityX);
+      }
+  }
 
-  const ruTexts$1 = {
+  const ruTexts$3 = {
       ammo: "Патронов"
   };
-  let currentTexts$1;
-  currentTexts$1 = ruTexts$1;
+  let currentTexts$3;
+  currentTexts$3 = ruTexts$3;
   class Loner extends __webpack_exports__Scene {
       /** Уровни для колонн и кустов */
       // lr20:Phaser.GameObjects.Layer;lr60:Phaser.GameObjects.Layer
@@ -242202,6 +242263,7 @@ var MyGame = (function (exports) {
           this.vActionArr = [];
           this.xActionArr = [];
           this.shootActionArr = [];
+          this.emptyAnchorArr = [];
           this.currentGameState = GameState.Gone;
           this.pointerDownOn = false;
           //this.myUIBlocks = new UIBlocks("")
@@ -242209,38 +242271,7 @@ var MyGame = (function (exports) {
       preload() {
       }
       create() {
-          // if (this.gameState.autoPilot) {
-          //     this.gameState.waitAction = true
-          //     let response = fetch('http://localhost/drgServer/get_actions.php',
-          //         {
-          //             method: 'post',
-          //             headers: {
-          //                 'Content-Type': 'application/x-www-form-urlencoded',
-          //                 'Origin': 'https://localhost/drg'
-          //             },
-          //             body: ('data=')
-          //         }).then(response => {
-          //             if (response.ok) {
-          //                 return response.json();
-          //             }
-          //         }).then((data : {a_time:string, id:string, is_shoot:string,
-          //             key_code:string, update_cntr:string, v:string,x:string}) => {
-          //             this.timeActionArr = data.a_time.split(',').
-          //                 map((val)=>Number(val))
-          //             this.counterActionArr = data.update_cntr.split(',').
-          //                 map((val)=>Number(val))
-          //             this.keyActionArr = data.key_code.split(',')
-          //             this.shootActionArr = data.is_shoot.split(',').
-          //                 map((val)=>Number(val))
-          //             this.vActionArr = data.v.split(',').map((val)=>Number(val))
-          //             this.xActionArr = data.x.split(',').map((val)=>Number(val))
-          //             if(this.keyActionArr.length != 0){
-          //                 this.gameState.waitAction = false
-          //                 this.indCounterArr = 0
-          //             }
-          //             this.scene.resume()
-          //         })
-          // }
+          globalThis.currentLevel = lvlNames.Loner;
           globalThis.currentScene = this;
           this.add.tileSprite(500, 225, 1000, 450, 'bg');
           this.shooterCont = this.add.container(400, 418);
@@ -242354,11 +242385,25 @@ var MyGame = (function (exports) {
               if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                   this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
                   this.inputText.setText('left');
+                  //this.timeActionArr.push(0)
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('l');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
                   return;
               }
               else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
                   this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60);
                   //this.inputText.setText('right')
+                  //this.timeActionArr.push(0)
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('r');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
                   return;
               }
               if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
@@ -242368,17 +242413,25 @@ var MyGame = (function (exports) {
                       this.inputText.setText('shootOn');
                   else
                       this.inputText.setText('shootOff');
+                  //this.timeActionArr.push(0)
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('u');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
           });
           this.pointerDownOn = true;
           globalThis.currentResult = GameState.Gone;
           this.currentGameState = GameState.Gone;
           //this.shootOn = true;
-          globalThis.currentScene = this;
-          globalThis.currentSceneName = "loner";
           this.shootBullets = 100;
+          this.emptyAnchor = this.physics.add.image(0, 0, "empty");
+          this.emptyAnchor.body.setVelocity(6, 0);
       }
       update(time, delta) {
+          this.game.getFrame();
           this.input.listeners('pointerdown');
           console.log("numListeners " + this.input.listenerCount("pointerdown"));
           // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
@@ -242387,7 +242440,6 @@ var MyGame = (function (exports) {
               && !this.enemiesIsStoped) {
               this.pointerDownOn = false;
               globalThis.currentResult = this.currentGameState;
-              globalThis.currentLevel = lvlNames.Loner;
               this.enemiesIsStoped = true;
               if (this.currentGameState == GameState.Lost) {
                   let point = this.enemies.stopEnemies(GameState.Lost);
@@ -242405,38 +242457,42 @@ var MyGame = (function (exports) {
                   globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
               }
               this.enemiesIsStoped = true;
+              this.saveBotData();
           }
           // при демонстрации Preview и при завершении игры, управление 
           // отключается (pointerDownOn=false)?, если управление не отключено,
           // то обрабатываем события
+          this.updateCounter++;
           if (this.pointerDownOn) {
-              this.updateCounter++;
               if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.up)) {
                   this.shootOn = !this.shootOn;
-                  // this.timeActionArr.push(Math.round(time))
-                  // this.counterActionArr.push(this.updateCounter)
-                  // this.keyActionArr.push('u')
-                  // this.vActionArr.push(this.shooter.body.velocity.x)
-                  // this.xActionArr.push(this.shooter.body.x)
-                  // this.shootActionArr.push(this.shootOn ? 1 : 0)
+                  //this.timeActionArr.push(Math.round(time))
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('u');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
               if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.left)) {
                   this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
-                  // this.timeActionArr.push(Math.round(time))
-                  // this.counterActionArr.push(this.updateCounter)
-                  // this.keyActionArr.push('l')
-                  // this.vActionArr.push(this.shooter.body.velocity.x)
-                  // this.xActionArr.push(this.shooter.body.x)
-                  // this.shootActionArr.push(this.shootOn ? 1 : 0)
+                  //this.timeActionArr.push(Math.round(time))
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('l');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
               if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.right)) {
                   this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60);
-                  // this.timeActionArr.push(Math.round(time))
-                  // this.counterActionArr.push(this.updateCounter)
-                  // this.keyActionArr.push('r')
-                  // this.vActionArr.push(this.shooter.body.velocity.x)
-                  // this.xActionArr.push(this.shooter.body.x)
-                  // this.shootActionArr.push(this.shootOn ? 1 : 0)
+                  //this.timeActionArr.push(Math.round(time))
+                  this.counterActionArr.push(this.updateCounter);
+                  this.keyActionArr.push('r');
+                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
+                  //this.xActionArr.push(this.shooterContBody.body.x)
+                  this.shootActionArr.push(this.shootOn ? 1 : 0);
+                  this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
           }
           // else if((this.currentGameState != GameState.Gone) && !this.gameState.waitAction){
@@ -242468,9 +242524,9 @@ var MyGame = (function (exports) {
           //         }
           //     }
           // }
-          this.infoText.setText(currentTexts$1.ammo + `: ${this.shootBullets}`);
+          this.infoText.setText(currentTexts$3.ammo + `: ${this.shootBullets}`);
           //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
-          this.fpsText.setText(` Num listeners:  ${this.input.listenerCount("pointerdown")}`);
+          this.fpsText.setText(` FPS:  ${1000 / delta}`);
       }
       // метод создающий твин летящей гранаты, после которого начинается
       // анимация взрыва, после которой текстура ж-д станции заменяется на
@@ -242541,17 +242597,1295 @@ var MyGame = (function (exports) {
           // delayChecker до полного истребления всех диверсов первой волны
           // достигалось 290, 300, 417,306, после тренировок ~ 230 
           this.currentGameState = this.enemies.handleUpdate();
-          if (this.currentGameState != GameState.Gone) {
-              let data = [];
-              data.push(this.timeActionArr.join());
-              data.push(this.counterActionArr.join());
-              data.push(this.keyActionArr.join());
-              data.push(this.shootActionArr.join());
-              data.push(this.vActionArr.join());
-              data.push(this.xActionArr.join());
-              // saveActions(JSON.stringify(data))
-              // this.gameState.needToSave = false
+          // if (this.currentGameState != GameState.Gone) {
+          //     let data: string[] = []
+          //     data.push(this.timeActionArr.join())
+          //     data.push(this.counterActionArr.join())
+          //     data.push(this.keyActionArr.join())
+          //     data.push(this.shootActionArr.join())
+          //     data.push(this.vActionArr.join())
+          //     data.push(this.xActionArr.join())
+          //     // saveActions(JSON.stringify(data))
+          //     // this.gameState.needToSave = false
+          // }
+      }
+      saveBotData() {
+          let botData = {
+              //time : this.timeActionArr,
+              counter: this.counterActionArr,
+              key: this.keyActionArr,
+              shoot: this.shootActionArr,
+              //vActionA : this.vActionArr,
+              //xAction : this.xActionArr,
+              anchor: this.emptyAnchorArr
+          };
+          let botDataJSON = JSON.stringify(botData);
+          try {
+              localStorage.setItem("botData", botDataJSON);
           }
+          catch (_a) { }
+      }
+  }
+
+  const ruTexts$2 = {
+      ammo: "Патронов"
+  };
+  let currentTexts$2;
+  currentTexts$2 = ruTexts$2;
+  class TwoGuns extends __webpack_exports__Scene {
+      /** Уровни для колонн и кустов */
+      // lr20:Phaser.GameObjects.Layer;lr60:Phaser.GameObjects.Layer
+      // lr100:Phaser.GameObjects.Layer;lr140:Phaser.GameObjects.Layer
+      // lr180:Phaser.GameObjects.Layer;lr220:Phaser.GameObjects.Layer
+      // lrTrees:Phaser.GameObjects.Layer;lrOvalBush:Phaser.GameObjects.Layer;
+      // lrRogaBush:Phaser.GameObjects.Layer;lrRosaBush:Phaser.GameObjects.Layer;
+      constructor() {
+          super('twoGuns');
+          //isActionFetched:boolean = false;
+          /** номер фрейма, увеличивается при каждом вызове update, используется
+           * при фиксации действий пользователя - стрельбы и движения
+           */
+          this.updateCounter = 0;
+          /** счётчик срабатывания таймера checkBullets */
+          this.delayChecker = 0;
+          this.numBullets = 0;
+          this.shootBullets = 100;
+          this.bbShootBullets = 100;
+          //this.gameState = {autoPilot: false,waitAction: false, needToSave:false}
+          this.shootOn = false;
+          this.bbShootOn = false;
+          this.currentAnchInd = 0;
+      }
+      preload() {
+      }
+      create() {
+          globalThis.currentLevel = lvlNames.TwoGuns;
+          globalThis.currentScene = this;
+          try {
+              let botData = JSON.parse(localStorage.getItem("botData"));
+              /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
+               *клавиш 'up', 'left' или 'right' */
+              this.counterActionArr = botData.counter;
+              /**показания часов в аргументе метода update time при воспроизведении
+               * фрейма с номером, указанным в массиве counterActionArr
+               */
+              this.timeActionArr = botData.time;
+              /**код клавиши, нажатой в соответствующем фрейме */
+              this.keyActionArr = botData.key;
+              /**состояние шутера(стреляет или нет) в соответствующем фрейме */
+              this.shootActionArr = botData.shoot;
+              this.emptyAnchorArr = botData.anchor;
+          }
+          catch (_a) { }
+          this.indCounterArr = 0;
+          this.add.tileSprite(500, 225, 1000, 450, 'bg');
+          //this.blackBot = this.physics.add.image(400,418,'blackBot');
+          this.shooterCont = this.add.container(400, 418);
+          this.shooterCont.add(this.add.image(0, 0, 'gun'));
+          this.leftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.shooterCont.add(this.leftBulletArs);
+          this.rightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.shooterCont.add(this.rightBulletArs);
+          this.shooterCont.setSize(80, 40);
+          this.shooterContBody = this.physics.world.enableBody(this.shooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
+          this.shooterContBody.body.setCollideWorldBounds(true);
+          this.shooterContBody.body.setBoundsRectangle(new __webpack_exports__Geom.Rectangle(80, 0, 910, 450));
+          this.bbShooterCont = this.add.container(400, 418);
+          this.bbShooterCont.add(this.add.image(0, 0, 'blackBot'));
+          this.bbLeftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.bbShooterCont.add(this.bbLeftBulletArs);
+          this.bbRightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.bbShooterCont.add(this.bbRightBulletArs);
+          this.bbShooterCont.setSize(80, 40);
+          this.bbShooterContBody = this.physics.world.enableBody(this.bbShooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
+          this.bbShooterContBody.body.setCollideWorldBounds(true);
+          this.bbShooterContBody.body.setBoundsRectangle(new __webpack_exports__Geom.Rectangle(80, 0, 910, 450));
+          // this.leftBulletArs = this.add.image(-16,3,'bulletArs');
+          // this.shooterCont.add(this.leftBulletArs)
+          // this.rightBulletArs = this.add.image(16,3,'bulletArs');
+          // this.shooterCont.add(this.rightBulletArs)
+          // this.shooterCont.setSize(80,40)
+          let bubble = this.add.graphics({ x: 0, y: 0 });
+          bubble.fillStyle(0x222222, 0.5);
+          bubble.fillRoundedRect(4, 4, 100, 20, 4);
+          //  Bubble color
+          bubble.fillStyle(0xffffff, 1);
+          //  Bubble outline line style
+          bubble.lineStyle(2, 0x565656, 1);
+          //  Bubble shape and outline
+          bubble.strokeRoundedRect(0, 0, 100, 20, 4);
+          bubble.fillRoundedRect(0, 0, 100, 20, 4);
+          bubble.generateTexture('numBulletsBubble', 120, 24);
+          this.add.image(748, 14, 'numBulletsBubble').setDepth(21);
+          bubble.clear();
+          //{ fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center',
+          this.infoText = this.add.text(694, 4, '').setStyle({ fontFamily: 'Arial, Roboto',
+              fill: 'black', fontSize: '14px' }).setDepth(21);
+          this.fpsText = this.add.text(150, 20, '').setStyle({ fill: 'black' });
+          this.inputText = this.add.text(150, 40, '').setStyle({ fill: 'black' });
+          this.inputText2 = this.add.text(150, 60, '').setStyle({ fill: 'black' });
+          this.anims.create({
+              key: 'strike',
+              frames: [
+                  { key: 'bulletStrike0' },
+                  { key: 'bulletStrike1' },
+                  { key: 'bulletStrike2' },
+                  { key: 'bulletStrike3' },
+                  { key: 'bulletStrike4' },
+                  { key: 'bulletStrike5' },
+                  { key: 'empty' }
+              ],
+              frameRate: 5,
+              //repeat: -1
+          });
+          this.cameras.main.setBounds(0, 0, 1000, 225);
+          this.physics.world.setBounds(0, 0, 1000, 450);
+          this.staticGrp = this.physics.add.staticGroup();
+          this.staticGrp.create(125, 158, 'ovalBush').
+              setBodySize(30, 24).setOffset(4, 2).setDepth(8);
+          this.staticGrp.create(211, 158, 'ovalBush').
+              setBodySize(30, 24).setOffset(4, 2).setDepth(8);
+          this.staticGrp.create(267, 148, 'ovalBush').
+              setBodySize(30, 24).setOffset(4, 2).setDepth(8);
+          this.staticGrp.create(400, 201, 'rogaBush').
+              setBodySize(34, 24).setOffset(0, 0).setDepth(10);
+          this.staticGrp.create(452, 192, 'rogaBush').
+              setBodySize(34, 24).setOffset(0, 0).setDepth(10);
+          this.staticGrp.create(708, 196, 'rosaBush').
+              setBodySize(42, 16).setOffset(9, 0).setDepth(10);
+          this.staticGrp.create(750, 202, 'rosaBush').
+              setBodySize(42, 16).setOffset(9, 0).setDepth(10);
+          this.staticGrp.create(846, 199, 'rosaBush').
+              setBodySize(42, 16).setOffset(9, 0).setDepth(10);
+          this.staticGrp.create(375, 64, 'bigTree').
+              setBodySize(94, 60).setOffset(0, 0).setDepth(8);
+          this.staticGrp.create(621, 50, 'midleTree').
+              setBodySize(92, 60).setOffset(0, 0).setDepth(5);
+          this.staticGrp.create(945, 250, 'rectBush').
+              setBodySize(42, 16).setOffset(0, 0).setDepth(5);
+          this.bulletsGrp = new Bullets(this);
+          this.physics.add.collider(this.staticGrp, this.bulletsGrp, (stat, bullet) => {
+              this.add.sprite(stat.body.center.x, stat.body.bottom, 'bulletStrike0').
+                  setDepth(11).anims.play({ key: 'strike', startFrame: 0 });
+              bullet.body.reset(0, -32);
+              bullet.setActive(false).setVisible(false);
+          });
+          // this.bigBulletsGrp = this.physics.add.staticGroup()
+          // this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
+          // this.bigBulletsGrp.create(790,426,'bigBullet').setData('isFull',true)
+          // this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp,
+          //     (shooterCont, bigBullet: Phaser.Types.Physics.Arcade.GameObjectWithStaticBody) => {
+          //         if (this.shootBullets <= 50 && bigBullet.getData('isFull')) {
+          //             this.shootBullets += 50
+          //             bigBullet.setData('isFull', false)
+          //             bigBullet.body.reset(-100, 0)
+          //             bigBullet.setActive(false)
+          //             this.rightBulletArs.isCropped = false
+          //             if (this.shootBullets >= 60) {
+          //                 let offset = Math.round(33 - 33 * (this.shootBullets - 50) / 50)
+          //                 this.leftBulletArs.setCrop(0, offset, 13, 33 - offset)
+          //             }
+          //         }
+          //     })
+          this.physics;
+          this.bulettCounter = 0;
+          this.shootOn = false;
+          this.enemies = new Enemies(this.bulletsGrp);
+          this.enemies.createGroup('loner', 0, 0, 0);
+          this.railway = this.physics.add.staticImage(44, 225, 'railway');
+          this.cursors = this.input.keyboard.createCursorKeys();
+          this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
+          this.rwExplode = this.add.sprite(43, 225, 'empty');
+          this.fireGranade = this.add.image(-100, -100, 'fireGranade');
+          this.add.tileSprite(500, 438, 1000, 24, 'scheben1');
+          this.cameras.main.startFollow(this.shooterCont);
+          this.enemiesIsStoped = false;
+          this.input.addPointer(2);
+          this.input.on('pointerdown', (pointer) => {
+              if (!this.pointerDownOn)
+                  return;
+              if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
+                  this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
+                  this.inputText.setText('left');
+                  return;
+              }
+              else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
+                  this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60);
+                  //this.inputText.setText('right')
+                  return;
+              }
+              if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
+                  (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
+                  this.shootOn = !this.shootOn;
+                  if (this.shootOn)
+                      this.inputText.setText('shootOn');
+                  else
+                      this.inputText.setText('shootOff');
+              }
+          });
+          this.pointerDownOn = true;
+          globalThis.currentResult = GameState.Gone;
+          this.currentGameState = GameState.Gone;
+          //this.shootOn = true;
+          this.shootBullets = 100;
+          this.emptyAnchor = this.physics.add.image(0, 0, "empty");
+          this.emptyAnchor.body.setVelocity(6, 0);
+      }
+      update(time, delta) {
+          this.game.getFrame();
+          this.input.listeners('pointerdown');
+          console.log("numListeners " + this.input.listenerCount("pointerdown"));
+          // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
+          // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
+          if ((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
+              && !this.enemiesIsStoped) {
+              this.pointerDownOn = false;
+              globalThis.currentResult = this.currentGameState;
+              this.enemiesIsStoped = true;
+              if (this.currentGameState == GameState.Lost) {
+                  let point = this.enemies.stopEnemies(GameState.Lost);
+                  this.fireGranade.setPosition(point.x - 16, point.y - 16);
+                  this.enemiesIsStoped = true;
+                  this.cameras.main.stopFollow();
+                  this.cameras.main.pan(400, 225, 300);
+                  this.shooterCont.
+                      body.reset(400, 398);
+                  this.shooterCont.setY(418);
+                  this.playGransdExplodeTween();
+              }
+              if (this.currentGameState == GameState.Win) {
+                  this.enemies.stopEnemies(GameState.Win);
+                  /** номер сообщения, которое зависит от результата и достижений игрока */
+                  globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
+              }
+              this.enemiesIsStoped = true;
+          }
+          // при демонстрации Preview и при завершении игры, управление 
+          // отключается (pointerDownOn=false)?, если управление не отключено,
+          // то обрабатываем события
+          if (this.pointerDownOn) {
+              this.updateCounter++;
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.up)) {
+                  this.shootOn = !this.shootOn;
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.left)) {
+                  this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.right)) {
+                  this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60);
+              }
+          }
+          if (this.currentGameState == GameState.Gone) {
+              if (this.currentAnchInd < this.emptyAnchorArr.length - 1) {
+                  while (this.emptyAnchor.body.x >= this.emptyAnchorArr[this.currentAnchInd]) {
+                      switch (this.keyActionArr[this.currentAnchInd]) {
+                          case 'u':
+                              this.bbShootOn = this.shootActionArr[this.currentAnchInd] == 1 ?
+                                  true : false;
+                              break;
+                          case 'l':
+                              this.bbShooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
+                              break;
+                          case 'r':
+                              this.bbShooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60);
+                              break;
+                      }
+                      this.currentAnchInd++;
+                  }
+              }
+              // извлекаем номер очередного фрейма, в котором следует что-то совершить 
+              this.counterActionArr[this.indCounterArr];
+          }
+          this.infoText.setText(currentTexts$2.ammo + `: ${this.shootBullets}`);
+          //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
+          this.fpsText.setText(` FPS:  ${1000 / delta}`);
+      }
+      // метод создающий твин летящей гранаты, после которого начинается
+      // анимация взрыва, после которой текстура ж-д станции заменяется на
+      // сгоревшую и стартует твин, делающий облако взрыва прозрачным, по
+      // окончании его в зависимости от того была ли это презентация или
+      // взрыв произошёл в реальной игре либо выводится окно с итогами, либо
+      // стартует уровень 
+      playGransdExplodeTween() {
+          let flyingGranad = this.tweens.add({
+              targets: this.fireGranade,
+              x: 50,
+              duration: 1000,
+              persist: false,
+              paused: true,
+              onComplete: () => {
+                  this.rwExplode.play({ key: 'rwExplode', startFrame: 0 });
+                  this.rwExplode.setAlpha(1);
+                  this.rwExplode.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
+                      this.railway.setTexture('blackRailway');
+                      this.explodeTween = this.tweens.add({
+                          targets: this.rwExplode,
+                          alpha: 0,
+                          duration: 2000,
+                          persist: false,
+                          paused: true,
+                          onComplete: () => {
+                              this.scene.pause("demo");
+                              let numRemBullets = 0;
+                              // считаем сколько осталось патронов в игре
+                              // this.bigBulletsGrp.getChildren().forEach((child) =>{
+                              //     if(child.getData("isFull")) numRemBullets += 50;
+                              // })
+                              numRemBullets += this.shootBullets;
+                              globalThis.myUIBlocks.showSummary(200 - numRemBullets, this.enemies.getNumKilledEnemies(), GameState.Lost);
+                          }
+                      });
+                      this.explodeTween.play();
+                  });
+              }
+          });
+          flyingGranad.play();
+      }
+      checkBullet() {
+          if (this.enemiesIsStoped)
+              return;
+          if (this.shootOn) {
+              if (this.shootBullets > 0) {
+                  this.bulletsGrp.fireBullet(this.shooterCont.x, this.shooterCont.y - 15, this.shooterCont.body.velocity.x);
+                  this.shootBullets--;
+                  if (this.shootBullets % 10 == 0) {
+                      if (this.shootBullets >= 50) {
+                          let offset = Math.round(33 - 33 * (this.shootBullets - 50) / 50);
+                          this.leftBulletArs.setCrop(0, offset, 13, 33 - offset);
+                      }
+                      else {
+                          let offset = Math.round(33 - 33 * this.shootBullets / 50);
+                          this.rightBulletArs.setCrop(0, offset, 13, 33 - offset);
+                      }
+                  }
+              }
+              else {
+                  this.bulletsGrp.fireBlank(this.shooterCont.x, this.shooterCont.y - 15, this.shooterCont.body.velocity.x);
+              }
+          }
+          this.delayChecker++;
+          if (this.bbShootOn) {
+              if (this.bbShootBullets > 0) {
+                  this.bulletsGrp.fireBullet(this.bbShooterCont.x, this.bbShooterCont.y - 15, this.bbShooterCont.body.velocity.x);
+                  this.bbShootBullets--;
+                  if (this.bbShootBullets % 10 == 0) {
+                      if (this.bbShootBullets >= 50) {
+                          let offset = Math.round(33 - 33 * (this.bbShootBullets - 50) / 50);
+                          this.bbLeftBulletArs.setCrop(0, offset, 13, 33 - offset);
+                      }
+                      else {
+                          let offset = Math.round(33 - 33 * this.bbShootBullets / 50);
+                          this.bbRightBulletArs.setCrop(0, offset, 13, 33 - offset);
+                      }
+                  }
+              }
+              else {
+                  this.bulletsGrp.fireBlank(this.bbShooterCont.x, this.bbShooterCont.y - 15, this.bbShooterCont.body.velocity.x);
+              }
+          }
+          // delayChecker до полного истребления всех диверсов первой волны
+          // достигалось 290, 300, 417,306, после тренировок ~ 230 
+          this.currentGameState = this.enemies.handleUpdate();
+      }
+  }
+
+  class EnemiesF extends __webpack_exports__Physics.Arcade.Group {
+      constructor(scene) {
+          super(scene.physics.world, scene);
+          this.scene.anims.create({
+              key: 'walkF',
+              frames: [
+                  { key: 'walkerF1' },
+                  { key: 'walkerF2' },
+                  { key: 'walkerF3' },
+                  { key: 'walkerF4' },
+                  { key: 'walkerF5' },
+                  { key: 'walkerF4' },
+                  { key: 'walkerF3' },
+                  { key: 'walkerF2' }
+              ],
+              frameRate: 5,
+              repeat: -1
+          });
+          this.createMultiple({
+              frameQuantity: 25,
+              key: 'enemyF',
+              setXY: { x: -100, y: 0 },
+              active: false,
+              visible: false,
+              classType: EnemyF
+          });
+          this.getChildren().forEach((enemy) => {
+              enemy.setSize(16, 16);
+          });
+      }
+      issueEnemy(enemiesArr) {
+          let walkerF;
+          let alpha;
+          let tmpArr = [];
+          for (let i = 0; i < enemiesArr.length; i++) {
+              walkerF = this.getFirstDead(false);
+              walkerF.setPushable(false);
+              walkerF.body.reset(enemiesArr[i].x, enemiesArr[i].y);
+              walkerF.setActive(true);
+              walkerF.setVisible(true);
+              alpha = Math.atan((400 - walkerF.x) / (450 - walkerF.y));
+              walkerF.setRotation(-alpha);
+              walkerF.setData('offSide', true);
+              walkerF.alpha = 0;
+              tmpArr.push(walkerF);
+          }
+          tmpArr.forEach((enemyF) => {
+              this.scene.tweens.add({
+                  targets: enemyF,
+                  alpha: { value: 1 },
+                  duration: 2000,
+                  onComplete: () => {
+                      enemyF.setData('offSide', false);
+                      enemyF.play('walkF');
+                      this.scene.physics.moveTo(enemyF, 400, 450, 5);
+                  }
+              });
+          });
+      }
+      stopEnemies() {
+          let activeEnemyArr = this.getMatching("active", true);
+          activeEnemyArr.forEach((enemy) => {
+              enemy.body.setVelocity(0);
+              enemy.anims.stop();
+          });
+      }
+      fireBlank(x, y, velocityX) {
+          this.blankShot.body.reset(x - 3, y - 10);
+          this.blankShot.play({ key: 'blankShoot', startFrame: 0 });
+          this.blankShot.setVelocityX(velocityX);
+      }
+  }
+  class EnemyF extends __webpack_exports__Physics.Arcade.Sprite {
+      constructor(scene, x, y, parentGrp) {
+          super(scene, x, y, 'walkerF1');
+          //this.parentGrp = parentGrp;
+          //this.setSize(28,16).setOffset(-2,-16)
+          //this.state = state;
+      }
+      preUpdate(time, delta) {
+          super.preUpdate(time, delta);
+          if (this.y <= -0) {
+              this.setActive(false);
+              this.setVisible(false);
+          }
+      }
+  }
+
+  const enTexts$1 = {
+      touchControl: "Control on the touchscreen:",
+      leftTap: "Tap to the left of the gun to rotate to the left.",
+      rightTap: "Tap to the right of the gun to rotate to the right.",
+      shooting: "To start or finish shooting, click on(above) the gun.",
+      keyboard: "Keyboard control.",
+      arrow: "The Up arrow key starts or ends shooting, the Right and Left arrows rotate the gun.",
+      dontLet: "Don't let them pass!",
+      replanish: "Replenish your ammo supply whenever possible.",
+      ammo: "Ammo"
+  };
+  const ruTexts$1 = {
+      touchControl: "Управление на тачскрине:",
+      leftTap: "Жмите слева от орудия, чтобы повернуть влево.",
+      rightTap: "Жмите справа от орудия, чтобы повернуть вправо.",
+      shooting: "Чтобы начать или закончить стрельбу, жмите над орудием.",
+      keyboard: "Управление с клавиатуры.",
+      arrow: "Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево поворачивает орудие.",
+      dontLet: "Не дайте им подобраться!",
+      replanish: "Пополняйте по возможности запас патронов.",
+      ammo: "Патронов"
+  };
+  let currentTexts$1;
+  currentTexts$1 = globalThis.lang == "en" ? enTexts$1 : ruTexts$1;
+  class Forest extends __webpack_exports__Scene {
+      constructor() {
+          super("forest");
+          this.walkersArr = [];
+          this.radDegreeCoef = Math.PI / 180;
+          this.numTick = 0;
+      }
+      preload() {
+          this.load.image('empty', 'assetsF/empty.png');
+          this.load.image('walkerF1', 'assetsF/walk1.png');
+          this.load.image('walkerF2', 'assetsF/walk2.png');
+          this.load.image('walkerF3', 'assetsF/walk3.png');
+          this.load.image('walkerF4', 'assetsF/walk4.png');
+          this.load.image('walkerF5', 'assetsF/walk5.png');
+          this.load.image('walkerF6', 'assetsF/walk6.png');
+          this.load.image('walkerF7', 'assetsF/walk7.png');
+          this.load.image('walkerF8', 'assetsF/walk8.png');
+          this.load.image('walkerF9', 'assetsF/walk9.png');
+          this.load.image('walkerF10', 'assetsF/walk10.png');
+          this.load.image('expl1', 'assetsF/expl1.png');
+          this.load.image('expl2', 'assetsF/expl2.png');
+          this.load.image('expl3', 'assetsF/expl3.png');
+          this.load.image('expl4', 'assetsF/expl4.png');
+          this.load.image('expl5', 'assetsF/expl5.png');
+          this.load.image('expl6', 'assetsF/expl6.png');
+          this.load.image('expl7', 'assetsF/expl7.png');
+          this.load.image('gunBase', 'assetsF/gunBase.png');
+          this.load.image('gunTube', 'assetsF/gunTubeC.png');
+          this.load.image('bulletF', 'assetsF/bulletA.png');
+          this.load.image('trsGrpLeft', 'assetsF/trsGrpLeft.png');
+          this.load.image('trs0', 'assetsF/trs0.png');
+          this.load.image('tr1', 'assetsF/tr1.png');
+          this.load.image('tr2', 'assetsF/tr2.png');
+          this.load.image('tr3', 'assetsF/tr3.png');
+          this.load.image('tr4', 'assetsF/tr4.png');
+          this.load.image('tr7', 'assetsF/tr7.png');
+          this.load.image('trs8', 'assetsF/trs8.png');
+          this.load.image('tr9', 'assetsF/tr9.png');
+          this.load.image('trs10', 'assetsF/trs10.png');
+          this.load.image('trs11', 'assetsF/trs11.png');
+          this.load.image('trsGrpRight', 'assetsF/trsGrpRight.png');
+          this.load.image('board', 'assetsF/board.png');
+          this.load.image('fireGranade', 'assets/circleBullet.png');
+      }
+      create() {
+          globalThis.currentLevel = lvlNames.Forest;
+          globalThis.currentScene = this;
+          this.anims.create({
+              key: 'fallenF',
+              frames: [
+                  { key: 'walkerF6' },
+                  { key: 'walkerF7' },
+                  { key: 'walkerF8' },
+                  { key: 'walkerF9' }
+              ],
+              frameRate: 5
+          });
+          this.anims.create({
+              key: 'strike',
+              frames: [
+                  { key: 'bulletStrike0' },
+                  { key: 'bulletStrike1' },
+                  { key: 'bulletStrike2' },
+                  { key: 'bulletStrike3' },
+                  { key: 'bulletStrike4' },
+                  { key: 'bulletStrike5' },
+                  { key: 'empty' }
+              ],
+              frameRate: 5,
+              //repeat: -1
+          });
+          this.anims.create({
+              key: 'gunExplode',
+              frames: [
+                  { key: 'expl1' },
+                  { key: 'expl2' },
+                  { key: 'expl3' },
+                  { key: 'expl4' },
+                  { key: 'expl5' },
+                  { key: 'expl6' },
+                  { key: 'expl7' }
+              ],
+              frameRate: 5
+          });
+          this.treesGrp = this.physics.add.staticGroup();
+          this.treesGrp.create(64, 230, 'trsGrpLeft').body.setSize(30, 152).setOffset(30, 20);
+          this.treesGrp.create(60, 68, 'trs0').body.setSize(36, 38).setOffset(4, 8);
+          this.treesGrp.create(131, 66, 'tr1').body.setSize(28, 28).setOffset(4, 6);
+          this.treesGrp.create(178, 37, 'tr2').body.setSize(36, 24).setOffset(1, 0);
+          this.treesGrp.create(251, 55, 'tr3').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(319, 61, 'tr4').body.setSize(40, 28).setOffset(6, 20);
+          this.treesGrp.create(365, 68, 'tr3').body.setSize(28, 32).setOffset(6, 6);
+          this.treesGrp.create(398, 46, 'tr3').body.setSize(32, 32).setOffset(4, 6);
+          this.treesGrp.create(422, 36, 'tr7').body.setSize(20, 16).setOffset(4, 8);
+          this.treesGrp.create(498, 80, 'trs8').body.setSize(48, 28).setOffset(4, 24);
+          this.treesGrp.create(552, 56, 'tr9').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(602, 40, 'trs10').body.setSize(38, 36).setOffset(4, 16);
+          this.treesGrp.create(664, 36, 'trs11').body.setSize(36, 36).setOffset(8, 12);
+          this.treesGrp.create(736, 160, 'trsGrpRight').body.setSize(64, 200).setOffset(16, 16);
+          this.add.image(399, 404, "bulletF");
+          this.cursors = this.input.keyboard.createCursorKeys();
+          this.shootOn = false;
+          this.pointerDownOn = true;
+          this.fpsText = this.add.text(150, 20, '').setStyle({ fill: 'black' });
+          this.enemiesGrp = new EnemiesF(this);
+          this.bulletsGrp = new BulletsF(this);
+          this.shootBullets = 200;
+          this.physics.add.collider(this.treesGrp, this.bulletsGrp, (stat, bullet) => {
+              let strikeSpr = this.myStrikeGrp.getFirstDead();
+              strikeSpr.setPosition(bullet.x, bullet.y).setActive(true).setVisible(true);
+              strikeSpr.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, (anim, frame, sprite) => {
+                  sprite.setPosition(0, -100);
+                  sprite.setActive(false).setVisible(false);
+              }, this);
+              strikeSpr.anims.play({ key: 'strike', startFrame: 0 });
+              bullet.body.reset(0, -100);
+              bullet.setActive(false).setVisible(false);
+          });
+          this.physics.add.collider(this.enemiesGrp, this.bulletsGrp, (enemyF, bulletF) => {
+              bulletF.body.reset(-100, 0);
+              bulletF.setActive(false).setVisible(false);
+              if (enemyF.getData("offSide"))
+                  return;
+              //enemyF.play("fallenF")
+              if (enemyF.state != 'falling') {
+                  enemyF.setVelocity(0, 0);
+                  enemyF.state = 'falling';
+                  enemyF.play({ key: "fallenF", startFrame: 0 });
+                  enemyF.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
+                      enemyF.body.reset(-100, 0);
+                      enemyF.setActive(false).setVisible(false);
+                      enemyF.state = '';
+                      //this.remove(enemy);
+                      //let hasActive = reserve.countActive()
+                      //console.log(hasActive)
+                  }, this);
+              }
+          });
+          this.add.image(401, 409, "board");
+          this.gunBase = this.physics.add.staticImage(400, 433, 'gunBase').setCircle(80).
+              setOffset(-40, -40);
+          this.physics.add.overlap(this.enemiesGrp, this.gunBase, (gunBase, enemyF) => {
+              //enemyF.anims.stop();
+              //enemyF.setVelocity(0,0)
+              if (this.gameState != GameState.Lost) {
+                  this.enemiesGrp.stopEnemies();
+                  enemyF.setData("offSide", true);
+                  enemyF.setTexture('walkerF10');
+                  this.gameState = GameState.Lost;
+                  this.playGransdExplodeTween(enemyF.x, enemyF.y);
+                  console.log(enemyF.state, gunBase.state);
+              }
+          });
+          //this.gunBase.setCircle(100);
+          //this.gunTube =  this.add.image(400,430,'gunTube')
+          this.gunTube = this.physics.add.image(400, 450, 'gunTube').setOrigin(0.5, 1);
+          this.fireGranade = this.add.sprite(-10, -10, "fireGranade");
+          this.gameState = GameState.Gone;
+          this.enemiesIsStoped = false;
+          this.input.on('pointerdown', (pointer) => {
+              if (!this.pointerDownOn)
+                  return;
+              if (pointer.x < this.gunBase.x - 80) {
+                  if (this.gunTube.body.rotation > -80)
+                      this.gunTube.body.setAngularAcceleration(-10);
+                  return;
+              }
+              else if (pointer.x > this.gunBase.x + 80) {
+                  if (this.gunTube.body.rotation < 80)
+                      this.gunTube.body.setAngularAcceleration(10);
+                  return;
+              }
+              if ((pointer.x <= this.gunBase.x + 80) &&
+                  (pointer.x >= this.gunBase.x - 80)) {
+                  this.shootOn = !this.shootOn;
+              }
+          });
+          this.myStrikeGrp = new StrikeGrp(this);
+          this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
+      }
+      update(time, delta) {
+          if ((this.gameState == GameState.Win || this.gameState == GameState.Lost)
+              && !this.enemiesIsStoped) {
+              this.pointerDownOn = false;
+              this.pointerDownOn = false;
+              this.gunTube.body.setAngularAcceleration(0);
+              this.gunTube.body.setAngularVelocity(0);
+              this.shootOn = false;
+              this.pointerDownOn = false;
+              //globalThis.currentResult = this.gameState;
+              //globalThis.currentLevel = lvlNames.Loner;
+              this.enemiesIsStoped = true;
+              if (this.gameState == GameState.Lost) {
+                  //let point = this.enemies.stopEnemies(GameState.Lost)
+                  //this.fireGranade.setPosition(point.x - 16, point.y - 16)
+                  this.enemiesIsStoped = true;
+                  // (this.shooterCont as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody).
+                  //     body.reset(400,398)
+                  // this.shooterCont.setY(418)
+                  // this.playGransdExplodeTween()
+              }
+              if (this.gameState == GameState.Win) {
+                  globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
+              }
+              this.enemiesIsStoped = true;
+          }
+          if (this.gunTube.body.angularVelocity <= -10) {
+              this.gunTube.body.angularAcceleration = 0;
+              this.gunTube.body.angularVelocity = -10;
+          }
+          if (this.gunTube.body.angularVelocity >= 10) {
+              this.gunTube.body.angularAcceleration = 0;
+              this.gunTube.body.angularVelocity = 10;
+          }
+          if (this.gunTube.body.rotation <= -80) {
+              if (this.gunTube.body.angularVelocity < 0)
+                  this.gunTube.body.angularVelocity = 0;
+              if (this.gunTube.body.angularAcceleration < 0)
+                  this.gunTube.body.angularAcceleration = 0;
+          }
+          if (this.gunTube.body.rotation >= 80) {
+              if (this.gunTube.body.angularVelocity > 0)
+                  this.gunTube.body.angularVelocity = 0;
+              if (this.gunTube.body.angularAcceleration > 0)
+                  this.gunTube.body.angularAcceleration = 0;
+          }
+          if (this.pointerDownOn) {
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.up)) {
+                  this.shootOn = !this.shootOn;
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.left)) {
+                  if (this.gunTube.body.rotation > -80)
+                      this.gunTube.body.setAngularAcceleration(-10);
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.right)) {
+                  if (this.gunTube.body.rotation < 80)
+                      this.gunTube.body.setAngularAcceleration(10);
+              }
+              this.fpsText.setText(` FPS:  ${Math.round(1000 / delta)}`);
+          }
+      }
+      checkBullet() {
+          if (this.numTick == 0) {
+              //{x:50,y:50},{x:750,y:50},,,{x:700,y:100},{x:550,y:200},{x:400,y:75}
+              this.enemiesGrp.issueEnemy([{ x: 250, y: 200 }, { x: 650, y: 150 }
+              ]);
+              this.numTick++;
+          }
+          if (this.shootOn) {
+              if (this.shootBullets > 0) {
+                  let xOrg = this.gunTube.body.gameObject
+                      .displayOriginX;
+                  let yOrg = this.gunTube.body.gameObject
+                      .displayOriginY;
+                  console.log(`xOrg = ${xOrg}, ${yOrg}`);
+                  let xProection = Math.sin(this.gunTube.body.rotation * this.radDegreeCoef);
+                  let yProection = Math.cos(this.gunTube.body.rotation * this.radDegreeCoef);
+                  let xCoord = 400 + 54 * xProection;
+                  let yCoord = 450 - 54 * yProection;
+                  //this.add.image(xCoord,yCoord,"bulletF")
+                  this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180);
+              }
+          }
+      }
+      showPreview() {
+          this.pointerDownOn = false;
+          let bubble;
+          let captionBubble;
+          bubble = this.add.graphics({ x: 0, y: 0 });
+          bubble.fillStyle(0x222222, 0.5);
+          bubble.fillRoundedRect(6, 6, 575, 48, 16);
+          //  Bubble color
+          bubble.fillStyle(0xffffff, 1);
+          //  Bubble outline line style
+          bubble.lineStyle(4, 0x565656, 1);
+          //  Bubble shape and outline
+          bubble.strokeRoundedRect(0, 0, 575, 48, 16);
+          bubble.fillRoundedRect(0, 0, 575, 48, 16);
+          bubble.generateTexture('captionBubble', 582, 54);
+          captionBubble = this.add.image(400, 36, 'captionBubble').setDepth(21);
+          bubble.clear();
+          let captionStyle = { fontFamily: "Roboto, Arial", fontSize: '30px', fontStyle: 'bold',
+              color: '#ff0000' };
+          let capTxt = this.add.text(200, 16, currentTexts$1.touchControl, captionStyle).setDepth(22);
+          capTxt.setShadow(1, 1, '#000000');
+          capTxt.setDepth(22);
+          bubble = this.add.graphics({ x: 0, y: 0 });
+          bubble.fillStyle(0x222222, 0.5);
+          bubble.fillRoundedRect(6, 6, 298, 128, 16);
+          //  Bubble color
+          bubble.fillStyle(0xffffff, 1);
+          //  Bubble outline line style
+          bubble.lineStyle(4, 0x565656, 1);
+          //  Bubble shape and outline
+          bubble.strokeRoundedRect(0, 0, 298, 128, 16);
+          bubble.fillRoundedRect(0, 0, 298, 128, 16);
+          bubble.generateTexture('bubble', 305, 135);
+          bubble.clear();
+          let rect = this.add.graphics({ x: 0, y: 0 });
+          rect.fillStyle(0x0000ff, 0.3);
+          rect.fillRoundedRect(0, 0, 330, 420, 30);
+          rect.generateTexture('leftTouchRect', 330, 420);
+          rect.clear();
+          let leftToughtRect = this.add.image(188, 228, 'leftTouchRect').setAlpha(0);
+          rect.fillStyle(0x0000ff, 0.3);
+          rect.fillRoundedRect(0, 0, 550, 420, 30);
+          rect.generateTexture('rightToughtRect', 550, 420);
+          rect.clear();
+          let rightToughtRect = this.add.image(532, 228, 'rightToughtRect').setAlpha(0);
+          rect.fillStyle(0x0000ff, 0.3);
+          rect.fillRoundedRect(0, 0, 120, 420, 30);
+          rect.generateTexture('centerToughtRect', 120, 420);
+          rect.clear();
+          let centerToughtRect = this.add.image(400, 228, 'centerToughtRect').setAlpha(0);
+          let hand = this.add.image(210, 280, 'hand').setAlpha(0);
+          const bubbleImg = this.add.image(186, 148, 'bubble').setDepth(21).setAlpha(0);
+          const leftBubbleTxt = this.add.text(0, 0, currentTexts$1.leftTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+          let txtBnd = leftBubbleTxt.getBounds();
+          //console.log(txtBnd)
+          leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width / 2 - 5, bubbleImg.y - txtBnd.height / 2 - 5).setDepth(22).setAlpha(0);
+          const rightBubbleTxt = this.add.text(0, 0, currentTexts$1.rightTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+          txtBnd = rightBubbleTxt.getBounds();
+          rightBubbleTxt.setPosition(634 - rightBubbleTxt.width / 2 - 5, 148 - txtBnd.height / 2 - 5).setDepth(22).setAlpha(0);
+          const centerBubbleTxt = this.add.text(0, 0, currentTexts$1.shooting, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
+          centerBubbleTxt.setPosition(400 - centerBubbleTxt.width / 2 - 5, 148 - centerBubbleTxt.height / 2 - 5).setDepth(22).setAlpha(0);
+          // цепочка для текста и подложек для него
+          this.tweens.chain({
+              persist: false,
+              // тыкаем слева от орудия
+              tweens: [
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100
+                  },
+                  {
+                      targets: leftBubbleTxt,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: leftBubbleTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      delay: 3500
+                  },
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 100,
+                      onComplete: () => {
+                          bubbleImg.setX(634);
+                          //bubbleImg.setAlpha(1)
+                      },
+                  },
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 1 }
+                      },
+                      delay: 1500,
+                      duration: 100,
+                  },
+                  {
+                      targets: rightBubbleTxt,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: rightToughtRect,
+                      props: {
+                          x: { value: 732 },
+                      },
+                      delay: 1500,
+                      duration: 1500,
+                  },
+              ]
+          });
+          // цепочка твинов для hand
+          this.tweens.chain({
+              persist: false,
+              // тыкаем слева от орудия
+              tweens: [
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100,
+                      delay: 800
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          scale: { value: 0.6 },
+                          y: { value: 260 }
+                      },
+                      duration: 300,
+                      delay: 400
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 0 },
+                      },
+                      duration: 200,
+                      delay: 800,
+                      onComplete: () => {
+                          hand.setAlpha(0);
+                          hand.setX(600);
+                          hand.setY(280);
+                          hand.setScale(1);
+                      }
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100,
+                      delay: 4000,
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          scale: { value: 0.6 },
+                          y: { value: 260 }
+                      },
+                      duration: 300,
+                      delay: 400
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 0 },
+                      },
+                      duration: 200,
+                      delay: 800,
+                      onComplete: () => {
+                          hand.setAlpha(0);
+                          hand.setX(400);
+                          hand.setY(280);
+                          hand.setScale(1);
+                      }
+                  },
+              ]
+          });
+          // появляется левая область-прямоугольник, эта область движется влево,
+          // появляется правая область-прямоугольник, левая область передвигается
+          // влево, левая область исчезает
+          this.tweens.chain({
+              persist: false,
+              tweens: [
+                  {
+                      targets: leftToughtRect,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300,
+                      delay: 1200
+                  },
+                  {
+                      targets: leftToughtRect,
+                      props: {
+                          x: { value: -12 }
+                      },
+                      duration: 1500,
+                      delay: 300
+                  },
+                  {
+                      targets: rightToughtRect,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300,
+                      delay: 4200
+                  },
+                  {
+                      targets: leftToughtRect,
+                      props: {
+                          x: { value: 188 }
+                      },
+                      duration: 1500,
+                      //delay:4200 
+                  },
+                  {
+                      targets: leftToughtRect,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      delay: 400
+                  },
+              ]
+          });
+          // цепочка для каретки - каретка движется влево, движется вправо,
+          // появляется подложка справа, подложка справа исчезает и перемещается
+          // в центр, исчезает правая область-прямоугольник, в центре появляется
+          // подложка, на ней появляется текст, появляется hand, hand жмёт на
+          // центральную область, появляется центральная область-прямоугольник,
+          // исчезает hand, начинается стрельба, появляется hand, hand жмёт на
+          // центральную область, стрельба прекращается, hand исчезает
+          this.tweens.chain({
+              persist: false,
+              tweens: [
+                  {
+                      targets: this.gunTube,
+                      props: {
+                          angle: { value: -80 }
+                      },
+                      duration: 1500,
+                      delay: 1800
+                  },
+                  {
+                      targets: this.gunTube,
+                      props: {
+                          angle: { value: 80 }
+                      },
+                      duration: 1500,
+                      delay: 4600
+                  },
+                  {
+                      targets: rightBubbleTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      //delay:3500
+                  },
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 100,
+                      onComplete: () => {
+                          bubbleImg.setX(400);
+                          bubbleImg.setAlpha(1);
+                          hand.setAlpha(1);
+                          centerBubbleTxt.setAlpha(1);
+                      },
+                  },
+                  {
+                      targets: rightToughtRect,
+                      props: {
+                          alpha: 0
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100,
+                      delay: 400
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          scale: { value: 0.6 },
+                          y: { value: 260 }
+                      },
+                      duration: 300,
+                      delay: 400
+                  },
+                  {
+                      targets: centerToughtRect,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 300,
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 200,
+                      onComplete: () => {
+                          hand.setScale(1);
+                          hand.setY(280);
+                          this.shootOn = true;
+                      }
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 1 },
+                      },
+                      duration: 100,
+                      delay: 2000
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          scale: { value: 0.6 },
+                          y: { value: 260 }
+                      },
+                      duration: 200,
+                      onComplete: () => {
+                          this.shootOn = false;
+                      }
+                  },
+                  {
+                      targets: hand,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 200
+                  },
+                  {
+                      targets: centerToughtRect,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                  },
+                  {
+                      targets: capTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      onComplete: () => {
+                          capTxt.setText(currentTexts$1.keyboard);
+                      }
+                  },
+                  {
+                      targets: capTxt,
+                      props: {
+                          alpha: { value: 1 }
+                      },
+                      duration: 300,
+                      onComplete: () => {
+                          centerBubbleTxt.setText(currentTexts$1.arrow);
+                          centerBubbleTxt.setFontSize('20px');
+                          centerBubbleTxt.setPosition(400 - centerBubbleTxt.width / 2 - 5, 148 - centerBubbleTxt.height / 2 - 5);
+                      }
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 1 }
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      delay: 2200
+                  },
+                  {
+                      targets: capTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 300,
+                      onComplete: () => {
+                          capTxt.setText(currentTexts$1.dontLet);
+                          capTxt.setX(captionBubble.x - capTxt.width / 2 - 5);
+                      }
+                  },
+                  {
+                      targets: capTxt,
+                      props: {
+                          alpha: { value: 1 }
+                      },
+                      duration: 300,
+                      onComplete: () => {
+                          centerBubbleTxt.setText(currentTexts$1.replanish);
+                          centerBubbleTxt.setFontSize('24px');
+                          centerBubbleTxt.setPosition(400 - centerBubbleTxt.width / 2 - 5, 148 - centerBubbleTxt.height / 2 - 5);
+                      },
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 1 }
+                      },
+                      duration: 300
+                  },
+                  {
+                      targets: centerBubbleTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      delay: 2000,
+                      duration: 300
+                  },
+                  {
+                      targets: bubbleImg,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      duration: 100
+                  },
+                  {
+                      targets: capTxt,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      delay: 200,
+                      duration: 300
+                  },
+                  {
+                      targets: captionBubble,
+                      props: {
+                          alpha: { value: 0 }
+                      },
+                      delay: 200,
+                      duration: 300,
+                      onComplete: () => {
+                          this.textures.remove("leftTouchRect");
+                          this.textures.remove("rightToughtRect");
+                          this.textures.remove("centerToughtRect");
+                          this.textures.remove("bubble");
+                          this.textures.remove("captionBubble");
+                      }
+                  }
+              ]
+          });
+          return;
+      }
+      playGransdExplodeTween(x, y) {
+          this.fireGranade.setPosition(x, y);
+          let flyingGranad = this.tweens.add({
+              targets: this.fireGranade,
+              x: 400,
+              y: 425,
+              duration: 1500,
+              persist: false,
+              paused: true,
+              onComplete: () => {
+                  this.fireGranade.play({ key: 'gunExplode', startFrame: 0 });
+              }
+          });
+          flyingGranad.play();
+      }
+  }
+  class StrikeGrp extends __webpack_exports__GameObjects.Group {
+      constructor(scene) {
+          super(scene);
+          this.createMultiple({
+              frameQuantity: 25,
+              key: 'empty',
+              setXY: { x: -100, y: 0 },
+              active: false,
+              visible: false,
+              classType: __webpack_exports__GameObjects.Sprite
+          });
       }
   }
 
@@ -243602,23 +244936,23 @@ var MyGame = (function (exports) {
   /** запускаем игру и загружаем ассеты в сцене Preload */
   function startGame() {
       const config = {
-          type: __webpack_exports__CANVAS,
-          transparent: true,
-          //backgroundColor: '#ffffff',
+          type: __webpack_exports__WEBGL,
+          //transparent: true,
+          backgroundColor: '#ffffff',
           width: 800,
           height: 450,
           parent: 'gameContainer',
           physics: {
               default: 'arcade',
               arcade: {
-                  debug: false,
+                  debug: true,
               }
           },
           scale: {
               autoCenter: __webpack_exports__Scale.CENTER_HORIZONTALLY,
               mode: __webpack_exports__Scale.FIT
           },
-          scene: [Preloader, Demo, Loner],
+          scene: [Preloader, Demo, Loner, TwoGuns, Forest],
           //render :render,
       };
       myGame = new __webpack_exports__Game(config);
@@ -243697,11 +245031,10 @@ var MyGame = (function (exports) {
                   break;
               }
           }
-          // если нулевой уровень (учебка) ещё не проходился, запускаем его
-          if (globalThis.achievments[0] == LvlState.NonAttempted) {
-              globalThis.currentLevel = lvlNames.Demo;
-              myGame.scene.start("demo");
-          }
+          // это надо закомментировать после создания Loner
+          globalThis.currentLevel = lvlNames.TwoGuns;
+          myGame.scene.start(lvlNames.TwoGuns);
+          return;
       }
   }
   function initApp(YaGames) {
@@ -243798,6 +245131,7 @@ var MyGame = (function (exports) {
           this.load.image('bg', 'assets/bg5.png');
           this.load.image('railway', 'assets/railway4.png');
           this.load.image('gun', 'assets/gun1.png');
+          this.load.image('blackBot', 'assets/blackBot.png');
           this.load.image('bullet', 'assets/bullet0.png');
           this.load.image('bigBullet', 'assets/bigBullet4.png');
           this.load.image('bulletArs', 'assets/bulletArs.png');

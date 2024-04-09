@@ -247,12 +247,14 @@ export class UIBlocks {
                 <div id="summaryMsg" >
                     <p>${bodySummary}</p>
                 </div>
+                <div style="display: flex; flex-direction: row; justify-content: space-around;">
                 <div style="align-self: center;">
                     <button class="lvlBottom" onclick="MyGame.startLevel('demo')">
                     ${this.myPhrases.demoBtn}</button></div>
                 <div style="align-self: center;">
                     <button class="lvlBottom" onclick="MyGame.startLevel('loner')">
                     ${this.myPhrases.lonerBtn}</button></div>
+                </div>
                 </div>
             </div></div>`
 

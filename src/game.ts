@@ -24,6 +24,8 @@ import { lvlNames } from './enums';
 import { Bullet } from './bullets';
 import { Bullets } from './bullets';
 import { Loner } from './loner';
+import { TwoGuns } from './twoGuns';
+import { Forest } from './forest';
 
 //let glPreviewMode:boolean
 let myGame: Phaser.Game;
@@ -1278,23 +1280,23 @@ export function startGame(){
     
     const config = {
     
-        type: Phaser.CANVAS,
-        transparent: true,
-        //backgroundColor: '#ffffff',
+        type: Phaser.WEBGL,
+        //transparent: true,
+        backgroundColor: '#ffffff',
         width: 800,
         height: 450,
         parent: 'gameContainer',
         physics: {
             default: 'arcade',
             arcade: {
-                debug: false,
+                debug: true,
             }
         },
         scale: {
             autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
             mode: Phaser.Scale.FIT
           },
-        scene: [Preloader, Demo, Loner],
+        scene: [Preloader, Demo, Loner, TwoGuns, Forest],
         //render :render,
     };
     myGame = new Phaser.Game(config);
@@ -1408,6 +1410,11 @@ function addLoading(name, value) {
             }
         }
 
+        // это надо закомментировать после создания Loner
+        globalThis.currentLevel = lvlNames.TwoGuns;
+            myGame.scene.start(lvlNames.TwoGuns)
+        return;
+        
         // если нулевой уровень (учебка) ещё не проходился, запускаем его
         if (globalThis.achievments[0] == LvlState.NonAttempted) {
             globalThis.currentLevel = lvlNames.Demo;
@@ -1520,6 +1527,7 @@ class Preloader extends Phaser.Scene
         this.load.image('bg','assets/bg5.png')
         this.load.image('railway','assets/railway4.png')
         this.load.image('gun','assets/gun1.png')
+        this.load.image('blackBot','assets/blackBot.png')
         this.load.image('bullet','assets/bullet0.png')
         this.load.image('bigBullet','assets/bigBullet4.png')
         this.load.image('bulletArs','assets/bulletArs.png')

@@ -8,6 +8,17 @@ import { UIBlocks } from "./uiblocks";
 type LocTexts = {
     ammo:string
 }
+
+type BotData = {
+        time : Array<number>,
+        counter: Array<number>,
+        key : Array<string>,
+        shoot : Array<number>,
+        vActionA : Array<number>,
+        xAction : Array<number>,
+        anchor:Array<number>
+}
+
 const enTexts:LocTexts = {
     ammo:"Ammo"
 }
@@ -17,7 +28,7 @@ const ruTexts:LocTexts = {
 let currentTexts:LocTexts;
 currentTexts = ruTexts;
 
-export class Loner extends Phaser.Scene
+export class TwoGuns extends Phaser.Scene
 {
     /** режимы и состояния игры: autoPilot - игра воспроизводится в режиме
      * автопилота на основе сохранённых данных,
@@ -49,12 +60,11 @@ export class Loner extends Phaser.Scene
     shooterVX:number
     virusOff:Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     bulletsGrp:Bullets
-    bigBulletsGrp:Phaser.Physics.Arcade.StaticGroup
+    //bigBulletsGrp:Phaser.Physics.Arcade.StaticGroup
     staticGrp:Phaser.Physics.Arcade.StaticGroup
     treeGrp:Phaser.Physics.Arcade.StaticGroup
 
     actionObj: string[]
-    
     /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
      *  клавиш 'up', 'left' или 'right' */
     counterActionArr:number[]
@@ -71,7 +81,7 @@ export class Loner extends Phaser.Scene
     /**состояние шутера(стреляет или нет) в соответствующем фрейме */
     shootActionArr:number[]
     /**x-координата якоря emptyAnchor */
-    emptyAnchorArr:number[]
+    emptyAnchorArr: number []
 
     //isActionFetched:boolean = false;
     /** номер фрейма, увеличивается при каждом вызове update, используется
@@ -101,6 +111,11 @@ export class Loner extends Phaser.Scene
      * ведётся ли стрельба
      */
     shootOn:boolean
+
+    /**ведётся ли стрельба ботом */
+    bbShootOn:boolean
+    bbShootBullets:number
+
     /** счётчик срабатывания таймера checkBullets */
     delayChecker:number = 0;
     railway:any;
@@ -117,18 +132,25 @@ export class Loner extends Phaser.Scene
     inputText:Phaser.GameObjects.Text
     inputText2:Phaser.GameObjects.Text
     numBullets:number = 0;
+    //blackBot:Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
     shooterCont:Phaser.GameObjects.Container
     shooterContBody:Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
     leftBulletArs:Phaser.GameObjects.Image
     rightBulletArs:Phaser.GameObjects.Image
+    
+    bbShooterCont:Phaser.GameObjects.Container
+    bbShooterContBody:Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
+    bbLeftBulletArs:Phaser.GameObjects.Image
+    bbRightBulletArs:Phaser.GameObjects.Image
+
     blankShot:Phaser.GameObjects.Sprite
     fireGranade:Phaser.GameObjects.Image
 
     /**индикатор прогресса анимации - движущийся с постоянной скоростью объект */
     emptyAnchor:Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
+    currentAnchInd:number
 
     myUIBlocks:UIBlocks
-
 
     /** Уровни для колонн и кустов */
     // lr20:Phaser.GameObjects.Layer;lr60:Phaser.GameObjects.Layer
@@ -139,21 +161,14 @@ export class Loner extends Phaser.Scene
 
     constructor ()
     {
-        super('loner');
+        super('twoGuns');
         this.shootBullets =100
+        this.bbShootBullets =100
         //this.gameState = {autoPilot: false,waitAction: false, needToSave:false}
         this.shootOn = false;
-        //this.actionArr = []
-        this.timeActionArr = []
-        this.counterActionArr = []
-        this.keyActionArr = []
-        this.vActionArr = []
-        this.xActionArr = []
-        this.shootActionArr = []
-        this.emptyAnchorArr = []
-        this.currentGameState = GameState.Gone;
-        this.pointerDownOn = false;
-        //this.myUIBlocks = new UIBlocks("")
+        this.bbShootOn = false;
+
+        this.currentAnchInd = 0;
     }  
 
     preload ()
@@ -163,10 +178,31 @@ export class Loner extends Phaser.Scene
 
     create ()
     {
-        globalThis.currentLevel = lvlNames.Loner;
+        globalThis.currentLevel = lvlNames.TwoGuns;
         globalThis.currentScene = this;
+
+        try{
+            let botData:BotData = JSON.parse(localStorage.getItem("botData"))
+            /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
+             *клавиш 'up', 'left' или 'right' */
+            this.counterActionArr = botData.counter;
+            /**показания часов в аргументе метода update time при воспроизведении
+             * фрейма с номером, указанным в массиве counterActionArr
+             */
+            this.timeActionArr = botData.time;
+            /**код клавиши, нажатой в соответствующем фрейме */
+            this.keyActionArr = botData.key;
+            
+            /**состояние шутера(стреляет или нет) в соответствующем фрейме */
+            this.shootActionArr = botData.shoot;
+            this.emptyAnchorArr = botData.anchor;
+        }catch{}
+
+        this.indCounterArr = 0;
         
         this.add.tileSprite(500,225,1000,450,'bg')
+
+        //this.blackBot = this.physics.add.image(400,418,'blackBot');
 
         this.shooterCont = this.add.container(400,418);
         this.shooterCont.add(this.add.image(0,0,'gun'))
@@ -181,6 +217,25 @@ export class Loner extends Phaser.Scene
         this.shooterContBody.body.setCollideWorldBounds(true);
         this.shooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
         
+        this.bbShooterCont = this.add.container(400,418);
+        this.bbShooterCont.add(this.add.image(0,0,'blackBot'))
+        this.bbLeftBulletArs = this.add.image(-16,3,'bulletArs');
+        this.bbShooterCont.add(this.bbLeftBulletArs)
+        this.bbRightBulletArs = this.add.image(16,3,'bulletArs');
+        this.bbShooterCont.add(this.bbRightBulletArs)
+        this.bbShooterCont.setSize(80,40)
+        this.bbShooterContBody = this.physics.world.enableBody(this.bbShooterCont,
+            Phaser.Physics.Arcade.DYNAMIC_BODY) as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody
+        this.bbShooterContBody.body.setCollideWorldBounds(true);
+        this.bbShooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
+
+        
+        // this.leftBulletArs = this.add.image(-16,3,'bulletArs');
+        // this.shooterCont.add(this.leftBulletArs)
+        // this.rightBulletArs = this.add.image(16,3,'bulletArs');
+        // this.shooterCont.add(this.rightBulletArs)
+        // this.shooterCont.setSize(80,40)
+
         let bubble = this.add.graphics({x:0, y:0})
         bubble.fillStyle(0x222222, 0.5);
         bubble.fillRoundedRect(4, 4, 100, 20, 4);
@@ -258,24 +313,24 @@ export class Loner extends Phaser.Scene
                 bullet.setActive(false).setVisible(false);
         })
 
-        this.bigBulletsGrp = this.physics.add.staticGroup()
-        this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
-        this.bigBulletsGrp.create(790,426,'bigBullet').setData('isFull',true)
+        // this.bigBulletsGrp = this.physics.add.staticGroup()
+        // this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
+        // this.bigBulletsGrp.create(790,426,'bigBullet').setData('isFull',true)
 
-        this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp,
-            (shooterCont, bigBullet: Phaser.Types.Physics.Arcade.GameObjectWithStaticBody) => {
-                if (this.shootBullets <= 50 && bigBullet.getData('isFull')) {
-                    this.shootBullets += 50
-                    bigBullet.setData('isFull', false)
-                    bigBullet.body.reset(-100, 0)
-                    bigBullet.setActive(false)
-                    this.rightBulletArs.isCropped = false
-                    if (this.shootBullets >= 60) {
-                        let offset = Math.round(33 - 33 * (this.shootBullets - 50) / 50)
-                        this.leftBulletArs.setCrop(0, offset, 13, 33 - offset)
-                    }
-                }
-            })
+        // this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp,
+        //     (shooterCont, bigBullet: Phaser.Types.Physics.Arcade.GameObjectWithStaticBody) => {
+        //         if (this.shootBullets <= 50 && bigBullet.getData('isFull')) {
+        //             this.shootBullets += 50
+        //             bigBullet.setData('isFull', false)
+        //             bigBullet.body.reset(-100, 0)
+        //             bigBullet.setActive(false)
+        //             this.rightBulletArs.isCropped = false
+        //             if (this.shootBullets >= 60) {
+        //                 let offset = Math.round(33 - 33 * (this.shootBullets - 50) / 50)
+        //                 this.leftBulletArs.setCrop(0, offset, 13, 33 - offset)
+        //             }
+        //         }
+        //     })
 
         const { world } = this.physics;
         this.bulettCounter = 0;
@@ -305,27 +360,11 @@ export class Loner extends Phaser.Scene
             if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
                 this.inputText.setText('left')
-
-                //this.timeActionArr.push(0)
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('l')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
                 return
             }
             else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
                 this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
                 //this.inputText.setText('right')
-
-                //this.timeActionArr.push(0)
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('r')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
                 return
             }
 
@@ -334,14 +373,6 @@ export class Loner extends Phaser.Scene
                 this.shootOn = !this.shootOn
                 if (this.shootOn) this.inputText.setText('shootOn')
                 else this.inputText.setText('shootOff')
-
-                //this.timeActionArr.push(0)
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('u')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
         })
 
@@ -349,7 +380,9 @@ export class Loner extends Phaser.Scene
         globalThis.currentResult = GameState.Gone;
         this.currentGameState = GameState.Gone;
         //this.shootOn = true;
+        
         this.shootBullets = 100;
+
         this.emptyAnchor =  this.physics.add.image(0,0,"empty")
         this.emptyAnchor.body.setVelocity(6,0)
     }
@@ -376,6 +409,7 @@ export class Loner extends Phaser.Scene
                 this.fireGranade.setPosition(point.x - 16, point.y - 16)
                 this.enemiesIsStoped = true;
                 
+                
                 this.cameras.main.stopFollow()
                 this.cameras.main.pan(400,225,300);
                 (this.shooterCont as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody).
@@ -386,82 +420,53 @@ export class Loner extends Phaser.Scene
             if (this.currentGameState == GameState.Win) {
                 this.enemies.stopEnemies(GameState.Win)
                 /** номер сообщения, которое зависит от результата и достижений игрока */
-                let numMsg;
                 
                 globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win)
             }
             this.enemiesIsStoped = true
-            this.saveBotData()
         }
 
         // при демонстрации Preview и при завершении игры, управление 
         // отключается (pointerDownOn=false)?, если управление не отключено,
         // то обрабатываем события
-        this.updateCounter++;
         if (this.pointerDownOn) {
-            
+            this.updateCounter++;
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.shootOn = !this.shootOn
-                //this.timeActionArr.push(Math.round(time))
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('u')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                //this.timeActionArr.push(Math.round(time))
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('l')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
                 this.shooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
-                //this.timeActionArr.push(Math.round(time))
-                this.counterActionArr.push(this.updateCounter)
-                this.keyActionArr.push('r')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
-                this.shootActionArr.push(this.shootOn ? 1 : 0)
-                this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
         }
-        // else if((this.currentGameState != GameState.Gone) && !this.gameState.waitAction){
-        //     // извлекаем номер очередного фрейма, в котором следует что-то совершить 
-        //     let numFrame = this.counterActionArr[this.indCounterArr]
-        //     if(numFrame == this.updateCounter){
-        //         // один и тот же номер фрейма может находится в соседних ячейках
-        //         // массива, если в момент воспроизведения этого фрейма была
-        //         // нажата не одна клавиша
-        //         while(numFrame == this.counterActionArr[this.indCounterArr]){
-        //             switch(this.keyActionArr[this.indCounterArr]){
-        //                 case 'u':
-        //                     this.shootOn = this.shootActionArr[this.indCounterArr] == 1?
-        //                         true:false;
-        //                     break;
-        //                 case 'l':
-        //                     this.shooter.setAcceleration(-60, 0).setMaxVelocity(60)
-        //                     break;
-        //                 case 'r':
-        //                     this.shooter.setAcceleration(60, 0).setMaxVelocity(60)
-        //                     break;
-        //             }
-        //             if(this.indCounterArr+1 < this.counterActionArr.length){
-        //                 this.indCounterArr++;
-        //             }else{
-        //                 //this.gameState.waitAction = true
-        //                 break;
-        //             }
-        //         }
-        //     }
-        // }
+
+        if(this.currentGameState == GameState.Gone){
+            if (this.currentAnchInd < this.emptyAnchorArr.length - 1) {
+                while (this.emptyAnchor.body.x >= this.emptyAnchorArr[this.currentAnchInd]) {
+                    switch (this.keyActionArr[this.currentAnchInd]) {
+                        case 'u':
+                            this.bbShootOn = this.shootActionArr[this.currentAnchInd] == 1 ?
+                                true : false;
+                            break;
+                        case 'l':
+                            this.bbShooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
+                            break;
+                        case 'r':
+                            this.bbShooterContBody.body.setAcceleration(60, 0).setMaxVelocity(60)
+                            break;
+                    }
+                    this.currentAnchInd++;
+                }
+            }
+
+            // извлекаем номер очередного фрейма, в котором следует что-то совершить 
+            let numFrame = this.counterActionArr[this.indCounterArr]
+            
+        }
 
         this.infoText.setText(currentTexts.ammo +`: ${this.shootBullets}`)
         //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
@@ -493,12 +498,13 @@ export class Loner extends Phaser.Scene
                         persist: false,
                         paused: true,
                         onComplete: () => {
+                            
                                 this.scene.pause("demo")
                                 let numRemBullets = 0;
                                 // считаем сколько осталось патронов в игре
-                                this.bigBulletsGrp.getChildren().forEach((child) =>{
-                                    if(child.getData("isFull")) numRemBullets += 50;
-                                })
+                                // this.bigBulletsGrp.getChildren().forEach((child) =>{
+                                //     if(child.getData("isFull")) numRemBullets += 50;
+                                // })
                                 numRemBullets += this.shootBullets;
                                 
                                 globalThis.myUIBlocks.showSummary(200 - numRemBullets,
@@ -536,42 +542,32 @@ export class Loner extends Phaser.Scene
                     this.shooterCont.body.velocity.x)
             }
         }
+
         this.delayChecker++;
-        if (this.delayChecker == 10) {
+
+        if (this.bbShootOn) {
+            if (this.bbShootBullets > 0) {
+                this.bulletsGrp.fireBullet(this.bbShooterCont.x,
+                    this.bbShooterCont.y - 15,
+                    this.bbShooterCont.body.velocity.x)
+                this.bbShootBullets--;
+                if (this.bbShootBullets % 10 == 0) {
+                    if (this.bbShootBullets >= 50) {
+                        let offset = Math.round(33 - 33 * (this.bbShootBullets - 50) / 50)
+                        this.bbLeftBulletArs.setCrop(0, offset, 13, 33 - offset)
+                    } else {
+                        let offset = Math.round(33 - 33 * this.bbShootBullets / 50)
+                        this.bbRightBulletArs.setCrop(0, offset, 13, 33 - offset)
+                    }
+                }
+            } else {
+                this.bulletsGrp.fireBlank(this.bbShooterCont.x, this.bbShooterCont.y - 15,
+                    this.bbShooterCont.body.velocity.x)
+            }
         }
 
         // delayChecker до полного истребления всех диверсов первой волны
         // достигалось 290, 300, 417,306, после тренировок ~ 230 
         this.currentGameState = this.enemies.handleUpdate();
-        // if (this.currentGameState != GameState.Gone) {
-        //     let data: string[] = []
-        //     data.push(this.timeActionArr.join())
-        //     data.push(this.counterActionArr.join())
-        //     data.push(this.keyActionArr.join())
-        //     data.push(this.shootActionArr.join())
-        //     data.push(this.vActionArr.join())
-        //     data.push(this.xActionArr.join())
-
-        //     // saveActions(JSON.stringify(data))
-        //     // this.gameState.needToSave = false
-        // }
-    }
-
-    saveBotData(){
-        let botData = {
-            //time : this.timeActionArr,
-            counter: this.counterActionArr,
-            key : this.keyActionArr,
-            shoot : this.shootActionArr,
-            //vActionA : this.vActionArr,
-            //xAction : this.xActionArr,
-            anchor : this.emptyAnchorArr
-        }
-
-        let botDataJSON = JSON.stringify(botData);
-        try{
-            localStorage.setItem("botData",botDataJSON)
-        }
-        catch{}
     }
 }
