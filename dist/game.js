@@ -241571,7 +241571,9 @@ var MyGame = (function (exports) {
       lvlNames["Demo"] = "demo";
       lvlNames["Loner"] = "loner";
       lvlNames["TwoGuns"] = "twoGuns";
+      lvlNames["DemoF"] = "demoF";
       lvlNames["Forest"] = "forest";
+      lvlNames["EveryLast"] = "everyLast";
   })(lvlNames || (lvlNames = {}));
   var GameState;
   (function (GameState) {
@@ -241596,41 +241598,41 @@ var MyGame = (function (exports) {
           this.bulletsGrp = bulletsGrp;
           this.myScene.anims.create({
               key: 'rwExplode',
+              defaultTextureKey: 'atlas0',
               frames: [
-                  { key: 'explode1' },
-                  { key: 'explode2' },
-                  { key: 'explode3' },
-                  { key: 'explode4' },
-                  { key: 'explode5' },
-                  { key: 'explode6' },
-                  { key: 'explode7' },
-                  { key: 'explode8' },
-                  { key: 'explode9' },
-                  { key: 'explode10' },
-                  { key: 'explode11' },
-                  { key: 'explode12' },
-                  { key: 'explode13' },
-                  { key: 'explode14' },
-                  { key: 'explode15' },
-                  { key: 'explode16' },
-                  { key: 'explode17' },
-                  { key: 'explode18' },
-                  { key: 'explode19' },
-                  { key: 'explode20' },
-                  { key: 'explode21' },
-                  { key: 'explode22' },
-                  { key: 'explode23' }
+                  { key: 'atlas0', frame: 'explode1' },
+                  { key: 'atlas0', frame: 'explode2' },
+                  { key: 'atlas0', frame: 'explode3' },
+                  { key: 'atlas0', frame: 'explode4' },
+                  { key: 'atlas0', frame: 'explode5' },
+                  { key: 'atlas0', frame: 'explode6' },
+                  { key: 'atlas1', frame: 'explode7' },
+                  { key: 'atlas1', frame: 'explode8' },
+                  { key: 'atlas1', frame: 'explode9' },
+                  { key: 'atlas0', frame: 'explode10' },
+                  { key: 'atlas0', frame: 'explode11' },
+                  { key: 'atlas0', frame: 'explode12' },
+                  { key: 'atlas0', frame: 'explode13' },
+                  { key: 'atlas0', frame: 'explode15' },
+                  { key: 'atlas0', frame: 'explode16' },
+                  { key: 'atlas0', frame: 'explode17' },
+                  { key: 'atlas0', frame: 'explode18' },
+                  { key: 'atlas0', frame: 'explode19' },
+                  { key: 'atlas0', frame: 'explode20' },
+                  { key: 'atlas0', frame: 'explode21' },
+                  { key: 'atlas0', frame: 'explode22' },
+                  { key: 'atlas0', frame: 'explode23' }
               ],
               frameRate: 5,
           });
           this.myScene.anims.create({
               key: 'walk',
               frames: [
-                  { key: 'walker0' },
-                  { key: 'walker1' },
-                  { key: 'walker2' },
-                  { key: 'walker3' },
-                  { key: 'walker4' }
+                  { key: 'atlas0', frame: 'walker0' },
+                  { key: 'atlas0', frame: 'walker1' },
+                  { key: 'atlas0', frame: 'walker2' },
+                  { key: 'atlas0', frame: 'walker3' },
+                  { key: 'atlas0', frame: 'walker4' }
               ],
               frameRate: 5,
               repeat: -1
@@ -241638,11 +241640,11 @@ var MyGame = (function (exports) {
           this.myScene.anims.create({
               key: 'run',
               frames: [
-                  { key: 'runner0' },
-                  { key: 'runner1' },
-                  { key: 'runner2' },
-                  { key: 'runner3' },
-                  { key: 'runner4' }
+                  { key: 'atlas0', frame: 'runner0' },
+                  { key: 'atlas0', frame: 'runner1' },
+                  { key: 'atlas0', frame: 'runner2' },
+                  { key: 'atlas0', frame: 'runner3' },
+                  { key: 'atlas0', frame: 'runner4' }
               ],
               frameRate: 5,
               repeat: -1
@@ -241650,9 +241652,9 @@ var MyGame = (function (exports) {
           this.myScene.anims.create({
               key: 'fallen',
               frames: [
-                  { key: 'failed0' },
-                  { key: 'failed1' },
-                  { key: 'empty' }
+                  { key: 'atlas0', frame: 'failed0' },
+                  { key: 'atlas0', frame: 'failed1' },
+                  { key: 'atlas0', frame: 'empty' }
               ],
               frameRate: 5
           });
@@ -241742,10 +241744,10 @@ var MyGame = (function (exports) {
                   column.getChildren().forEach((enemy, ind, arr) => {
                       enemy.anims.stop();
                       let num = __webpack_exports__Math.RND.integerInRange(0, 4);
-                      enemy.setTexture(this.stayStrArray[num]);
+                      enemy.setTexture('atlas0', this.stayStrArray[num]);
                   });
               });
-              this.firstWalker.setTexture('granade');
+              this.firstWalker.setTexture('atlas0', 'granade');
               return new __webpack_exports__Geom.Point(this.firstWalker.x, this.firstWalker.y);
           }
           if (result == GameState.Win) {
@@ -241887,6 +241889,7 @@ var MyGame = (function (exports) {
 
   //import { startGame } from "./game";
   const ruPhrases = {
+      gameName: "Вражьи тропы.",
       tutorWinFirstTime: "Отлично! Вы прошли уровень 'Учебка'.",
       tutorWinAnother: "Вы прошли уровень 'Учебка'.",
       capSummaryWin: "Враг уничтожен полностью!",
@@ -241902,13 +241905,16 @@ var MyGame = (function (exports) {
       demoBtn: "Учебка.",
       lonerBtn: "Одиночка.",
       twoGunsBtn: "В два ствола.",
+      demoFBtn: "В лесу.",
+      forestBtn: "Оборона.",
+      everyLast: "До последнего.",
       bodyContent: ["Если Вам непонятны правила или управление, жмите кнопку 'Учебка.', " +
-              "если всё понятно - кнопку 'Одиночка' - это тот же уровень, но без презентации. " +
+              "если всё понятно - кнопку 'Одиночка'. " +
               "Пройдите его чтобы получить свою первую звезду, и у вас появится напарник-бот " +
               "для игры 'В два ствола'. Удачи!",
           "Пройдите уровень 'Одиночка' чтобы получить свою первую звезду, и у вас появится напарник-бот " +
               "для игры 'В два ствола'. Удачи!",
-          " Превосходно! Вы получаете свою первую звезду и у Вас теперь есть напарник-бот, " +
+          " Превосходно! Вы получаете свою первую звезду и у Вас теперь есть напарник- Чёрный Бот, " +
               "с которым Вы можете пройти уровень 'В два ствола'." +
               " Бот будет пытаться повторять все ваши действия на только что пройденном уровне." +
               " Если Вы захотите заменить бота, пройдите этот уровень ещё раз.",
@@ -241919,7 +241925,15 @@ var MyGame = (function (exports) {
               " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола'. Удачи!" +
               " Бот будет пытаться повторять все ваши действия на пройденном уровне.",
           " Немного не повезло. Но если Вы хотите заменить своего бота, Вам придётся пройти" +
-              " этот уровень ещё раз. Удачи!"],
+              " этот уровень ещё раз. Удачи!",
+          "Пройдите уровень 'Учебка', чтобы ознакомиться с правилами и управлением.",
+          " Пройдите уровень 'В два ствола' с напарником - Чёрным Ботом, " +
+              " который будет пытаться повторять все ваши действия на уровне 'Одиночка'." +
+              " Если Вы захотите заменить бота, пройдите уровень 'Одиночка' ещё раз.",
+          "Пройдите учебный уровень 'В лесу.', чтобы познакомиться с новой локацией.",
+          "На уровне 'Оборона' Вам придётся защищаться от наседающих врагов. Пройдите его, " +
+              "чтобы получить третью звезду.",
+          "Пройдите уровень 'До последнего.', чтобы получить свою четвёртую звезду. "],
       bodyMsg: {
           //** сообщение при впервые пройденной Учебке */
           tutorWinFirstTime: "Пройдите уровень 'Одиночка.' чтобы получить свою первую " +
@@ -241930,22 +241944,25 @@ var MyGame = (function (exports) {
       }
   };
   const enPhrases = {
+      gameName: "Enemies is coming.",
       tutorWinFirstTime: "Congratulation! Level 'Tutorial' completed.",
       tutorWinAnother: "Level 'Tutorial' completed.",
       capSummaryWin: "The enemy has been completely terminated!",
       capSummaryLost: "The enemy has passed...",
-      bodySummary: "If you do not understand the rules or control, click the 'Tutorial.' " +
-          "button, if everything is clear, click 'Loner' button, it is the same level, but without " +
-          "presentation. Go through it to get your first star, and you will have a bot " +
+      bodySummary: "If you do not understand the rules or control, click the 'Demo.' " +
+          "button, if everything is clear, click 'Loner' button. Go through it to get your first star, and you will have a bot " +
           "partner for a two-gun level. Good luck!",
       destEnemy: "Destroyed enemies: ",
       spentAmmo: "Spent ammo: ",
       effectiv: "Effectiveness: ",
       effectivTail: " ammo per enemy.",
-      demoBtn: "With Demo",
+      demoBtn: "Demo",
       lonerBtn: " Loner ",
       twoGunsBtn: " Two gun ",
-      bodyContent: ["If you do not understand the rules or control, click the 'Tutorial.' " +
+      demoFBtn: "The forest.",
+      forestBtn: "Defense.",
+      everyLast: "Every last.",
+      bodyContent: ["If you do not understand the rules or control, click the 'Demo.' " +
               "button, if everything is clear, click 'Loner' button, it is the same level, but without " +
               "presentation. Go through it to get your first star, and you will have a bot " +
               "partner for a two-gun level. Good luck!",
@@ -241962,7 +241979,15 @@ var MyGame = (function (exports) {
               "your first star, and you will have a partner-a bot for the game 'Two gun'. Good luck!" +
               " The bot will try to repeat all your actions at the completed level.",
           "A little unlucky. But if you want to replace your bot, you will have to go through the " +
-              " this level again. Good luck!"],
+              " this level again. Good luck!",
+          "Complete the 'Demo' level to familiarize yourself with the rules and control.",
+          "Complete the level 'Two guns' with a Black Bot partner, " +
+              " which will try to repeat all your actions at the 'Loner' level." +
+              " If you want to replace the bot, go through the 'Loner' level again.",
+          "Complete the training level 'In the forest.'to get to know the new location.",
+          "At the 'Defense' level You will have to defend yourself from the pressing enemies. " +
+              "Go through it, to get the third star.",
+          "Complete the 'Every last.' level to get your fourth star."],
       bodyMsg: {
           tutorWinFirstTime: "Click 'Loner' to go through it to get your first star, " +
               "and you will have a Black Bot partner for a two-gun level. Good luck!",
@@ -241978,6 +242003,110 @@ var MyGame = (function (exports) {
           else {
               this.myPhrases = ruPhrases;
           }
+          let numStars = 0;
+          for (let i = 0; i < globalThis.achievments.length; i++) {
+              if ((globalThis.achievments[i] == 1) && (i != 0) && (i != 3)) {
+                  numStars++;
+              }
+          }
+          globalThis.numStars = numStars;
+      }
+      /** вставляет в контейнер id="modalContainer" базовое окно с перечнем всех уровней */
+      showBaseWnd(achievments, lang) {
+          document.getElementById("modalContainer").innerHTML = "";
+          //ниже семь строчек для тестирования, для продакта раскомментировать
+          //следующие две строчки
+          let locAchievments = achievments;
+          let locLang = lang;
+          let locNumStars = 0;
+          let content;
+          this.myPhrases = locLang == "en" ? enPhrases : ruPhrases;
+          /**вычисляем количество звёзд */
+          for (let i = 0; i < locAchievments.length; i++) {
+              if ((locAchievments[i] == 1) && (i != 0) && (i != 3)) {
+                  locNumStars++;
+              }
+          }
+          /** наименьший непройденный уровень */
+          let firstUncompleted = 5;
+          for (let i = 0; i < locAchievments.length; i++) {
+              if (locAchievments[i] != 1) {
+                  firstUncompleted = i;
+                  break;
+              }
+          }
+          switch (firstUncompleted) {
+              case 0:
+                  content = this.myPhrases.bodyContent[6];
+                  break;
+              case 1:
+                  content = this.myPhrases.bodyContent[0];
+                  break;
+              case 2:
+                  content = this.myPhrases.bodyContent[7];
+                  break;
+              case 3:
+                  content = this.myPhrases.bodyContent[8];
+                  break;
+              case 4:
+                  content = this.myPhrases.bodyContent[9];
+                  break;
+              case 5:
+                  content = this.myPhrases.bodyContent[10];
+                  break;
+          }
+          // if(locAchievments[2] == 0) content = this.myPhrases.bodyContent[1];
+          // if(locAchievments[1] == -1) content = this.myPhrases.bodyContent[0];
+          // if(locAchievments[1] == 0) content = this.myPhrases.bodyContent[1];
+          let modalWnd = `
+        <div id="modalWnd">
+        <div id="summaryTop">
+          <p>${this.myPhrases.gameName}</p>
+        </div>
+        <div id="summaryResult">
+          <div style="margin: 5px;"><img src="assets/pogon` + locNumStars +
+              `.png" class="pogonImg"></div>
+          <div  id="summaryMsg" >
+            ${content}
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: row; justify-content: space-around;">
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('demo')">
+              ${this.myPhrases.demoBtn}</button>
+          </div>
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('loner')"`
+              + (locAchievments[0] != 1 ? " disabled" : "") + `>
+              ${this.myPhrases.lonerBtn}</button>
+          </div>
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('twoGuns')"`
+              + (locAchievments[1] != 1 ? " disabled" : "") + `>
+              ${this.myPhrases.twoGunsBtn}</button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: row; justify-content: space-around;">
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('demoF')"`
+              + (locAchievments[2] < 1 ? " disabled" : "") + `>
+              ${this.myPhrases.demoFBtn}</button>
+          </div>
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('forest')"`
+              + (locAchievments[3] < 1 ? " disabled" : "") + `>
+              ${this.myPhrases.forestBtn}</button>
+          </div>
+          <div style="align-self: center;">
+            <button class="lvlBottom" onclick="MyGame.startLevel('everyLast')"`
+              + (locAchievments[4] != 1 ? " disabled" : "") + `>
+              ${this.myPhrases.everyLast}</button>
+          </div>
+        </div>
+      </div>`;
+          document.getElementById("modalContainer").innerHTML = modalWnd;
+          document.getElementById("modalContainer").style.visibility = "visible";
+          document.getElementById("modalContainer").style.display = "flex";
       }
       /** вставляет в контейнер набор кнопок с уровнями */
       showLevelsMenu(lang, lvlsAchives) {
@@ -242024,10 +242153,10 @@ var MyGame = (function (exports) {
        */
       hideModal() {
           //startGame()
-          document.getElementById("modalContainer").remove();
+          document.getElementById("modalContainer").innerHTML = "";
           // document.getElementById("modalContainer").innerHTML = "";
-          // document.getElementById("modalContainer").style.visibility = "hidden";
-          // document.getElementById("modalContainer").style.display = "none"
+          document.getElementById("modalContainer").style.visibility = "hidden";
+          document.getElementById("modalContainer").style.display = "none";
       }
       /** выводит итоговое окно с результатами пройденного уровня
        * @numBullets число потраченных патронов
@@ -242036,19 +242165,41 @@ var MyGame = (function (exports) {
        * @numMsg номер сообщения в окне
        */
       showSummary(numBullets, numEnemies, result) {
+          document.getElementById("modalContainer").innerHTML = "";
+          let lang = globalThis.lang;
           let content;
+          /** сообщение - призыв продолжить игру */
           let bodySummary;
-          /** текст в заголовке */
+          this.myPhrases = globalThis.lang == "en" ? enPhrases : ruPhrases;
+          /** текст в заголовке о результате - пройден или нет уровень */
           let summaryTopTxt;
+          /** разметка для левой и правой кнопок */
+          let leftBtn;
+          let rightBtn;
+          /** надписи для левой и правой кнопок */
+          let leftBtnTxt;
+          let rightBtnTxt;
           switch (globalThis.currentSceneName) {
-              case "demo":
+              case lvlNames.Demo:
                   if (result == GameState.Win) {
-                      // если уровень пройден впервые
+                      // если уровень 'Учебка' пройден впервые
                       if (globalThis.achievments[0] != 1) {
                           let lvlsDataStr = JSON.stringify(globalThis.achievments);
                           globalThis.achievments[0] = 1;
-                          summaryTopTxt = this.myPhrases.tutorWinFirstTime;
-                          bodySummary = this.myPhrases.bodyMsg.tutorWinFirstTime;
+                          summaryTopTxt = lang == "ru" ? "Вы прошли уровень 'Учебка'." :
+                              "Congratulation! Level 'Tutorial' completed.";
+                          bodySummary = lang == "ru" ? "Пройдите уровень 'Одиночка' чтобы " +
+                              "получить свою первую звезду, и у вас появится напарник-бот " +
+                              "для игры 'В два ствола'. Удачи!" :
+                              "Complete the 'Loner' level to get your first star, and you will " +
+                                  "have a partner-bot for playing 'Two gun' level. Good luck!";
+                          leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
+                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
+                            ${leftBtnTxt}</button>`;
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                            ${rightBtnTxt}</button>`;
                           try {
                               globalThis.gPlayer.setData({ lvlsData: lvlsDataStr }).
                                   then(() => { });
@@ -242059,14 +242210,24 @@ var MyGame = (function (exports) {
                           }
                           catch (err) { }
                       }
-                      // если уровень уже был пройден, то ничего не меняем в lvlsData
+                      // если уровень уже 'Учебка'  был пройден, то ничего не меняем в lvlsData
                       else {
-                          summaryTopTxt = this.myPhrases.tutorWinAnother;
-                          if (achievments[1] != 1) {
-                              bodySummary = this.myPhrases.bodyMsg.tutorWinFirstTime;
+                          summaryTopTxt = lang == "ru" ? "Вы прошли уровень 'Учебка'." :
+                              "Level 'Tutorial' completed.";
+                          // если следующий уровень "Одиночка" уже пройден
+                          if (global.achievments[1] == 1) {
+                              bodySummary = lang == "ru" ? " Если Вы захотите заменить бота, " +
+                                  "пройдите уровень 'Одиночка' ещё раз." :
+                                  "If you need to replace the Black Bot, complete the " +
+                                      " 'Loner' level one more time and you'll have another partner.";
                           }
+                          // если следующий уровень "Одиночка" ещё не проходился
                           else {
-                              bodySummary = this.myPhrases.bodyMsg.tutorWinAnother;
+                              bodySummary = lang == "ru" ? "Пройдите уровень 'Одиночка' чтобы " +
+                                  "получить свою первую звезду, и у вас появится напарник-бот " +
+                                  "для игры 'В два ствола'. Удачи!" :
+                                  "Complete the 'Loner' level to get your first star, and you will " +
+                                      "have a partner-bot for playing 'Two gun' level. Good luck!";
                           }
                       }
                   }
@@ -242076,8 +242237,7 @@ var MyGame = (function (exports) {
           //     this.myPhrases.capSummaryLost;
           let replanish = (numEnemies == 0) ? 0 : Math.round(numBullets * 100 / numEnemies) / 100;
           content =
-              `<div id="modalContainer">
-            <div id="modalWnd">
+              `<div id="modalWnd">
                 <div id="summaryTop">
                     <p>${summaryTopTxt}</p>
                 </div>
@@ -242099,28 +242259,21 @@ var MyGame = (function (exports) {
                     <p>${bodySummary}</p>
                 </div>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
-                <div style="align-self: center;">
-                    <button class="lvlBottom" onclick="MyGame.startLevel('demo')">
-                    ${this.myPhrases.demoBtn}</button></div>
-                <div style="align-self: center;">
-                    <button class="lvlBottom" onclick="MyGame.startLevel('loner')">
-                    ${this.myPhrases.lonerBtn}</button></div>
+                <div style="align-self: center;">${leftBtn}</div>
+                <div style="align-self: center;">${rightBtn}</div>
                 </div>
                 </div>
-            </div></div>`;
-          let div = document.createElement('div');
-          div.className = "modalContainer";
-          div.innerHTML = content;
-          document.body.append(div);
+            </div>`;
+          document.getElementById('modalContainer').innerHTML = content;
           // document.getElementById("modalContainer").innerHTML = content;
-          // document.getElementById("modalContainer").style.visibility = "visible";
-          // document.getElementById("modalContainer").style.display = "flex"
+          document.getElementById("modalContainer").style.visibility = "visible";
+          document.getElementById("modalContainer").style.display = "flex";
       }
   }
 
   class Bullet extends __webpack_exports__Physics.Arcade.Sprite {
       constructor(scene, x, y) {
-          super(scene, x, y, 'bullet');
+          super(scene, x, y, 'atlas0', 'bullet');
       }
       fire(x, y, velocityX) {
           this.body.reset(x, y);
@@ -242151,10 +242304,10 @@ var MyGame = (function (exports) {
           scene.anims.create({
               key: 'blankShoot',
               frames: [
-                  { key: 'empty' },
-                  { key: 'blankShoot' },
-                  { key: 'blankShoot2' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'empty' },
+                  { key: "atlas0", frame: 'blankShoot' },
+                  { key: "atlas0", frame: 'blankShoot2' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 10,
           });
@@ -242175,7 +242328,7 @@ var MyGame = (function (exports) {
   }
   class BulletF extends __webpack_exports__Physics.Arcade.Sprite {
       constructor(scene, x, y) {
-          super(scene, x, y, 'bulletF');
+          super(scene, x, y, 'atlas1', 'bulletF');
       }
       fire(x, y, velocityX, velocityY) {
           this.body.reset(x, y);
@@ -242208,10 +242361,10 @@ var MyGame = (function (exports) {
           scene.anims.create({
               key: 'blankShoot',
               frames: [
-                  { key: 'empty' },
-                  { key: 'blankShoot' },
-                  { key: 'blankShoot2' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'empty' },
+                  { key: "atlas0", frame: 'blankShoot' },
+                  { key: "atlas0", frame: 'blankShoot2' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 10,
           });
@@ -242231,6 +242384,9 @@ var MyGame = (function (exports) {
       }
   }
 
+  const enTexts$2 = {
+      ammo: "Ammo"
+  };
   const ruTexts$3 = {
       ammo: "Патронов"
   };
@@ -242273,12 +242429,13 @@ var MyGame = (function (exports) {
       create() {
           globalThis.currentLevel = lvlNames.Loner;
           globalThis.currentScene = this;
-          this.add.tileSprite(500, 225, 1000, 450, 'bg');
+          currentTexts$3 = globalThis.lang == "en" ? enTexts$2 : ruTexts$3;
+          this.add.tileSprite(500, 225, 1000, 450, 'atlas0', 'bg');
           this.shooterCont = this.add.container(400, 418);
-          this.shooterCont.add(this.add.image(0, 0, 'gun'));
-          this.leftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.shooterCont.add(this.add.image(0, 0, 'atlas0', 'gun'));
+          this.leftBulletArs = this.add.image(-16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.leftBulletArs);
-          this.rightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.rightBulletArs = this.add.image(16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.rightBulletArs);
           this.shooterCont.setSize(80, 40);
           this.shooterContBody = this.physics.world.enableBody(this.shooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
@@ -242306,13 +242463,13 @@ var MyGame = (function (exports) {
           this.anims.create({
               key: 'strike',
               frames: [
-                  { key: 'bulletStrike0' },
-                  { key: 'bulletStrike1' },
-                  { key: 'bulletStrike2' },
-                  { key: 'bulletStrike3' },
-                  { key: 'bulletStrike4' },
-                  { key: 'bulletStrike5' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'bulletStrike0' },
+                  { key: "atlas0", frame: 'bulletStrike1' },
+                  { key: "atlas0", frame: 'bulletStrike2' },
+                  { key: "atlas0", frame: 'bulletStrike3' },
+                  { key: "atlas0", frame: 'bulletStrike4' },
+                  { key: "atlas0", frame: 'bulletStrike5' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 5,
               //repeat: -1
@@ -242320,27 +242477,27 @@ var MyGame = (function (exports) {
           this.cameras.main.setBounds(0, 0, 1000, 225);
           this.physics.world.setBounds(0, 0, 1000, 450);
           this.staticGrp = this.physics.add.staticGroup();
-          this.staticGrp.create(125, 158, 'ovalBush').
+          this.staticGrp.create(125, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(211, 158, 'ovalBush').
+          this.staticGrp.create(211, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(267, 148, 'ovalBush').
+          this.staticGrp.create(267, 148, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(400, 201, 'rogaBush').
+          this.staticGrp.create(400, 201, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(452, 192, 'rogaBush').
+          this.staticGrp.create(452, 192, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(708, 196, 'rosaBush').
+          this.staticGrp.create(708, 196, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(750, 202, 'rosaBush').
+          this.staticGrp.create(750, 202, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(846, 199, 'rosaBush').
+          this.staticGrp.create(846, 199, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(375, 64, 'bigTree').
+          this.staticGrp.create(375, 64, 'atlas0', 'bigTree').
               setBodySize(94, 60).setOffset(0, 0).setDepth(8);
-          this.staticGrp.create(621, 50, 'midleTree').
+          this.staticGrp.create(621, 50, 'atlas0', 'midleTree').
               setBodySize(92, 60).setOffset(0, 0).setDepth(5);
-          this.staticGrp.create(945, 250, 'rectBush').
+          this.staticGrp.create(945, 250, 'atlas0', 'rectBush').
               setBodySize(42, 16).setOffset(0, 0).setDepth(5);
           this.bulletsGrp = new Bullets(this);
           this.physics.add.collider(this.staticGrp, this.bulletsGrp, (stat, bullet) => {
@@ -242350,8 +242507,8 @@ var MyGame = (function (exports) {
               bullet.setActive(false).setVisible(false);
           });
           this.bigBulletsGrp = this.physics.add.staticGroup();
-          this.bigBulletsGrp.create(94, 426, 'bigBullet').setData('isFull', true);
-          this.bigBulletsGrp.create(790, 426, 'bigBullet').setData('isFull', true);
+          this.bigBulletsGrp.create(94, 426, 'atlas0', 'bigBullet').setData('isFull', true);
+          this.bigBulletsGrp.create(790, 426, 'atlas0', 'bigBullet').setData('isFull', true);
           this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp, (shooterCont, bigBullet) => {
               if (this.shootBullets <= 50 && bigBullet.getData('isFull')) {
                   this.shootBullets += 50;
@@ -242370,12 +242527,12 @@ var MyGame = (function (exports) {
           this.shootOn = false;
           this.enemies = new Enemies(this.bulletsGrp);
           this.enemies.createGroup('loner', 0, 0, 0);
-          this.railway = this.physics.add.staticImage(44, 225, 'railway');
+          this.railway = this.physics.add.staticImage(44, 225, 'atlas1', 'railway');
           this.cursors = this.input.keyboard.createCursorKeys();
           this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
-          this.rwExplode = this.add.sprite(43, 225, 'empty');
-          this.fireGranade = this.add.image(-100, -100, 'fireGranade');
-          this.add.tileSprite(500, 438, 1000, 24, 'scheben1');
+          this.rwExplode = this.add.sprite(43, 225, 'atlas0', 'empty');
+          this.fireGranade = this.add.image(-100, -100, 'atlas0', 'fireGranade');
+          this.add.tileSprite(500, 438, 1000, 24, 'atlas0', 'scheben1');
           this.cameras.main.startFollow(this.shooterCont);
           this.enemiesIsStoped = false;
           this.input.addPointer(2);
@@ -242427,7 +242584,7 @@ var MyGame = (function (exports) {
           this.currentGameState = GameState.Gone;
           //this.shootOn = true;
           this.shootBullets = 100;
-          this.emptyAnchor = this.physics.add.image(0, 0, "empty");
+          this.emptyAnchor = this.physics.add.image(0, 0, 'atlas0', "empty");
           this.emptyAnchor.body.setVelocity(6, 0);
       }
       update(time, delta) {
@@ -242545,7 +242702,7 @@ var MyGame = (function (exports) {
                   this.rwExplode.play({ key: 'rwExplode', startFrame: 0 });
                   this.rwExplode.setAlpha(1);
                   this.rwExplode.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
-                      this.railway.setTexture('blackRailway');
+                      this.railway.setTexture('atlas1', 'blackRailway');
                       this.explodeTween = this.tweens.add({
                           targets: this.rwExplode,
                           alpha: 0,
@@ -242678,23 +242835,23 @@ var MyGame = (function (exports) {
           }
           catch (_a) { }
           this.indCounterArr = 0;
-          this.add.tileSprite(500, 225, 1000, 450, 'bg');
+          this.add.tileSprite(500, 225, 1000, 450, 'atlas0', 'bg');
           //this.blackBot = this.physics.add.image(400,418,'blackBot');
           this.shooterCont = this.add.container(400, 418);
-          this.shooterCont.add(this.add.image(0, 0, 'gun'));
-          this.leftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.shooterCont.add(this.add.image(0, 0, 'atlas0', 'gun'));
+          this.leftBulletArs = this.add.image(-16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.leftBulletArs);
-          this.rightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.rightBulletArs = this.add.image(16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.rightBulletArs);
           this.shooterCont.setSize(80, 40);
           this.shooterContBody = this.physics.world.enableBody(this.shooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
           this.shooterContBody.body.setCollideWorldBounds(true);
           this.shooterContBody.body.setBoundsRectangle(new __webpack_exports__Geom.Rectangle(80, 0, 910, 450));
           this.bbShooterCont = this.add.container(400, 418);
-          this.bbShooterCont.add(this.add.image(0, 0, 'blackBot'));
-          this.bbLeftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.bbShooterCont.add(this.add.image(0, 0, 'atlas0', 'blackBot'));
+          this.bbLeftBulletArs = this.add.image(-16, 3, 'atlas0', 'bulletArs');
           this.bbShooterCont.add(this.bbLeftBulletArs);
-          this.bbRightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.bbRightBulletArs = this.add.image(16, 3, 'atlas0', 'bulletArs');
           this.bbShooterCont.add(this.bbRightBulletArs);
           this.bbShooterCont.setSize(80, 40);
           this.bbShooterContBody = this.physics.world.enableBody(this.bbShooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
@@ -242727,13 +242884,13 @@ var MyGame = (function (exports) {
           this.anims.create({
               key: 'strike',
               frames: [
-                  { key: 'bulletStrike0' },
-                  { key: 'bulletStrike1' },
-                  { key: 'bulletStrike2' },
-                  { key: 'bulletStrike3' },
-                  { key: 'bulletStrike4' },
-                  { key: 'bulletStrike5' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'bulletStrike0' },
+                  { key: "atlas0", frame: 'bulletStrike1' },
+                  { key: "atlas0", frame: 'bulletStrike2' },
+                  { key: "atlas0", frame: 'bulletStrike3' },
+                  { key: "atlas0", frame: 'bulletStrike4' },
+                  { key: "atlas0", frame: 'bulletStrike5' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 5,
               //repeat: -1
@@ -242741,27 +242898,27 @@ var MyGame = (function (exports) {
           this.cameras.main.setBounds(0, 0, 1000, 225);
           this.physics.world.setBounds(0, 0, 1000, 450);
           this.staticGrp = this.physics.add.staticGroup();
-          this.staticGrp.create(125, 158, 'ovalBush').
+          this.staticGrp.create(125, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(211, 158, 'ovalBush').
+          this.staticGrp.create(211, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(267, 148, 'ovalBush').
+          this.staticGrp.create(267, 148, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(400, 201, 'rogaBush').
+          this.staticGrp.create(400, 201, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(452, 192, 'rogaBush').
+          this.staticGrp.create(452, 192, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(708, 196, 'rosaBush').
+          this.staticGrp.create(708, 196, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(750, 202, 'rosaBush').
+          this.staticGrp.create(750, 202, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(846, 199, 'rosaBush').
+          this.staticGrp.create(846, 199, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(375, 64, 'bigTree').
+          this.staticGrp.create(375, 64, 'atlas0', 'bigTree').
               setBodySize(94, 60).setOffset(0, 0).setDepth(8);
-          this.staticGrp.create(621, 50, 'midleTree').
+          this.staticGrp.create(621, 50, 'atlas0', 'midleTree').
               setBodySize(92, 60).setOffset(0, 0).setDepth(5);
-          this.staticGrp.create(945, 250, 'rectBush').
+          this.staticGrp.create(945, 250, 'atlas0', 'rectBush').
               setBodySize(42, 16).setOffset(0, 0).setDepth(5);
           this.bulletsGrp = new Bullets(this);
           this.physics.add.collider(this.staticGrp, this.bulletsGrp, (stat, bullet) => {
@@ -242792,12 +242949,12 @@ var MyGame = (function (exports) {
           this.shootOn = false;
           this.enemies = new Enemies(this.bulletsGrp);
           this.enemies.createGroup('loner', 0, 0, 0);
-          this.railway = this.physics.add.staticImage(44, 225, 'railway');
+          this.railway = this.physics.add.staticImage(44, 225, 'atlas1', 'railway');
           this.cursors = this.input.keyboard.createCursorKeys();
           this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
-          this.rwExplode = this.add.sprite(43, 225, 'empty');
-          this.fireGranade = this.add.image(-100, -100, 'fireGranade');
-          this.add.tileSprite(500, 438, 1000, 24, 'scheben1');
+          this.rwExplode = this.add.sprite(43, 225, 'atlas0', 'empty');
+          this.fireGranade = this.add.image(-100, -100, 'atlas0', 'fireGranade');
+          this.add.tileSprite(500, 438, 1000, 24, 'atlas0', 'scheben1');
           this.cameras.main.startFollow(this.shooterCont);
           this.enemiesIsStoped = false;
           this.input.addPointer(2);
@@ -242828,7 +242985,7 @@ var MyGame = (function (exports) {
           this.currentGameState = GameState.Gone;
           //this.shootOn = true;
           this.shootBullets = 100;
-          this.emptyAnchor = this.physics.add.image(0, 0, "empty");
+          this.emptyAnchor = this.physics.add.image(0, 0, 'atlas0', "empty");
           this.emptyAnchor.body.setVelocity(6, 0);
       }
       update(time, delta) {
@@ -242917,7 +243074,7 @@ var MyGame = (function (exports) {
                   this.rwExplode.play({ key: 'rwExplode', startFrame: 0 });
                   this.rwExplode.setAlpha(1);
                   this.rwExplode.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
-                      this.railway.setTexture('blackRailway');
+                      this.railway.setTexture('atlas1', 'blackRailway');
                       this.explodeTween = this.tweens.add({
                           targets: this.rwExplode,
                           alpha: 0,
@@ -242995,20 +243152,20 @@ var MyGame = (function (exports) {
           this.scene.anims.create({
               key: 'walkF',
               frames: [
-                  { key: 'walkerF1' },
-                  { key: 'walkerF2' },
-                  { key: 'walkerF3' },
-                  { key: 'walkerF4' },
-                  { key: 'walkerF5' },
-                  { key: 'walkerF4' },
-                  { key: 'walkerF3' },
-                  { key: 'walkerF2' }
+                  { key: "atlas1", frame: 'walkerF1' },
+                  { key: "atlas1", frame: 'walkerF2' },
+                  { key: "atlas1", frame: 'walkerF3' },
+                  { key: "atlas1", frame: 'walkerF4' },
+                  { key: "atlas1", frame: 'walkerF5' },
+                  { key: "atlas1", frame: 'walkerF4' },
+                  { key: "atlas1", frame: 'walkerF3' },
+                  { key: "atlas1", frame: 'walkerF2' }
               ],
               frameRate: 5,
               repeat: -1
           });
           this.createMultiple({
-              frameQuantity: 25,
+              frameQuantity: 60,
               key: 'enemyF',
               setXY: { x: -100, y: 0 },
               active: false,
@@ -243022,7 +243179,6 @@ var MyGame = (function (exports) {
       issueEnemy(enemiesArr) {
           let walkerF;
           let alpha;
-          let tmpArr = [];
           for (let i = 0; i < enemiesArr.length; i++) {
               walkerF = this.getFirstDead(false);
               walkerF.setPushable(false);
@@ -243033,26 +243189,46 @@ var MyGame = (function (exports) {
               walkerF.setRotation(-alpha);
               walkerF.setData('offSide', true);
               walkerF.alpha = 0;
-              tmpArr.push(walkerF);
-          }
-          tmpArr.forEach((enemyF) => {
+              walkerF.play('walkF');
+              walkerF.state = '';
+              this.scene.physics.moveTo(walkerF, 400, 450, 5);
               this.scene.tweens.add({
-                  targets: enemyF,
+                  targets: walkerF,
                   alpha: { value: 1 },
                   duration: 2000,
-                  onComplete: () => {
-                      enemyF.setData('offSide', false);
-                      enemyF.play('walkF');
-                      this.scene.physics.moveTo(enemyF, 400, 450, 5);
-                  }
+                  // onComplete: () => {
+                  //     walkerF.setData('offSide', false);
+                  //     walkerF.play('walkF')
+                  // }
               });
-          });
+              //tmpArr.push(walkerF)
+          }
+          // tmpArr.forEach((enemyF) => {
+          //     this.scene.tweens.add({
+          //         targets:enemyF,
+          //         alpha: { value: 1 },
+          //         duration: 2000,
+          //         onComplete: () => {
+          //             enemyF.setData('offSide', false);
+          //             enemyF.play('walkF')
+          //             this.scene.physics.moveTo(enemyF,400,450,5)
+          //         }
+          //     })
+          // })
       }
       stopEnemies() {
           let activeEnemyArr = this.getMatching("active", true);
           activeEnemyArr.forEach((enemy) => {
               enemy.body.setVelocity(0);
               enemy.anims.stop();
+          });
+      }
+      clearEnemies() {
+          let activeEnemyArr = this.getMatching("active", true);
+          activeEnemyArr.forEach((enemy) => {
+              enemy.setActive(false).setVisible(false);
+              enemy.state = '';
+              enemy.body.reset(-100, 0);
           });
       }
       fireBlank(x, y, velocityX) {
@@ -243085,7 +243261,7 @@ var MyGame = (function (exports) {
       keyboard: "Keyboard control.",
       arrow: "The Up arrow key starts or ends shooting, the Right and Left arrows rotate the gun.",
       dontLet: "Don't let them pass!",
-      replanish: "Replenish your ammo supply whenever possible.",
+      replanish: "Test it.",
       ammo: "Ammo"
   };
   const ruTexts$1 = {
@@ -243096,78 +243272,62 @@ var MyGame = (function (exports) {
       keyboard: "Управление с клавиатуры.",
       arrow: "Клавиша со стрелкой вверх начинает или заканчивает стрельбу, со стрелками вправо и влево поворачивает орудие.",
       dontLet: "Не дайте им подобраться!",
-      replanish: "Пополняйте по возможности запас патронов.",
+      replanish: "Теперь попробуйте сами.",
       ammo: "Патронов"
   };
   let currentTexts$1;
   currentTexts$1 = globalThis.lang == "en" ? enTexts$1 : ruTexts$1;
-  class Forest extends __webpack_exports__Scene {
+  class DemoF extends __webpack_exports__Scene {
       constructor() {
-          super("forest");
+          super("demoF");
           this.walkersArr = [];
           this.radDegreeCoef = Math.PI / 180;
           this.numTick = 0;
+          this.pointerDownOn = false;
+          this.isPreview = true;
+          this.numIssue = 0;
+          this.issueArr = [{ numTick: 0, issue: [{ x: 700, y: 50 }, { x: 700, y: 120 }, { x: 700, y: 180 },
+                      { x: 60, y: 160 }, { x: 60, y: 260 }, { x: 650, y: 150 }] },
+              { numTick: 50, issue: [{ x: 700, y: 50 }, { x: 700, y: 120 }, { x: 700, y: 180 },
+                      { x: 60, y: 160 }, { x: 60, y: 260 }, { x: 650, y: 150 }] }];
+          //{x:290,y:290},
+          this.numEnemiesBefore = 0;
+          this.issueArr.forEach((element) => {
+              this.numEnemiesBefore += element.issue.length;
+          });
+          this.numEnemiesAfter = this.numEnemiesBefore;
       }
       preload() {
-          this.load.image('empty', 'assetsF/empty.png');
-          this.load.image('walkerF1', 'assetsF/walk1.png');
-          this.load.image('walkerF2', 'assetsF/walk2.png');
-          this.load.image('walkerF3', 'assetsF/walk3.png');
-          this.load.image('walkerF4', 'assetsF/walk4.png');
-          this.load.image('walkerF5', 'assetsF/walk5.png');
-          this.load.image('walkerF6', 'assetsF/walk6.png');
-          this.load.image('walkerF7', 'assetsF/walk7.png');
-          this.load.image('walkerF8', 'assetsF/walk8.png');
-          this.load.image('walkerF9', 'assetsF/walk9.png');
-          this.load.image('walkerF10', 'assetsF/walk10.png');
-          this.load.image('expl1', 'assetsF/expl1.png');
-          this.load.image('expl2', 'assetsF/expl2.png');
-          this.load.image('expl3', 'assetsF/expl3.png');
-          this.load.image('expl4', 'assetsF/expl4.png');
-          this.load.image('expl5', 'assetsF/expl5.png');
-          this.load.image('expl6', 'assetsF/expl6.png');
-          this.load.image('expl7', 'assetsF/expl7.png');
-          this.load.image('gunBase', 'assetsF/gunBase.png');
-          this.load.image('gunTube', 'assetsF/gunTubeC.png');
-          this.load.image('bulletF', 'assetsF/bulletA.png');
-          this.load.image('trsGrpLeft', 'assetsF/trsGrpLeft.png');
-          this.load.image('trs0', 'assetsF/trs0.png');
-          this.load.image('tr1', 'assetsF/tr1.png');
-          this.load.image('tr2', 'assetsF/tr2.png');
-          this.load.image('tr3', 'assetsF/tr3.png');
-          this.load.image('tr4', 'assetsF/tr4.png');
-          this.load.image('tr7', 'assetsF/tr7.png');
-          this.load.image('trs8', 'assetsF/trs8.png');
-          this.load.image('tr9', 'assetsF/tr9.png');
-          this.load.image('trs10', 'assetsF/trs10.png');
-          this.load.image('trs11', 'assetsF/trs11.png');
-          this.load.image('trsGrpRight', 'assetsF/trsGrpRight.png');
-          this.load.image('board', 'assetsF/board.png');
-          this.load.image('fireGranade', 'assets/circleBullet.png');
       }
       create() {
-          globalThis.currentLevel = lvlNames.Forest;
+          globalThis.currentLevel = lvlNames.DemoF;
           globalThis.currentScene = this;
+          // this.numEnemiesBefore =0;
+          // this.issueArr.forEach((element) => {
+          //     this.numEnemiesBefore+=element.issue.length;
+          // })
+          // this.numEnemiesAfter = this.numEnemiesBefore;
+          this.cameras.main.setBackgroundColor('#fafbfd');
           this.anims.create({
               key: 'fallenF',
               frames: [
-                  { key: 'walkerF6' },
-                  { key: 'walkerF7' },
-                  { key: 'walkerF8' },
-                  { key: 'walkerF9' }
+                  { key: "atlas1", frame: 'walkerF6' },
+                  { key: "atlas1", frame: 'walkerF7' },
+                  { key: "atlas1", frame: 'walkerF8' },
+                  { key: "atlas1", frame: 'walkerF9' }
               ],
               frameRate: 5
           });
           this.anims.create({
               key: 'strike',
               frames: [
-                  { key: 'bulletStrike0' },
-                  { key: 'bulletStrike1' },
-                  { key: 'bulletStrike2' },
-                  { key: 'bulletStrike3' },
-                  { key: 'bulletStrike4' },
-                  { key: 'bulletStrike5' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'bulletStrike0' },
+                  { key: "atlas0", frame: 'bulletStrike1' },
+                  { key: "atlas0", frame: 'bulletStrike2' },
+                  { key: "atlas0", frame: 'bulletStrike3' },
+                  { key: "atlas0", frame: 'bulletStrike4' },
+                  { key: "atlas0", frame: 'bulletStrike5' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 5,
               //repeat: -1
@@ -243175,39 +243335,41 @@ var MyGame = (function (exports) {
           this.anims.create({
               key: 'gunExplode',
               frames: [
-                  { key: 'expl1' },
-                  { key: 'expl2' },
-                  { key: 'expl3' },
-                  { key: 'expl4' },
-                  { key: 'expl5' },
-                  { key: 'expl6' },
-                  { key: 'expl7' }
+                  { key: "atlas1", frame: 'expl1' },
+                  { key: "atlas1", frame: 'expl2' },
+                  { key: "atlas1", frame: 'expl3' },
+                  { key: "atlas1", frame: 'expl4' },
+                  { key: "atlas1", frame: 'expl5' },
+                  { key: "atlas1", frame: 'expl6' },
+                  { key: "atlas1", frame: 'expl7' }
               ],
               frameRate: 5
           });
           this.treesGrp = this.physics.add.staticGroup();
-          this.treesGrp.create(64, 230, 'trsGrpLeft').body.setSize(30, 152).setOffset(30, 20);
-          this.treesGrp.create(60, 68, 'trs0').body.setSize(36, 38).setOffset(4, 8);
-          this.treesGrp.create(131, 66, 'tr1').body.setSize(28, 28).setOffset(4, 6);
-          this.treesGrp.create(178, 37, 'tr2').body.setSize(36, 24).setOffset(1, 0);
-          this.treesGrp.create(251, 55, 'tr3').body.setSize(24, 24).setOffset(4, 12);
-          this.treesGrp.create(319, 61, 'tr4').body.setSize(40, 28).setOffset(6, 20);
-          this.treesGrp.create(365, 68, 'tr3').body.setSize(28, 32).setOffset(6, 6);
-          this.treesGrp.create(398, 46, 'tr3').body.setSize(32, 32).setOffset(4, 6);
-          this.treesGrp.create(422, 36, 'tr7').body.setSize(20, 16).setOffset(4, 8);
-          this.treesGrp.create(498, 80, 'trs8').body.setSize(48, 28).setOffset(4, 24);
-          this.treesGrp.create(552, 56, 'tr9').body.setSize(24, 24).setOffset(4, 12);
-          this.treesGrp.create(602, 40, 'trs10').body.setSize(38, 36).setOffset(4, 16);
-          this.treesGrp.create(664, 36, 'trs11').body.setSize(36, 36).setOffset(8, 12);
-          this.treesGrp.create(736, 160, 'trsGrpRight').body.setSize(64, 200).setOffset(16, 16);
-          this.add.image(399, 404, "bulletF");
+          this.treesGrp.create(64, 230, "atlas1", 'trsGrpLeft').body.setSize(30, 152).setOffset(30, 20);
+          this.treesGrp.create(60, 68, "atlas1", 'trs0').body.setSize(36, 38).setOffset(4, 8);
+          this.treesGrp.create(131, 66, "atlas1", 'tr1').body.setSize(28, 28).setOffset(4, 6);
+          this.treesGrp.create(178, 37, "atlas1", 'tr2').body.setSize(36, 24).setOffset(1, 0);
+          this.treesGrp.create(251, 55, "atlas1", 'tr3').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(319, 61, "atlas1", 'tr4').body.setSize(40, 28).setOffset(6, 20);
+          this.treesGrp.create(365, 68, "atlas1", 'tr3').body.setSize(28, 32).setOffset(6, 6);
+          this.treesGrp.create(398, 46, "atlas1", 'tr3').body.setSize(32, 32).setOffset(4, 6);
+          this.treesGrp.create(422, 36, "atlas1", 'tr7').body.setSize(20, 16).setOffset(4, 8);
+          this.treesGrp.create(498, 80, "atlas1", 'trs8').body.setSize(48, 28).setOffset(4, 24);
+          this.treesGrp.create(552, 56, "atlas1", 'tr9').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(602, 40, "atlas1", 'trs10').body.setSize(38, 36).setOffset(4, 16);
+          this.treesGrp.create(664, 36, "atlas1", 'trs11').body.setSize(36, 36).setOffset(8, 12);
+          this.treesGrp.create(736, 160, "atlas1", 'trsGrpRight').body.setSize(64, 200).setOffset(16, 16);
+          this.treesGrp.create(725, 302, "atlas1", 'tr12').body.setSize(32, 24).setOffset(4, 4);
+          this.treesGrp.create(758, 374, "atlas1", 'tr13').body.setSize(32, 40).setOffset(4, 8);
+          //this.add.image(399,404,"atlas1","bulletF")
           this.cursors = this.input.keyboard.createCursorKeys();
           this.shootOn = false;
           this.pointerDownOn = true;
           this.fpsText = this.add.text(150, 20, '').setStyle({ fill: 'black' });
           this.enemiesGrp = new EnemiesF(this);
           this.bulletsGrp = new BulletsF(this);
-          this.shootBullets = 200;
+          this.shootBullets = 0;
           this.physics.add.collider(this.treesGrp, this.bulletsGrp, (stat, bullet) => {
               let strikeSpr = this.myStrikeGrp.getFirstDead();
               strikeSpr.setPosition(bullet.x, bullet.y).setActive(true).setVisible(true);
@@ -243220,12 +243382,13 @@ var MyGame = (function (exports) {
               bullet.setActive(false).setVisible(false);
           });
           this.physics.add.collider(this.enemiesGrp, this.bulletsGrp, (enemyF, bulletF) => {
-              bulletF.body.reset(-100, 0);
+              bulletF.body.reset(0, -100);
               bulletF.setActive(false).setVisible(false);
-              if (enemyF.getData("offSide"))
-                  return;
+              //if(enemyF.getData("offSide")) return;
               //enemyF.play("fallenF")
               if (enemyF.state != 'falling') {
+                  if (!this.isPreview)
+                      this.numEnemiesAfter--;
                   enemyF.setVelocity(0, 0);
                   enemyF.state = 'falling';
                   enemyF.play({ key: "fallenF", startFrame: 0 });
@@ -243238,9 +243401,12 @@ var MyGame = (function (exports) {
                       //console.log(hasActive)
                   }, this);
               }
+              if (this.numEnemiesAfter == 0) {
+                  this.gameState = GameState.Win;
+              }
           });
-          this.add.image(401, 409, "board");
-          this.gunBase = this.physics.add.staticImage(400, 433, 'gunBase').setCircle(80).
+          this.add.image(401, 409, "atlas1", "board");
+          this.gunBase = this.physics.add.staticImage(400, 433, "atlas1", 'gunBase').setCircle(80).
               setOffset(-40, -40);
           this.physics.add.overlap(this.enemiesGrp, this.gunBase, (gunBase, enemyF) => {
               //enemyF.anims.stop();
@@ -243248,7 +243414,8 @@ var MyGame = (function (exports) {
               if (this.gameState != GameState.Lost) {
                   this.enemiesGrp.stopEnemies();
                   enemyF.setData("offSide", true);
-                  enemyF.setTexture('walkerF10');
+                  enemyF.setTexture("atlas1", 'walkerF10');
+                  enemyF.state = '';
                   this.gameState = GameState.Lost;
                   this.playGransdExplodeTween(enemyF.x, enemyF.y);
                   console.log(enemyF.state, gunBase.state);
@@ -243256,10 +243423,11 @@ var MyGame = (function (exports) {
           });
           //this.gunBase.setCircle(100);
           //this.gunTube =  this.add.image(400,430,'gunTube')
-          this.gunTube = this.physics.add.image(400, 450, 'gunTube').setOrigin(0.5, 1);
-          this.fireGranade = this.add.sprite(-10, -10, "fireGranade");
+          this.gunTube = this.physics.add.image(400, 450, "atlas1", 'gunTube').setOrigin(0.5, 1);
+          this.fireGranade = this.add.sprite(-10, -10, "atlas0", "fireGranade");
           this.gameState = GameState.Gone;
           this.enemiesIsStoped = false;
+          this.showPreview();
           this.input.on('pointerdown', (pointer) => {
               if (!this.pointerDownOn)
                   return;
@@ -243278,13 +243446,12 @@ var MyGame = (function (exports) {
                   this.shootOn = !this.shootOn;
               }
           });
-          this.myStrikeGrp = new StrikeGrp(this);
+          this.myStrikeGrp = new StrikeGrp$1(this);
           this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
       }
       update(time, delta) {
           if ((this.gameState == GameState.Win || this.gameState == GameState.Lost)
               && !this.enemiesIsStoped) {
-              this.pointerDownOn = false;
               this.pointerDownOn = false;
               this.gunTube.body.setAngularAcceleration(0);
               this.gunTube.body.setAngularVelocity(0);
@@ -243303,17 +243470,18 @@ var MyGame = (function (exports) {
                   // this.playGransdExplodeTween()
               }
               if (this.gameState == GameState.Win) {
-                  globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
+                  this.scene.pause(lvlNames.DemoF);
+                  globalThis.myUIBlocks.showSummary(this.shootBullets, this.numEnemiesBefore, GameState.Win);
               }
               this.enemiesIsStoped = true;
           }
-          if (this.gunTube.body.angularVelocity <= -10) {
+          if (this.gunTube.body.angularVelocity <= -15) {
               this.gunTube.body.angularAcceleration = 0;
-              this.gunTube.body.angularVelocity = -10;
+              this.gunTube.body.angularVelocity = -15;
           }
-          if (this.gunTube.body.angularVelocity >= 10) {
+          if (this.gunTube.body.angularVelocity >= 15) {
               this.gunTube.body.angularAcceleration = 0;
-              this.gunTube.body.angularVelocity = 10;
+              this.gunTube.body.angularVelocity = 15;
           }
           if (this.gunTube.body.rotation <= -80) {
               if (this.gunTube.body.angularVelocity < 0)
@@ -243339,30 +243507,42 @@ var MyGame = (function (exports) {
                   if (this.gunTube.body.rotation < 80)
                       this.gunTube.body.setAngularAcceleration(10);
               }
-              this.fpsText.setText(` FPS:  ${Math.round(1000 / delta)}`);
+              this.fpsText.setText(` Num Enemies:  ${this.numEnemiesAfter}`);
           }
       }
       checkBullet() {
-          if (this.numTick == 0) {
-              //{x:50,y:50},{x:750,y:50},,,{x:700,y:100},{x:550,y:200},{x:400,y:75}
-              this.enemiesGrp.issueEnemy([{ x: 250, y: 200 }, { x: 650, y: 150 }
-              ]);
-              this.numTick++;
+          if (this.isPreview) {
+              if (this.numTick == 0)
+                  this.enemiesGrp.issueEnemy([{ x: 700, y: 50 }, { x: 700, y: 120 }, { x: 700, y: 180 },
+                      { x: 60, y: 160 }, { x: 60, y: 260 }, { x: 290, y: 290 }, { x: 650, y: 150 },
+                      { x: 740, y: 380 }]);
           }
-          if (this.shootOn) {
-              if (this.shootBullets > 0) {
-                  let xOrg = this.gunTube.body.gameObject
-                      .displayOriginX;
-                  let yOrg = this.gunTube.body.gameObject
-                      .displayOriginY;
-                  console.log(`xOrg = ${xOrg}, ${yOrg}`);
-                  let xProection = Math.sin(this.gunTube.body.rotation * this.radDegreeCoef);
-                  let yProection = Math.cos(this.gunTube.body.rotation * this.radDegreeCoef);
-                  let xCoord = 400 + 54 * xProection;
-                  let yCoord = 450 - 54 * yProection;
-                  //this.add.image(xCoord,yCoord,"bulletF")
-                  this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180);
+          else {
+              if (this.issueArr[this.numIssue].numTick == this.numTick) {
+                  if (this.numTick == this.issueArr[this.numIssue].numTick) {
+                      this.enemiesGrp.issueEnemy(this.issueArr[this.numIssue].issue);
+                      if (this.numIssue < this.issueArr.length - 1) {
+                          this.numIssue++;
+                      }
+                  }
               }
+          }
+          this.numTick++;
+          if (this.shootOn) {
+              //if(this.shootBullets > 0){
+              // let xOrg = (this.gunTube.body.gameObject as Phaser.GameObjects.Image)
+              //     .displayOriginX;
+              // let yOrg = (this.gunTube.body.gameObject as Phaser.GameObjects.Image)
+              //     .displayOriginY;
+              //console.log(`xOrg = ${xOrg}, ${yOrg}`)
+              let xProection = Math.sin(this.gunTube.body.rotation * this.radDegreeCoef);
+              let yProection = Math.cos(this.gunTube.body.rotation * this.radDegreeCoef);
+              let xCoord = 400 + 54 * xProection;
+              let yCoord = 450 - 54 * yProection;
+              //this.add.image(xCoord,yCoord,"bulletF")
+              this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180);
+              this.shootBullets++;
+              //}
           }
       }
       showPreview() {
@@ -243404,18 +243584,18 @@ var MyGame = (function (exports) {
           rect.fillRoundedRect(0, 0, 330, 420, 30);
           rect.generateTexture('leftTouchRect', 330, 420);
           rect.clear();
-          let leftToughtRect = this.add.image(188, 228, 'leftTouchRect').setAlpha(0);
+          //let leftToughtRect = this.add.image(188,228,'leftTouchRect').setAlpha(0)
           rect.fillStyle(0x0000ff, 0.3);
           rect.fillRoundedRect(0, 0, 550, 420, 30);
           rect.generateTexture('rightToughtRect', 550, 420);
           rect.clear();
-          let rightToughtRect = this.add.image(532, 228, 'rightToughtRect').setAlpha(0);
+          //let rightToughtRect = this.add.image(532,228,'rightToughtRect').setAlpha(0)
           rect.fillStyle(0x0000ff, 0.3);
           rect.fillRoundedRect(0, 0, 120, 420, 30);
           rect.generateTexture('centerToughtRect', 120, 420);
           rect.clear();
           let centerToughtRect = this.add.image(400, 228, 'centerToughtRect').setAlpha(0);
-          let hand = this.add.image(210, 280, 'hand').setAlpha(0);
+          let hand = this.add.image(210, 280, 'atlas0', 'hand').setAlpha(0);
           const bubbleImg = this.add.image(186, 148, 'bubble').setDepth(21).setAlpha(0);
           const leftBubbleTxt = this.add.text(0, 0, currentTexts$1.leftTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           let txtBnd = leftBubbleTxt.getBounds();
@@ -243479,14 +243659,14 @@ var MyGame = (function (exports) {
                       },
                       duration: 300
                   },
-                  {
-                      targets: rightToughtRect,
-                      props: {
-                          x: { value: 732 },
-                      },
-                      delay: 1500,
-                      duration: 1500,
-                  },
+                  // {
+                  //      targets: rightToughtRect,
+                  //      props: {
+                  //          x: { value: 732 },
+                  //      },
+                  //      delay:1500,
+                  //      duration: 1500,
+                  // },
               ]
           });
           // цепочка твинов для hand
@@ -243561,51 +243741,51 @@ var MyGame = (function (exports) {
           // появляется левая область-прямоугольник, эта область движется влево,
           // появляется правая область-прямоугольник, левая область передвигается
           // влево, левая область исчезает
-          this.tweens.chain({
-              persist: false,
-              tweens: [
-                  {
-                      targets: leftToughtRect,
-                      props: {
-                          alpha: { value: 1 },
-                      },
-                      duration: 300,
-                      delay: 1200
-                  },
-                  {
-                      targets: leftToughtRect,
-                      props: {
-                          x: { value: -12 }
-                      },
-                      duration: 1500,
-                      delay: 300
-                  },
-                  {
-                      targets: rightToughtRect,
-                      props: {
-                          alpha: { value: 1 },
-                      },
-                      duration: 300,
-                      delay: 4200
-                  },
-                  {
-                      targets: leftToughtRect,
-                      props: {
-                          x: { value: 188 }
-                      },
-                      duration: 1500,
-                      //delay:4200 
-                  },
-                  {
-                      targets: leftToughtRect,
-                      props: {
-                          alpha: { value: 0 }
-                      },
-                      duration: 300,
-                      delay: 400
-                  },
-              ]
-          });
+          // this.tweens.chain({
+          //     persist:false,
+          //     tweens: [
+          // {
+          //     targets: leftToughtRect,
+          //     props: {
+          //         alpha: { value: 1 },
+          //     },
+          //     duration: 300,
+          //     delay:1200 
+          // },
+          // {
+          //     targets: leftToughtRect,
+          //     props: {
+          //         x: {value: -12}
+          //     },
+          //     duration: 1500,
+          //     delay:300 
+          // },
+          // {
+          //     targets: rightToughtRect,
+          //     props: {
+          //         alpha: { value: 1 },
+          //     },
+          //     duration: 300,
+          //     delay:4200 
+          // },
+          // {
+          //     targets: leftToughtRect,
+          //     props: {
+          //         x: {value: 188}
+          //     },
+          //     duration: 1500,
+          //     //delay:4200 
+          // },
+          // {
+          //     targets: leftToughtRect,
+          //     props: {
+          //         alpha: {value: 0}
+          //     },
+          //     duration: 300,
+          //     delay:400 
+          // },
+          //     ]
+          // })
           // цепочка для каретки - каретка движется влево, движется вправо,
           // появляется подложка справа, подложка справа исчезает и перемещается
           // в центр, исчезает правая область-прямоугольник, в центре появляется
@@ -243653,13 +243833,13 @@ var MyGame = (function (exports) {
                           centerBubbleTxt.setAlpha(1);
                       },
                   },
-                  {
-                      targets: rightToughtRect,
-                      props: {
-                          alpha: 0
-                      },
-                      duration: 300
-                  },
+                  // {
+                  //     targets: rightToughtRect,
+                  //     props:{
+                  //         alpha: 0
+                  //     },
+                  //     duration: 300
+                  // },
                   {
                       targets: bubbleImg,
                       props: {
@@ -243803,7 +243983,7 @@ var MyGame = (function (exports) {
                       props: {
                           alpha: { value: 1 }
                       },
-                      duration: 300,
+                      duration: 1500,
                       onComplete: () => {
                           centerBubbleTxt.setText(currentTexts$1.replanish);
                           centerBubbleTxt.setFontSize('24px');
@@ -243858,6 +244038,360 @@ var MyGame = (function (exports) {
               ]
           });
           return;
+      }
+      playGransdExplodeTween(x, y) {
+          this.fireGranade.setPosition(x, y);
+          let flyingGranad = this.tweens.add({
+              targets: this.fireGranade,
+              x: 400,
+              y: 425,
+              duration: 1500,
+              persist: false,
+              paused: true,
+              onComplete: () => {
+                  this.fireGranade.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
+                      if (this.isPreview) {
+                          this.isPreview = false;
+                          this.playLevel();
+                      }
+                      else {
+                          this.scene.pause(lvlNames.DemoF);
+                          globalThis.myUIBlocks.showSummary(this.shootBullets, (this.numEnemiesBefore - this.numEnemiesAfter), GameState.Lost);
+                      }
+                  }, this);
+                  this.fireGranade.play({ key: 'gunExplode', startFrame: 0 });
+              }
+          });
+          flyingGranad.play();
+      }
+      playLevel() {
+          this.enemiesGrp.clearEnemies();
+          //this.enemiesGrp.createGroup("demo", 0, 0, 0)
+          //this.turnOnInput(true)
+          this.gunTube.setAngle(0);
+          this.enemiesIsStoped = false;
+          this.fireGranade.setPosition(-100, -100).setTexture('atlas0', "fireGranade");
+          this.pointerDownOn = true;
+          this.gameState = GameState.Gone;
+          this.numTick = 0;
+          this.isPreview = false;
+          this.numIssue = 0;
+          this.scene.resume("demoF");
+      }
+  }
+  let StrikeGrp$1 = class StrikeGrp extends __webpack_exports__GameObjects.Group {
+      constructor(scene) {
+          super(scene);
+          this.createMultiple({
+              frameQuantity: 25,
+              key: 'empty',
+              setXY: { x: -100, y: 0 },
+              active: false,
+              visible: false,
+              classType: __webpack_exports__GameObjects.Sprite
+          });
+      }
+  };
+
+  class Forest extends __webpack_exports__Scene {
+      constructor() {
+          super("forest");
+          this.walkersArr = [];
+          this.radDegreeCoef = Math.PI / 180;
+          this.numTick = 0;
+          this.numIssue = 0;
+          // точки входа для верхних деревьев
+          // [{ x: 30, y: 50 }, { x: 40, y: 50 }, { x: 50, y: 50 }, { x: 130, y: 60 }, { x: 170, y: 30 },
+          //     { x: 240, y: 50 }, { x: 300, y: 60 }, { x: 360, y: 70 }, { x: 380, y: 50 }, { x: 390, y: 50 },
+          //     { x: 420, y: 30 }, { x: 460, y: 60 }, { x: 480, y: 60 }, { x: 490, y: 60 }, { x: 540, y: 50 },
+          //     { x: 550, y: 50 }, { x: 590, y: 40 }, { x: 600, y: 50 }, { x: 610, y: 60 }, { x: 650, y: 50 }, { x: 660, y: 50 }]
+          /**верхний вход без шести точек, близких к другим */
+          this.topStartPointArr = [{ x: 30, y: 50 }, { x: 50, y: 50 }, { x: 130, y: 60 }, { x: 170, y: 30 },
+              { x: 240, y: 50 }, { x: 300, y: 60 }, { x: 360, y: 70 }, { x: 390, y: 50 },
+              { x: 420, y: 30 }, { x: 460, y: 60 }, { x: 490, y: 60 }, { x: 540, y: 50 },
+              { x: 590, y: 40 }, { x: 610, y: 60 }, { x: 650, y: 50 }];
+          this.topStartPointArrL = [{ x: 30, y: 50 }, { x: 40, y: 50 }, { x: 50, y: 50 }, { x: 130, y: 60 }, { x: 170, y: 30 },
+              { x: 240, y: 50 }, { x: 300, y: 60 }, { x: 360, y: 70 }, { x: 380, y: 50 }, { x: 390, y: 50 }];
+          this.topStartPointArrR = [{ x: 420, y: 30 }, { x: 460, y: 60 }, { x: 480, y: 60 }, { x: 490, y: 60 }, { x: 540, y: 50 },
+              { x: 550, y: 50 }, { x: 590, y: 40 }, { x: 600, y: 50 }, { x: 610, y: 60 }, { x: 650, y: 50 }, { x: 660, y: 50 }];
+          this.leftStartPointArr = [{ x: 60, y: 166 }, { x: 50, y: 174 }, { x: 64, y: 174 }, { x: 60, y: 200 }, { x: 60, y: 204 }, { x: 56, y: 210 },
+              { x: 54, y: 214 }, { x: 56, y: 224 }, { x: 58, y: 230 }, { x: 60, y: 236 }, { x: 64, y: 242 }, { x: 70, y: 250 },
+              { x: 70, y: 256 }, { x: 70, y: 264 }, { x: 60, y: 270 }, { x: 56, y: 278 }, { x: 54, y: 286 }, { x: 56, y: 294 },
+              { x: 52, y: 300 }, { x: 54, y: 308 }, { x: 54, y: 314 }];
+          this.leftStartPointArr31 = [{ x: 60, y: 166 }, { x: 60, y: 200 }, { x: 54, y: 214 }, { x: 60, y: 236 },
+              { x: 70, y: 256 }, { x: 56, y: 278 }, { x: 52, y: 300 }];
+          this.leftStartPointArr32 = [{ x: 50, y: 174 }, { x: 60, y: 204 }, { x: 56, y: 224 }, { x: 64, y: 242 },
+              { x: 70, y: 264 }, { x: 54, y: 286 }, { x: 54, y: 308 }];
+          this.leftStartPointArr33 = [{ x: 64, y: 174 }, { x: 56, y: 210 }, { x: 58, y: 230 }, { x: 70, y: 250 },
+              { x: 60, y: 270 }, { x: 56, y: 294 }, { x: 54, y: 314 }];
+          this.leftStartPointArrEven = [{ x: 50, y: 174 }, { x: 60, y: 200 }, { x: 60, y: 204 },
+              { x: 54, y: 214 }, { x: 58, y: 230 }, { x: 64, y: 242 },
+              { x: 70, y: 256 }, { x: 60, y: 270 }, { x: 54, y: 286 },
+              { x: 52, y: 300 }, { x: 54, y: 314 }];
+          this.leftStartPointArrOdd = [{ x: 60, y: 166 }, { x: 64, y: 174 }, { x: 60, y: 204 },
+              { x: 54, y: 214 }, { x: 58, y: 230 }, { x: 64, y: 242 },
+              { x: 70, y: 256 }, { x: 60, y: 270 }, { x: 54, y: 286 },
+              { x: 52, y: 300 }, { x: 54, y: 314 }];
+          this.leftStartPointArr3 = [{ x: 60, y: 166 }, { x: 60, y: 200 },
+              { x: 54, y: 214 }, { x: 60, y: 236 },
+              { x: 70, y: 256 }, { x: 56, y: 278 },
+              { x: 52, y: 300 },];
+          this.rightStartPointArr = [{ x: 704, y: 60 }, { x: 704, y: 70 }, { x: 704, y: 80 }, { x: 704, y: 90 },
+              { x: 704, y: 100 }, { x: 704, y: 110 }, { x: 704, y: 120 }, { x: 704, y: 130 }, { x: 704, y: 140 },
+              { x: 704, y: 150 }, { x: 704, y: 160 }, { x: 704, y: 170 }, { x: 704, y: 216 }, { x: 720, y: 230 },
+              { x: 720, y: 300 }, { x: 740, y: 370 }];
+          this.rightStartPointArrOdd = [{ x: 704, y: 60 }, { x: 704, y: 80 },
+              { x: 704, y: 100 }, { x: 704, y: 120 }, { x: 704, y: 140 },
+              { x: 704, y: 160 }, { x: 704, y: 216 }, { x: 720, y: 230 },
+              { x: 720, y: 300 }, { x: 740, y: 370 }];
+          //{x:704,y:60},{x:704,y:70},{x:704,y:80},{x:704,y:90},{x:704,y:100},{x:704,y:110}
+          //,{x:704,y:120},{x:704,y:130},{x:704,y:140},{x:704,y:150},{x:704,y:160},{x:704,y:170}
+          //{x:704,y:216},{x:720,y:230},{x:720,y:300},{x:740,y:370}
+          this.issueArr = [
+              { numTick: 0, issue: this.rightStartPointArrOdd },
+              //{numTick:35,issue:this.topStartPointArr},
+              { numTick: 30, issue: this.topStartPointArrR },
+              //{numTick:70,issue:this.topStartPointArrR},
+              { numTick: 75, issue: this.topStartPointArrL },
+              { numTick: 105, issue: this.leftStartPointArr32 },
+              { numTick: 145, issue: this.topStartPointArr },
+              { numTick: 160, issue: this.leftStartPointArr3 },
+              { numTick: 175, issue: this.leftStartPointArr31 },
+              { numTick: 195, issue: this.leftStartPointArr32 },
+              { numTick: 215, issue: this.rightStartPointArrOdd },
+              { numTick: 235, issue: this.topStartPointArrR }
+          ];
+          //{x:650,y:50},{x:660,y:50}
+      }
+      preload() {
+      }
+      create() {
+          globalThis.currentLevel = lvlNames.Forest;
+          globalThis.currentScene = this;
+          this.cameras.main.setBackgroundColor('#fafbfd');
+          this.anims.create({
+              key: 'fallenF',
+              frames: [
+                  { key: "atlas1", frame: 'walkerF6' },
+                  { key: "atlas1", frame: 'walkerF7' },
+                  { key: "atlas1", frame: 'walkerF8' },
+                  { key: "atlas1", frame: 'walkerF9' }
+              ],
+              frameRate: 5
+          });
+          this.anims.create({
+              key: 'strike',
+              frames: [
+                  { key: "atlas0", frame: 'bulletStrike0' },
+                  { key: "atlas0", frame: 'bulletStrike1' },
+                  { key: "atlas0", frame: 'bulletStrike2' },
+                  { key: "atlas0", frame: 'bulletStrike3' },
+                  { key: "atlas0", frame: 'bulletStrike4' },
+                  { key: "atlas0", frame: 'bulletStrike5' },
+                  { key: "atlas0", frame: 'empty' }
+              ],
+              frameRate: 5,
+              //repeat: -1
+          });
+          this.anims.create({
+              key: 'gunExplode',
+              frames: [
+                  { key: "atlas1", frame: 'expl1' },
+                  { key: "atlas1", frame: 'expl2' },
+                  { key: "atlas1", frame: 'expl3' },
+                  { key: "atlas1", frame: 'expl4' },
+                  { key: "atlas1", frame: 'expl5' },
+                  { key: "atlas1", frame: 'expl6' },
+                  { key: "atlas1", frame: 'expl7' }
+              ],
+              frameRate: 5
+          });
+          //this.add.image(172,432,'progressEnemy')
+          //this.add.image(634,432,'progressAmmo')
+          this.treesGrp = this.physics.add.staticGroup();
+          this.treesGrp.create(64, 230, "atlas1", 'trsGrpLeft').body.setSize(30, 152).setOffset(30, 20);
+          this.treesGrp.create(60, 68, "atlas1", 'trs0').body.setSize(36, 38).setOffset(4, 8);
+          this.treesGrp.create(131, 66, "atlas1", 'tr1').body.setSize(28, 28).setOffset(4, 6);
+          this.treesGrp.create(178, 37, "atlas1", 'tr2').body.setSize(36, 24).setOffset(1, 0);
+          this.treesGrp.create(251, 55, "atlas1", 'tr3').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(319, 61, "atlas1", 'tr4').body.setSize(40, 28).setOffset(6, 20);
+          this.treesGrp.create(365, 68, "atlas1", 'tr3').body.setSize(28, 32).setOffset(6, 6);
+          this.treesGrp.create(398, 46, "atlas1", 'tr3').body.setSize(32, 32).setOffset(4, 6);
+          this.treesGrp.create(422, 36, "atlas1", 'tr7').body.setSize(20, 16).setOffset(4, 8);
+          this.treesGrp.create(498, 80, "atlas1", 'trs8').body.setSize(48, 28).setOffset(4, 24);
+          this.treesGrp.create(552, 56, "atlas1", 'tr9').body.setSize(24, 24).setOffset(4, 12);
+          this.treesGrp.create(602, 40, "atlas1", 'trs10').body.setSize(38, 36).setOffset(4, 16);
+          this.treesGrp.create(664, 36, "atlas1", 'trs11').body.setSize(36, 36).setOffset(8, 12);
+          this.treesGrp.create(724, 302, "atlas1", 'tr12').body.setSize(28, 24).setOffset(8, 4);
+          this.treesGrp.create(758, 374, "atlas1", 'tr13').body.setSize(28, 36).setOffset(8, 10);
+          this.treesGrp.create(736, 160, "atlas1", 'trsGrpRight').body.setSize(64, 200).setOffset(16, 16);
+          //this.add.image(399,404,"bulletF")
+          this.cursors = this.input.keyboard.createCursorKeys();
+          this.shootOn = false;
+          this.pointerDownOn = true;
+          this.fpsText = this.add.text(150, 20, '').setStyle({ fill: 'black' });
+          this.enemiesGrp = new EnemiesF(this);
+          this.bulletsGrp = new BulletsF(this);
+          this.shootBullets = 200;
+          this.physics.add.collider(this.treesGrp, this.bulletsGrp, (stat, bullet) => {
+              let strikeSpr = this.myStrikeGrp.getFirstDead();
+              strikeSpr.setPosition(bullet.x, bullet.y).setActive(true).setVisible(true);
+              strikeSpr.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, (anim, frame, sprite) => {
+                  sprite.setPosition(0, -100);
+                  sprite.setActive(false).setVisible(false);
+              }, this);
+              strikeSpr.anims.play({ key: 'strike', startFrame: 0 });
+              bullet.body.reset(0, -100);
+              bullet.setActive(false).setVisible(false);
+          });
+          this.physics.add.collider(this.enemiesGrp, this.bulletsGrp, (enemyF, bulletF) => {
+              bulletF.body.reset(0, -100);
+              bulletF.setActive(false).setVisible(false);
+              //if(enemyF.getData("offSide")) return;
+              //enemyF.play("fallenF")
+              if (enemyF.state != 'falling') {
+                  enemyF.setVelocity(0, 0);
+                  enemyF.state = 'falling';
+                  enemyF.play({ key: "fallenF", startFrame: 0 });
+                  enemyF.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
+                      enemyF.body.reset(-100, 0);
+                      enemyF.setActive(false).setVisible(false);
+                      enemyF.state = '';
+                      //this.remove(enemy);
+                      //let hasActive = reserve.countActive()
+                      //console.log(hasActive)
+                  }, this);
+              }
+          });
+          this.add.image(401, 409, "atlas1", "board");
+          this.gunBase = this.physics.add.staticImage(400, 433, "atlas1", 'gunBase').setCircle(80).
+              setOffset(-40, -40);
+          this.physics.add.overlap(this.enemiesGrp, this.gunBase, (gunBase, enemyF) => {
+              //enemyF.anims.stop();
+              //enemyF.setVelocity(0,0)
+              if (this.gameState != GameState.Lost) {
+                  this.enemiesGrp.stopEnemies();
+                  enemyF.setData("offSide", true);
+                  enemyF.setTexture("atlas1", 'walkerF10');
+                  this.gameState = GameState.Lost;
+                  this.playGransdExplodeTween(enemyF.x, enemyF.y);
+                  console.log(enemyF.state, gunBase.state);
+              }
+          });
+          //this.gunBase.setCircle(100);
+          //this.gunTube =  this.add.image(400,430,'gunTube')
+          this.gunTube = this.physics.add.image(400, 450, "atlas1", 'gunTube').setOrigin(0.5, 1);
+          this.fireGranade = this.add.sprite(-10, -10, "atlas0", "fireGranade");
+          this.gameState = GameState.Gone;
+          this.enemiesIsStoped = false;
+          this.input.on('pointerdown', (pointer) => {
+              if (!this.pointerDownOn)
+                  return;
+              if (pointer.x < this.gunBase.x - 80) {
+                  if (this.gunTube.body.rotation > -80)
+                      this.gunTube.body.setAngularAcceleration(-10);
+                  return;
+              }
+              else if (pointer.x > this.gunBase.x + 80) {
+                  if (this.gunTube.body.rotation < 80)
+                      this.gunTube.body.setAngularAcceleration(10);
+                  return;
+              }
+              if ((pointer.x <= this.gunBase.x + 80) &&
+                  (pointer.x >= this.gunBase.x - 80)) {
+                  this.shootOn = !this.shootOn;
+              }
+          });
+          this.myStrikeGrp = new StrikeGrp(this);
+          this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
+      }
+      update(time, delta) {
+          if ((this.gameState == GameState.Win || this.gameState == GameState.Lost)
+              && !this.enemiesIsStoped) {
+              this.pointerDownOn = false;
+              this.pointerDownOn = false;
+              this.gunTube.body.setAngularAcceleration(0);
+              this.gunTube.body.setAngularVelocity(0);
+              this.shootOn = false;
+              this.pointerDownOn = false;
+              //globalThis.currentResult = this.gameState;
+              //globalThis.currentLevel = lvlNames.Loner;
+              this.enemiesIsStoped = true;
+              if (this.gameState == GameState.Lost) {
+                  //let point = this.enemies.stopEnemies(GameState.Lost)
+                  //this.fireGranade.setPosition(point.x - 16, point.y - 16)
+                  this.enemiesIsStoped = true;
+                  // (this.shooterCont as Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody).
+                  //     body.reset(400,398)
+                  // this.shooterCont.setY(418)
+                  // this.playGransdExplodeTween()
+              }
+              if (this.gameState == GameState.Win) {
+                  globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
+              }
+              this.enemiesIsStoped = true;
+          }
+          if (this.gunTube.body.angularVelocity <= -15) {
+              this.gunTube.body.angularAcceleration = 0;
+              this.gunTube.body.angularVelocity = -15;
+          }
+          if (this.gunTube.body.angularVelocity >= 15) {
+              this.gunTube.body.angularAcceleration = 0;
+              this.gunTube.body.angularVelocity = 15;
+          }
+          if (this.gunTube.body.rotation <= -80) {
+              if (this.gunTube.body.angularVelocity < 0)
+                  this.gunTube.body.angularVelocity = 0;
+              if (this.gunTube.body.angularAcceleration < 0)
+                  this.gunTube.body.angularAcceleration = 0;
+          }
+          if (this.gunTube.body.rotation >= 80) {
+              if (this.gunTube.body.angularVelocity > 0)
+                  this.gunTube.body.angularVelocity = 0;
+              if (this.gunTube.body.angularAcceleration > 0)
+                  this.gunTube.body.angularAcceleration = 0;
+          }
+          if (this.pointerDownOn) {
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.up)) {
+                  this.shootOn = !this.shootOn;
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.left)) {
+                  if (this.gunTube.body.rotation > -80)
+                      this.gunTube.body.setAngularAcceleration(-10);
+              }
+              if (__webpack_exports__Input.Keyboard.JustDown(this.cursors.right)) {
+                  if (this.gunTube.body.rotation < 80)
+                      this.gunTube.body.setAngularAcceleration(10);
+              }
+              this.fpsText.setText(` FPS:  ${Math.round(1000 / delta)}`);
+          }
+          this.fpsText.setText(` FPS:  ${Math.round(1000 / delta)}`);
+      }
+      checkBullet() {
+          if (this.issueArr[this.numIssue].numTick == this.numTick) {
+              if (this.numTick == this.issueArr[this.numIssue].numTick) {
+                  this.enemiesGrp.issueEnemy(this.issueArr[this.numIssue].issue);
+                  if (this.numIssue < this.issueArr.length - 1) {
+                      this.numIssue++;
+                  }
+              }
+          }
+          this.numTick++;
+          if (this.shootOn) {
+              if (this.shootBullets > 0) {
+                  let xOrg = this.gunTube.body.gameObject
+                      .displayOriginX;
+                  let yOrg = this.gunTube.body.gameObject
+                      .displayOriginY;
+                  console.log(`xOrg = ${xOrg}, ${yOrg}`);
+                  let xProection = Math.sin(this.gunTube.body.rotation * this.radDegreeCoef);
+                  let yProection = Math.cos(this.gunTube.body.rotation * this.radDegreeCoef);
+                  let xCoord = 400 + 54 * xProection;
+                  let yCoord = 450 - 54 * yProection;
+                  //this.add.image(xCoord,yCoord,"bulletF")
+                  this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180);
+              }
+          }
       }
       playGransdExplodeTween(x, y) {
           this.fireGranade.setPosition(x, y);
@@ -244036,7 +244570,8 @@ var MyGame = (function (exports) {
       }
       create() {
           globalThis.currentScene = this;
-          globalThis.currentSceneName = "demo";
+          globalThis.currentSceneName = lvlNames.Demo;
+          currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
           if (this.gameState.autoPilot) {
               this.gameState.waitAction = true;
               fetch('http://localhost/drgServer/get_actions.php', {
@@ -244067,12 +244602,12 @@ var MyGame = (function (exports) {
                   this.scene.resume();
               });
           }
-          this.add.tileSprite(500, 225, 1000, 450, 'bg');
+          this.add.tileSprite(500, 225, 1000, 450, 'atlas0', 'bg');
           this.shooterCont = this.add.container(400, 418);
-          this.shooterCont.add(this.add.image(0, 0, 'gun'));
-          this.leftBulletArs = this.add.image(-16, 3, 'bulletArs');
+          this.shooterCont.add(this.add.image(0, 0, 'atlas0', 'gun'));
+          this.leftBulletArs = this.add.image(-16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.leftBulletArs);
-          this.rightBulletArs = this.add.image(16, 3, 'bulletArs');
+          this.rightBulletArs = this.add.image(16, 3, 'atlas0', 'bulletArs');
           this.shooterCont.add(this.rightBulletArs);
           this.shooterCont.setSize(80, 40);
           this.shooterContBody = this.physics.world.enableBody(this.shooterCont, __webpack_exports__Physics.Arcade.DYNAMIC_BODY);
@@ -244100,13 +244635,13 @@ var MyGame = (function (exports) {
           this.anims.create({
               key: 'strike',
               frames: [
-                  { key: 'bulletStrike0' },
-                  { key: 'bulletStrike1' },
-                  { key: 'bulletStrike2' },
-                  { key: 'bulletStrike3' },
-                  { key: 'bulletStrike4' },
-                  { key: 'bulletStrike5' },
-                  { key: 'empty' }
+                  { key: "atlas0", frame: 'bulletStrike0' },
+                  { key: "atlas0", frame: 'bulletStrike1' },
+                  { key: "atlas0", frame: 'bulletStrike2' },
+                  { key: "atlas0", frame: 'bulletStrike3' },
+                  { key: "atlas0", frame: 'bulletStrike4' },
+                  { key: "atlas0", frame: 'bulletStrike5' },
+                  { key: "atlas0", frame: 'empty' }
               ],
               frameRate: 5,
               //repeat: -1
@@ -244114,38 +244649,38 @@ var MyGame = (function (exports) {
           this.cameras.main.setBounds(0, 0, 1000, 225);
           this.physics.world.setBounds(0, 0, 1000, 450);
           this.staticGrp = this.physics.add.staticGroup();
-          this.staticGrp.create(125, 158, 'ovalBush').
+          this.staticGrp.create(125, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(211, 158, 'ovalBush').
+          this.staticGrp.create(211, 158, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(267, 148, 'ovalBush').
+          this.staticGrp.create(267, 148, 'atlas0', 'ovalBush').
               setBodySize(30, 24).setOffset(4, 2).setDepth(8);
-          this.staticGrp.create(400, 201, 'rogaBush').
+          this.staticGrp.create(400, 201, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(452, 192, 'rogaBush').
+          this.staticGrp.create(452, 192, 'atlas0', 'rogaBush').
               setBodySize(34, 24).setOffset(0, 0).setDepth(10);
-          this.staticGrp.create(708, 196, 'rosaBush').
+          this.staticGrp.create(708, 196, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(750, 202, 'rosaBush').
+          this.staticGrp.create(750, 202, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(846, 199, 'rosaBush').
+          this.staticGrp.create(846, 199, 'atlas0', 'rosaBush').
               setBodySize(42, 16).setOffset(9, 0).setDepth(10);
-          this.staticGrp.create(375, 64, 'bigTree').
+          this.staticGrp.create(375, 64, 'atlas0', 'bigTree').
               setBodySize(94, 60).setOffset(0, 0).setDepth(8);
-          this.staticGrp.create(621, 50, 'midleTree').
+          this.staticGrp.create(621, 50, 'atlas0', 'midleTree').
               setBodySize(92, 60).setOffset(0, 0).setDepth(5);
-          this.staticGrp.create(945, 250, 'rectBush').
+          this.staticGrp.create(945, 250, 'atlas0', 'rectBush').
               setBodySize(42, 16).setOffset(0, 0).setDepth(5);
           this.bulletsGrp = new Bullets(this);
           this.physics.add.collider(this.staticGrp, this.bulletsGrp, (stat, bullet) => {
-              this.add.sprite(stat.body.center.x, stat.body.bottom, 'bulletStrike0').
+              this.add.sprite(stat.body.center.x, stat.body.bottom, 'atlas0', 'bulletStrike0').
                   setDepth(11).anims.play({ key: 'strike', startFrame: 0 });
               bullet.body.reset(0, -32);
               bullet.setActive(false).setVisible(false);
           });
           this.bigBulletsGrp = this.physics.add.staticGroup();
-          this.bigBulletsGrp.create(94, 426, 'bigBullet').setData('isFull', true);
-          this.bigBulletsGrp.create(790, 426, 'bigBullet').setData('isFull', true);
+          this.bigBulletsGrp.create(94, 426, 'atlas0', 'bigBullet').setData('isFull', true);
+          this.bigBulletsGrp.create(790, 426, 'atlas0', 'bigBullet').setData('isFull', true);
           this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp, (shooterCont, bigBullet) => {
               if (this.shootBullets <= 50 && bigBullet.getData('isFull')) {
                   this.shootBullets += 50;
@@ -244162,14 +244697,14 @@ var MyGame = (function (exports) {
           this.physics;
           this.bulettCounter = 0;
           this.shootOn = false;
+          this.railway = this.physics.add.staticImage(44, 225, 'atlas1', 'railway');
           this.enemies = new Enemies(this.bulletsGrp);
           this.enemies.createGroup('demo', 0, 0, 0);
-          this.railway = this.physics.add.staticImage(44, 225, 'railway');
           this.cursors = this.input.keyboard.createCursorKeys();
           this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
-          this.rwExplode = this.add.sprite(43, 225, 'empty');
-          this.fireGranade = this.add.image(-100, -100, 'fireGranade');
-          this.add.tileSprite(500, 438, 1000, 24, 'scheben1');
+          this.rwExplode = this.add.sprite(43, 225, 'atlas0', 'empty');
+          this.fireGranade = this.add.image(-100, -100, 'atlas0', 'fireGranade');
+          this.add.tileSprite(500, 438, 1000, 24, 'atlas0', 'scheben1');
           this.cameras.main.startFollow(this.shooterCont);
           if (this.gameState.autoPilot)
               this.scene.pause();
@@ -244204,6 +244739,9 @@ var MyGame = (function (exports) {
           globalThis.currentResult = GameState.Gone;
           this.currentGameState = GameState.Gone;
           this.isPreview = true;
+          // let fromAtlas1 = this.add.image(30,30,"myTexture",'bg1')
+          // let fromAtlas2 = this.add.image(30,30,"myTexture",'bulletArs')
+          // console.log(fromAtlas1.alpha,fromAtlas2.alpha)
       }
       update(time, delta) {
           this.input.listeners('pointerdown');
@@ -244330,7 +244868,7 @@ var MyGame = (function (exports) {
                   this.rwExplode.play({ key: 'rwExplode', startFrame: 0 });
                   this.rwExplode.setAlpha(1);
                   this.rwExplode.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
-                      this.railway.setTexture('blackRailway');
+                      this.railway.setTexture('atlas1', 'blackRailway');
                       this.explodeTween = this.tweens.add({
                           targets: this.rwExplode,
                           alpha: 0,
@@ -244374,7 +244912,7 @@ var MyGame = (function (exports) {
           //this.turnOnInput(true)
           this.enemiesIsStoped = false;
           this.fireGranade.setPosition(-100, -100);
-          this.railway.setTexture('railway');
+          this.railway.setTexture('atlas1', 'railway');
           this.shootBullets = 100;
           this.leftBulletArs.setCrop();
           this.bigBulletsGrp.getChildren()[0].body.
@@ -244449,7 +244987,7 @@ var MyGame = (function (exports) {
           rect.generateTexture('centerToughtRect', 120, 420);
           rect.clear();
           let centerToughtRect = this.add.image(400, 228, 'centerToughtRect').setAlpha(0);
-          let hand = this.add.image(210, 280, 'hand').setAlpha(0);
+          let hand = this.add.image(210, 280, 'atlas0', 'hand').setAlpha(0);
           const bubbleImg = this.add.image(186, 148, 'bubble').setDepth(21).setAlpha(0);
           const leftBubbleTxt = this.add.text(0, 0, currentTexts.leftTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           let txtBnd = leftBubbleTxt.getBounds();
@@ -244938,21 +245476,21 @@ var MyGame = (function (exports) {
       const config = {
           type: __webpack_exports__WEBGL,
           //transparent: true,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#bfc874',
           width: 800,
           height: 450,
           parent: 'gameContainer',
           physics: {
               default: 'arcade',
               arcade: {
-                  debug: true,
+                  debug: false,
               }
           },
           scale: {
               autoCenter: __webpack_exports__Scale.CENTER_HORIZONTALLY,
               mode: __webpack_exports__Scale.FIT
           },
-          scene: [Preloader, Demo, Loner, TwoGuns, Forest],
+          scene: [Preloader, Demo, Loner, TwoGuns, DemoF, Forest],
           //render :render,
       };
       myGame = new __webpack_exports__Game(config);
@@ -245013,10 +245551,17 @@ var MyGame = (function (exports) {
           globalThis.myUIBlocks = new UIBlocks();
           let locAchievments;
           try {
+              // Показываем SDK, что игра загрузилась и можно начинать играть.
+              if (globalThis.gYsdk.features.LoadingAPI) {
+                  globalThis.gYsdk.features.LoadingAPI.ready();
+              }
+          }
+          catch (err) { }
+          try {
               locAchievments = JSON.parse(localStorage.getItem("lvlsData"));
           }
           catch (err) {
-              locAchievments = [-1, -1, -1];
+              locAchievments = [-1, -1, -1, -1, -1];
           }
           for (let i = 0; i < locAchievments.length; i++) {
               if (locAchievments[i] > globalThis.achievments[i]) {
@@ -245031,9 +245576,20 @@ var MyGame = (function (exports) {
                   break;
               }
           }
+          if (loadings.isPlayerData == 1) {
+              try {
+                  let data = globalThis.gPlayer.getData();
+                  globalThis.achievments = data.achievments;
+              }
+              catch (err) {
+              }
+          }
+          //testFunc([1,1,1,1,-1,-1],"en")
           // это надо закомментировать после создания Loner
-          globalThis.currentLevel = lvlNames.TwoGuns;
-          myGame.scene.start(lvlNames.TwoGuns);
+          globalThis.achievments = [0, -1, -1, -1, -1, -1];
+          globalThis.lang = 'ru';
+          globalThis.myUIBlocks.showSummary(20, 19, GameState.Win);
+          //myGame.scene.start(lvlNames.DemoF)
           return;
       }
   }
@@ -245042,7 +245598,7 @@ var MyGame = (function (exports) {
       //let remotecAchievments:Array<number>;
       // значение по умолчанию
       globalThis.lang = "ru";
-      globalThis.achievments = [-1, -1, -1];
+      globalThis.achievments = [-1, -1, -1, -1, -1, -1];
       currentTexts = ruTexts;
       // запускаем игру и загружаем ассеты в сцене Preload
       startGame();
@@ -245087,24 +245643,25 @@ var MyGame = (function (exports) {
           //         }
           //     }
           // })
-          addLoading('isAdvFinish', 1);
+          addLoading('isAdvFinish', 0);
           ysdk.getPlayer().then(player => {
               globalThis.gPlayer = player;
               player.getData().then(data => {
                   try {
+                      gData = data;
                       globalThis.achievments = JSON.parse(data.lvlsData);
                       addLoading('isPlayerData', 1);
                   }
                   catch (err) {
-                      globalThis.achievments = [-1, -1, -1];
+                      globalThis.achievments = [-1, -1, -1, -1, -1, -1];
                       addLoading('isPlayerData', 0);
                   }
               }).catch(err => {
-                  globalThis.achievments = [-1, -1, -1];
+                  globalThis.achievments = [-1, -1, -1, -1, -1, -1];
                   addLoading('isPlayerData', 0);
               });
           }).catch(err => {
-              globalThis.achievments = [-1, -1, -1];
+              globalThis.achievments = [-1, -1, -1, -1, -1, -1];
               addLoading('isPlayerData', 0);
           });
       })
@@ -245112,7 +245669,7 @@ var MyGame = (function (exports) {
           addLoading('isSDKLoaded', 0);
           addLoading('isPlayerData', 0);
           addLoading('isAdvFinish', 0);
-          globalThis.achievments = [-1, -1, -1];
+          globalThis.achievments = [-1, -1, -1, -1, -1, -1];
           globalThis.lang = "ru";
           currentTexts = ruTexts;
       });
@@ -245128,75 +245685,84 @@ var MyGame = (function (exports) {
           super("preloader");
       }
       preload() {
-          this.load.image('bg', 'assets/bg5.png');
-          this.load.image('railway', 'assets/railway4.png');
-          this.load.image('gun', 'assets/gun1.png');
-          this.load.image('blackBot', 'assets/blackBot.png');
-          this.load.image('bullet', 'assets/bullet0.png');
-          this.load.image('bigBullet', 'assets/bigBullet4.png');
-          this.load.image('bulletArs', 'assets/bulletArs.png');
-          this.load.image('circleBullet', 'assets/circleBullet0.png');
-          this.load.image('fireGranade', 'assets/circleBullet.png');
-          this.load.image('virusOff', 'assets/virusOff.png');
-          this.load.image('walker0', 'assets/walker0b.png');
-          this.load.image('walker1', 'assets/walker1b.png');
-          this.load.image('walker2', 'assets/walker2b.png');
-          this.load.image('walker3', 'assets/walker3b.png');
-          this.load.image('walker4', 'assets/walker4b.png');
-          this.load.image('runner0', 'assets/runner0b.png');
-          this.load.image('runner1', 'assets/runner1b.png');
-          this.load.image('runner2', 'assets/runner2b.png');
-          this.load.image('runner3', 'assets/runner3b.png');
-          this.load.image('runner4', 'assets/runner4b.png');
-          this.load.image('failed0', 'assets/failing0b.png');
-          this.load.image('failed1', 'assets/fallen0b.png');
-          this.load.image('granade', 'assets/granade0a.png');
-          this.load.image('standStay', 'assets/standStay.png');
-          this.load.image('sitStay', 'assets/sitStay.png');
-          this.load.image('handStay', 'assets/handStay.png');
-          this.load.image('stepStay', 'assets/stepStay.png');
-          this.load.image('gunStay', 'assets/gunStay.png');
-          this.load.image('blackRailway', 'assets/blackRailway1.png');
-          this.load.image('explode1', 'assets/explode1.png');
-          this.load.image('explode2', 'assets/explode2.png');
-          this.load.image('explode3', 'assets/explode3.png');
-          this.load.image('explode4', 'assets/explode4.png');
-          this.load.image('explode5', 'assets/explode5.png');
-          this.load.image('explode6', 'assets/explode6.png');
-          this.load.image('explode7', 'assets/explode7.png');
-          this.load.image('explode8', 'assets/explode8.png');
-          this.load.image('explode9', 'assets/explode9.png');
-          this.load.image('explode10', 'assets/explode10.png');
-          this.load.image('explode11', 'assets/explode11.png');
-          this.load.image('explode12', 'assets/explode12.png');
-          this.load.image('explode13', 'assets/explode13.png');
-          this.load.image('explode14', 'assets/explode14.png');
-          this.load.image('explode15', 'assets/explode15.png');
-          this.load.image('explode16', 'assets/explode16.png');
-          this.load.image('explode17', 'assets/explode17.png');
-          this.load.image('explode18', 'assets/explode18.png');
-          this.load.image('explode19', 'assets/explode19.png');
-          this.load.image('explode20', 'assets/explode20.png');
-          this.load.image('explode21', 'assets/explode21.png');
-          this.load.image('explode22', 'assets/explode22.png');
-          this.load.image('explode23', 'assets/explode23.png');
-          this.load.image('bigTree', 'assets/bigTree.png');
-          this.load.image('midleTree', 'assets/midleTree.png');
-          this.load.image('rogaBush', 'assets/rogaBush_B.png');
-          this.load.image('rosaBush', 'assets/rosaBush_B.png');
-          this.load.image('ovalBush', 'assets/ovalBush_B.png');
-          this.load.image('rectBush', 'assets/rectBush.png');
-          this.load.image('scheben1', 'assets/scheben11.png');
-          this.load.image('bulletStrike0', 'assets/bulletStrike0a.png');
-          this.load.image('bulletStrike1', 'assets/bulletStrike1a.png');
-          this.load.image('bulletStrike2', 'assets/bulletStrike2a.png');
-          this.load.image('bulletStrike3', 'assets/bulletStrike3a.png');
-          this.load.image('bulletStrike4', 'assets/bulletStrike4a.png');
-          this.load.image('bulletStrike5', 'assets/bulletStrike5a.png');
-          this.load.image('blankShoot', 'assets/blankShoot.png');
-          this.load.image('blankShoot2', 'assets/blankShoot2.png');
-          this.load.image('empty', 'assets/empty.png');
-          this.load.image('hand', 'assets/hand.png');
+          //this.load.atlas('myTexture',"assets/myTexture.png","assets/myTexture.json")
+          this.load.atlas([{ key: 'atlas0',
+                  textureURL: 'atlas-0.png',
+                  atlasURL: 'atlas-0.json' },
+              { key: 'atlas1',
+                  textureURL: 'atlas-1.png',
+                  atlasURL: 'atlas-1.json' }]);
+          //'atlas0',["atlas-0.png","atlas-1.png"],["atlas-0.json","atlas-1.json"])
+          //this.load.atlas('atlas1',"atlas-1.png","atlas-1.json")
+          // this.load.image('bg','assets/bg5.png')
+          // this.load.image('railway','assets/railway4.png')
+          // this.load.image('gun','assets/gun1.png')
+          // this.load.image('blackBot','assets/blackBot.png')
+          // this.load.image('bullet','assets/bullet0.png')
+          // this.load.image('bigBullet','assets/bigBullet4.png')
+          // this.load.image('bulletArs','assets/bulletArs.png')
+          // this.load.image('circleBullet','assets/circleBullet0.png')
+          // this.load.image('fireGranade','assets/circleBullet.png')
+          // this.load.image('virusOff','assets/virusOff.png')
+          // this.load.image('walker0','assets/walker0b.png')
+          // this.load.image('walker1','assets/walker1b.png')
+          // this.load.image('walker2','assets/walker2b.png')
+          // this.load.image('walker3','assets/walker3b.png')
+          // this.load.image('walker4','assets/walker4b.png')
+          // this.load.image('runner0','assets/runner0b.png')
+          // this.load.image('runner1','assets/runner1b.png')
+          // this.load.image('runner2','assets/runner2b.png')
+          // this.load.image('runner3','assets/runner3b.png')
+          // this.load.image('runner4','assets/runner4b.png')
+          // this.load.image('failed0','assets/failing0b.png')
+          // this.load.image('failed1','assets/fallen0b.png')
+          // this.load.image('granade','assets/granade0a.png')
+          // this.load.image('standStay','assets/standStay.png')
+          // this.load.image('sitStay','assets/sitStay.png')
+          // this.load.image('handStay','assets/handStay.png')
+          // this.load.image('stepStay','assets/stepStay.png')
+          // this.load.image('gunStay','assets/gunStay.png')
+          // this.load.image('blackRailway','assets/blackRailway1.png')
+          // this.load.image('explode1','assets/explode1.png')
+          // this.load.image('explode2','assets/explode2.png')
+          // this.load.image('explode3','assets/explode3.png')
+          // this.load.image('explode4','assets/explode4.png')
+          // this.load.image('explode5','assets/explode5.png')
+          // this.load.image('explode6','assets/explode6.png')
+          // this.load.image('explode7','assets/explode7.png')
+          // this.load.image('explode8','assets/explode8.png')
+          // this.load.image('explode9','assets/explode9.png')
+          // this.load.image('explode10','assets/explode10.png')
+          // this.load.image('explode11','assets/explode11.png')
+          // this.load.image('explode12','assets/explode12.png')
+          // this.load.image('explode13','assets/explode13.png')
+          // this.load.image('explode14','assets/explode14.png')
+          // this.load.image('explode15','assets/explode15.png')
+          // this.load.image('explode16','assets/explode16.png')
+          // this.load.image('explode17','assets/explode17.png')
+          // this.load.image('explode18','assets/explode18.png')
+          // this.load.image('explode19','assets/explode19.png')
+          // this.load.image('explode20','assets/explode20.png')
+          // this.load.image('explode21','assets/explode21.png')
+          // this.load.image('explode22','assets/explode22.png')
+          // this.load.image('explode23','assets/explode23.png')
+          // this.load.image('bigTree','assets/bigTree.png')
+          // this.load.image('midleTree','assets/midleTree.png')
+          // this.load.image('rogaBush','assets/rogaBush_B.png')
+          // this.load.image('rosaBush','assets/rosaBush_B.png')
+          // this.load.image('ovalBush','assets/ovalBush_B.png')
+          // this.load.image('rectBush','assets/rectBush.png')
+          // this.load.image('scheben1','assets/scheben11.png')
+          // this.load.image('bulletStrike0','assets/bulletStrike0a.png')
+          // this.load.image('bulletStrike1','assets/bulletStrike1a.png')
+          // this.load.image('bulletStrike2','assets/bulletStrike2a.png')
+          // this.load.image('bulletStrike3','assets/bulletStrike3a.png')
+          // this.load.image('bulletStrike4','assets/bulletStrike4a.png')
+          // this.load.image('bulletStrike5','assets/bulletStrike5a.png')
+          // this.load.image('blankShoot','assets/blankShoot.png')
+          // this.load.image('blankShoot2','assets/blankShoot2.png')
+          // this.load.image('empty','assets/empty.png')
+          // this.load.image('hand','assets/hand.png')
       }
       create() {
           addLoading("isGameAtlas", 1);

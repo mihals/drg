@@ -6,11 +6,13 @@ import * as Phaser from "phaser";
 declare global{
      var gYsdk;
      var gPlayer;
+     var gData;
      var lang: string;
      
      var currentLevel: lvlNames;
      var currentResult: GameState;
      var achievments: Array<LvlState>;
+     var numStars:number;
      var myUIBlocks:UIBlocks;
      var currentScene:Phaser.Scene;
      var currentSceneName:string;

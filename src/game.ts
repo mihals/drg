@@ -25,6 +25,7 @@ import { Bullet } from './bullets';
 import { Bullets } from './bullets';
 import { Loner } from './loner';
 import { TwoGuns } from './twoGuns';
+import { DemoF } from './demoF';
 import { Forest } from './forest';
 
 //let glPreviewMode:boolean
@@ -291,7 +292,9 @@ export class Demo extends Phaser.Scene
     create ()
     {
         globalThis.currentScene = this;
-        globalThis.currentSceneName = "demo";
+        globalThis.currentSceneName = lvlNames.Demo;
+
+        currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;        
         
         if (this.gameState.autoPilot) {
             this.gameState.waitAction = true
@@ -327,14 +330,14 @@ export class Demo extends Phaser.Scene
                 })
         }
         
-        this.add.tileSprite(500,225,1000,450,'bg')
+        this.add.tileSprite(500,225,1000,450,'atlas0','bg')
 
         this.shooterCont = this.add.container(400,418);
-        this.shooterCont.add(this.add.image(0,0,'gun'))
+        this.shooterCont.add(this.add.image(0,0,'atlas0','gun'))
         
-        this.leftBulletArs = this.add.image(-16,3,'bulletArs');
+        this.leftBulletArs = this.add.image(-16,3,'atlas0','bulletArs');
         this.shooterCont.add(this.leftBulletArs)
-        this.rightBulletArs = this.add.image(16,3,'bulletArs');
+        this.rightBulletArs = this.add.image(16,3,'atlas0','bulletArs');
         this.shooterCont.add(this.rightBulletArs)
         this.shooterCont.setSize(80,40)
         this.shooterContBody = this.physics.world.enableBody(this.shooterCont,
@@ -369,13 +372,13 @@ export class Demo extends Phaser.Scene
         this.anims.create({
             key: 'strike',
             frames: [
-                { key: 'bulletStrike0' },
-                { key: 'bulletStrike1' },
-                { key: 'bulletStrike2' },
-                { key: 'bulletStrike3' },
-                { key: 'bulletStrike4' },
-                { key: 'bulletStrike5' },
-                { key: 'empty' }
+                {key:"atlas0", frame: 'bulletStrike0' },
+                {key:"atlas0", frame: 'bulletStrike1' },
+                {key:"atlas0", frame: 'bulletStrike2' },
+                {key:"atlas0", frame: 'bulletStrike3' },
+                {key:"atlas0", frame: 'bulletStrike4' },
+                {key:"atlas0", frame: 'bulletStrike5' },
+                {key:"atlas0", frame: 'empty' }
             ],
             frameRate: 5,
             //repeat: -1
@@ -386,42 +389,42 @@ export class Demo extends Phaser.Scene
 
         this.staticGrp = this.physics.add.staticGroup();
 
-        this.staticGrp.create(125,158,'ovalBush').
+        this.staticGrp.create(125,158,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(211,158,'ovalBush').
+        this.staticGrp.create(211,158,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(267,148,'ovalBush').
+        this.staticGrp.create(267,148,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(400,201,'rogaBush').
+        this.staticGrp.create(400,201,'atlas0','rogaBush').
             setBodySize(34,24).setOffset(0,0).setDepth(10);
-        this.staticGrp.create(452,192,'rogaBush').
+        this.staticGrp.create(452,192,'atlas0','rogaBush').
             setBodySize(34,24).setOffset(0,0).setDepth(10);
-        this.staticGrp.create(708,196,'rosaBush').
+        this.staticGrp.create(708,196,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(750,202,'rosaBush').
+        this.staticGrp.create(750,202,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(846,199,'rosaBush').
+        this.staticGrp.create(846,199,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(375,64,'bigTree').
+        this.staticGrp.create(375,64,'atlas0','bigTree').
             setBodySize(94,60).setOffset(0,0).setDepth(8);
-        this.staticGrp.create(621,50,'midleTree').
+        this.staticGrp.create(621,50,'atlas0','midleTree').
             setBodySize(92,60).setOffset(0,0).setDepth(5);
-        this.staticGrp.create(945,250,'rectBush').
+        this.staticGrp.create(945,250,'atlas0','rectBush').
             setBodySize(42,16).setOffset(0,0).setDepth(5);
 
         this.bulletsGrp = new Bullets(this)
 
         this.physics.add.collider(this.staticGrp,this.bulletsGrp,
             (stat:Phaser.Types.Physics.Arcade.GameObjectWithStaticBody,bullet:Bullet)=>{
-                this.add.sprite(stat.body.center.x,stat.body.bottom,'bulletStrike0').
+                this.add.sprite(stat.body.center.x,stat.body.bottom,'atlas0','bulletStrike0').
                     setDepth(11).anims.play({key:'strike', startFrame:0})
                 bullet.body.reset(0,-32);
                 bullet.setActive(false).setVisible(false);
         })
 
         this.bigBulletsGrp = this.physics.add.staticGroup()
-        this.bigBulletsGrp.create(94,426,'bigBullet').setData('isFull',true)
-        this.bigBulletsGrp.create(790,426,'bigBullet').setData('isFull',true)
+        this.bigBulletsGrp.create(94,426,'atlas0','bigBullet').setData('isFull',true)
+        this.bigBulletsGrp.create(790,426,'atlas0','bigBullet').setData('isFull',true)
 
         this.physics.add.overlap(this.shooterCont, this.bigBulletsGrp,
             (shooterCont, bigBullet: Phaser.Types.Physics.Arcade.GameObjectWithStaticBody) => {
@@ -441,20 +444,22 @@ export class Demo extends Phaser.Scene
         const { world } = this.physics;
         this.bulettCounter = 0;
         this.shootOn = false
+
+        this.railway = this.physics.add.staticImage(44,225,'atlas1','railway');
         
         this.enemies = new Enemies(this.bulletsGrp);
 
         this.enemies.createGroup('demo',0,0,0)
 
-        this.railway = this.physics.add.staticImage(44,225,'railway');
+        
         
         this.cursors = this.input.keyboard.createCursorKeys();
         this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
-        this.rwExplode = this.add.sprite(43,225,'empty');
+        this.rwExplode = this.add.sprite(43,225,'atlas0','empty');
 
-        this.fireGranade =  this.add.image(-100,-100,'fireGranade')
+        this.fireGranade =  this.add.image(-100,-100,'atlas0','fireGranade')
 
-        this.add.tileSprite(500,438,1000,24,'scheben1')
+        this.add.tileSprite(500,438,1000,24,'atlas0','scheben1')
         
         this.cameras.main.startFollow(this.shooterCont)
         if(this.gameState.autoPilot) this.scene.pause()
@@ -491,6 +496,10 @@ export class Demo extends Phaser.Scene
         globalThis.currentResult = GameState.Gone
         this.currentGameState = GameState.Gone
         this.isPreview =true
+
+        // let fromAtlas1 = this.add.image(30,30,"myTexture",'bg1')
+        // let fromAtlas2 = this.add.image(30,30,"myTexture",'bulletArs')
+        // console.log(fromAtlas1.alpha,fromAtlas2.alpha)
     }
 
     update(time: number, delta: number): void {
@@ -629,7 +638,7 @@ export class Demo extends Phaser.Scene
                 this.rwExplode.play({ key: 'rwExplode', startFrame: 0 })
                 this.rwExplode.setAlpha(1)
                 this.rwExplode.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                    this.railway.setTexture('blackRailway');
+                    this.railway.setTexture('atlas1','blackRailway');
                     this.explodeTween = this.tweens.add({
                         targets: this.rwExplode,
                         alpha: 0,
@@ -675,7 +684,7 @@ export class Demo extends Phaser.Scene
         
         this.enemiesIsStoped = false
         this.fireGranade.setPosition(-100, -100)
-        this.railway.setTexture('railway')
+        this.railway.setTexture('atlas1','railway')
         this.shootBullets = 100;
         this.leftBulletArs.setCrop();
         (this.bigBulletsGrp.getChildren()[0] as
@@ -765,7 +774,7 @@ export class Demo extends Phaser.Scene
         rect.clear()
         let centerToughtRect = this.add.image(400,228,'centerToughtRect').setAlpha(0)
         
-        let hand = this.add.image(210,280,'hand').setAlpha(0)
+        let hand = this.add.image(210,280,'atlas0', 'hand').setAlpha(0)
 
         const bubbleImg = this.add.image(186,148,'bubble').setDepth(21).setAlpha(0)
         const leftBubbleTxt = this.add.text(0, 0, currentTexts.leftTap,
@@ -1282,21 +1291,21 @@ export function startGame(){
     
         type: Phaser.WEBGL,
         //transparent: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#bfc874',
         width: 800,
         height: 450,
         parent: 'gameContainer',
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true,
+                debug: false,
             }
         },
         scale: {
             autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
             mode: Phaser.Scale.FIT
           },
-        scene: [Preloader, Demo, Loner, TwoGuns, Forest],
+        scene: [Preloader, Demo, Loner, TwoGuns,DemoF, Forest],
         //render :render,
     };
     myGame = new Phaser.Game(config);
@@ -1387,13 +1396,24 @@ function addLoading(name, value) {
     if (!Object.values(loadings).includes(-1)) {
         globalThis.myUIBlocks = new UIBlocks()
 
+
+
         let locAchievments:Array<number>
+        let remoteAchievments:Array<number>
+
+        try {
+            // Показываем SDK, что игра загрузилась и можно начинать играть.
+            if (globalThis.gYsdk.features.LoadingAPI) {
+                globalThis.gYsdk.features.LoadingAPI.ready();
+            }
+        }
+        catch (err) { }
 
         try{
             locAchievments = JSON.parse(localStorage.getItem("lvlsData"))
         }
         catch(err){
-            locAchievments = [-1,-1,-1]
+            locAchievments = [-1,-1,-1,-1,-1]
         }
 
         for( let i=0; i < locAchievments.length; i++){
@@ -1410,15 +1430,30 @@ function addLoading(name, value) {
             }
         }
 
+        if(loadings.isPlayerData == 1){
+            try{
+                let data = globalThis.gPlayer.getData()
+                globalThis.achievments = data.achievments
+            }catch(err){
+
+            }
+        }
+
+        //testFunc([1,1,1,1,-1,-1],"en")
+
         // это надо закомментировать после создания Loner
-        globalThis.currentLevel = lvlNames.TwoGuns;
-            myGame.scene.start(lvlNames.TwoGuns)
+        globalThis.achievments = [0,-1,-1,-1,-1,-1]
+        globalThis.lang = 'ru'
+        globalThis.myUIBlocks.showSummary(20,19,GameState.Win)
+        //myGame.scene.start(lvlNames.DemoF)
         return;
         
         // если нулевой уровень (учебка) ещё не проходился, запускаем его
         if (globalThis.achievments[0] == LvlState.NonAttempted) {
             globalThis.currentLevel = lvlNames.Demo;
             myGame.scene.start("demo")
+        }else{
+            globalThis.myUIBlocks.showBaseWnd(achievments,lang)
         }
     }
 }
@@ -1430,7 +1465,7 @@ export function initApp(YaGames) {
     //let remotecAchievments:Array<number>;
     // значение по умолчанию
     globalThis.lang = "ru";
-    globalThis.achievments =[-1,-1,-1];
+    globalThis.achievments =[-1,-1,-1,-1,-1,-1];
     currentTexts = ruTexts;
     
     // запускаем игру и загружаем ассеты в сцене Preload
@@ -1476,23 +1511,24 @@ export function initApp(YaGames) {
             //         }
             //     }
             // })
-            addLoading('isAdvFinish', 1)
+            addLoading('isAdvFinish', 0)
             ysdk.getPlayer().then(player => {
                 globalThis.gPlayer = player;
                 player.getData().then(data => {
                     try {
+                        gData = data;
                         globalThis.achievments = JSON.parse(data.lvlsData)
                         addLoading('isPlayerData', 1)
                     } catch (err) {
-                        globalThis.achievments = [-1, -1, -1]
+                        globalThis.achievments = [-1,-1,-1,-1,-1,-1]
                         addLoading('isPlayerData', 0)
                     }
                 }).catch(err => {
-                    globalThis.achievments = [-1, -1, -1]
+                    globalThis.achievments = [-1,-1,-1,-1,-1,-1]
                     addLoading('isPlayerData', 0)
                 })
             }).catch(err => {
-                globalThis.achievments = [-1, -1, -1]
+                globalThis.achievments = [-1,-1,-1,-1,-1,-1]
                 addLoading('isPlayerData', 0)
             });
             
@@ -1501,12 +1537,10 @@ export function initApp(YaGames) {
             addLoading('isSDKLoaded', 0)
             addLoading('isPlayerData', 0)
             addLoading('isAdvFinish', 0)
-            globalThis.achievments = [-1, -1, -1]
+            globalThis.achievments = [-1,-1,-1,-1,-1,-1]
             globalThis.lang = "ru"
             currentTexts =ruTexts;
         });
-
-        
 }
 
 export function hideModal(level:lvlNames){
@@ -1517,6 +1551,13 @@ export function hideModal(level:lvlNames){
     myGame.scene.add("demo",Demo,true);
 };
 
+/** функция для тестирования */
+function testFunc(achievments:Array<LvlState>,lang:string){
+    // globalThis.achievments = achievments;
+    // globalThis.lang = lang
+    globalThis.myUIBlocks.showBaseWnd(achievments,lang)
+}
+
 class Preloader extends Phaser.Scene
 {
     constructor(){
@@ -1524,78 +1565,90 @@ class Preloader extends Phaser.Scene
     }
 
     preload(){
-        this.load.image('bg','assets/bg5.png')
-        this.load.image('railway','assets/railway4.png')
-        this.load.image('gun','assets/gun1.png')
-        this.load.image('blackBot','assets/blackBot.png')
-        this.load.image('bullet','assets/bullet0.png')
-        this.load.image('bigBullet','assets/bigBullet4.png')
-        this.load.image('bulletArs','assets/bulletArs.png')
-        this.load.image('circleBullet','assets/circleBullet0.png')
-        this.load.image('fireGranade','assets/circleBullet.png')
-        this.load.image('virusOff','assets/virusOff.png')
-        this.load.image('walker0','assets/walker0b.png')
-        this.load.image('walker1','assets/walker1b.png')
-        this.load.image('walker2','assets/walker2b.png')
-        this.load.image('walker3','assets/walker3b.png')
-        this.load.image('walker4','assets/walker4b.png')
-        this.load.image('runner0','assets/runner0b.png')
-        this.load.image('runner1','assets/runner1b.png')
-        this.load.image('runner2','assets/runner2b.png')
-        this.load.image('runner3','assets/runner3b.png')
-        this.load.image('runner4','assets/runner4b.png')
-        this.load.image('failed0','assets/failing0b.png')
-        this.load.image('failed1','assets/fallen0b.png')
-        this.load.image('granade','assets/granade0a.png')
-        this.load.image('standStay','assets/standStay.png')
-        this.load.image('sitStay','assets/sitStay.png')
-        this.load.image('handStay','assets/handStay.png')
-        this.load.image('stepStay','assets/stepStay.png')
-        this.load.image('gunStay','assets/gunStay.png')
+        //this.load.atlas('myTexture',"assets/myTexture.png","assets/myTexture.json")
 
-        this.load.image('blackRailway','assets/blackRailway1.png')
-        this.load.image('explode1','assets/explode1.png')
-        this.load.image('explode2','assets/explode2.png')
-        this.load.image('explode3','assets/explode3.png')
-        this.load.image('explode4','assets/explode4.png')
-        this.load.image('explode5','assets/explode5.png')
-        this.load.image('explode6','assets/explode6.png')
-        this.load.image('explode7','assets/explode7.png')
-        this.load.image('explode8','assets/explode8.png')
-        this.load.image('explode9','assets/explode9.png')
-        this.load.image('explode10','assets/explode10.png')
-        this.load.image('explode11','assets/explode11.png')
-        this.load.image('explode12','assets/explode12.png')
-        this.load.image('explode13','assets/explode13.png')
-        this.load.image('explode14','assets/explode14.png')
-        this.load.image('explode15','assets/explode15.png')
-        this.load.image('explode16','assets/explode16.png')
-        this.load.image('explode17','assets/explode17.png')
-        this.load.image('explode18','assets/explode18.png')
-        this.load.image('explode19','assets/explode19.png')
-        this.load.image('explode20','assets/explode20.png')
-        this.load.image('explode21','assets/explode21.png')
-        this.load.image('explode22','assets/explode22.png')
-        this.load.image('explode23','assets/explode23.png')
-        this.load.image('bigTree','assets/bigTree.png')
-        this.load.image('midleTree','assets/midleTree.png')
-        this.load.image('rogaBush','assets/rogaBush_B.png')
-        this.load.image('rosaBush','assets/rosaBush_B.png')
-        this.load.image('ovalBush','assets/ovalBush_B.png')
-        this.load.image('rectBush','assets/rectBush.png')
-        this.load.image('scheben1','assets/scheben11.png')
+        this.load.atlas([{key: 'atlas0',
+        textureURL: 'atlas-0.png',
+        atlasURL: 'atlas-0.json'},
+        {key: 'atlas1',
+        textureURL: 'atlas-1.png',
+        atlasURL: 'atlas-1.json'}])
 
-        this.load.image('bulletStrike0','assets/bulletStrike0a.png')
-        this.load.image('bulletStrike1','assets/bulletStrike1a.png')
-        this.load.image('bulletStrike2','assets/bulletStrike2a.png')
-        this.load.image('bulletStrike3','assets/bulletStrike3a.png')
-        this.load.image('bulletStrike4','assets/bulletStrike4a.png')
-        this.load.image('bulletStrike5','assets/bulletStrike5a.png')
-        this.load.image('blankShoot','assets/blankShoot.png')
-        this.load.image('blankShoot2','assets/blankShoot2.png')
+        //'atlas0',["atlas-0.png","atlas-1.png"],["atlas-0.json","atlas-1.json"])
+        //this.load.atlas('atlas1',"atlas-1.png","atlas-1.json")
 
-        this.load.image('empty','assets/empty.png')
-        this.load.image('hand','assets/hand.png')
+        // this.load.image('bg','assets/bg5.png')
+        // this.load.image('railway','assets/railway4.png')
+        // this.load.image('gun','assets/gun1.png')
+        // this.load.image('blackBot','assets/blackBot.png')
+        // this.load.image('bullet','assets/bullet0.png')
+        // this.load.image('bigBullet','assets/bigBullet4.png')
+        // this.load.image('bulletArs','assets/bulletArs.png')
+        // this.load.image('circleBullet','assets/circleBullet0.png')
+        // this.load.image('fireGranade','assets/circleBullet.png')
+        // this.load.image('virusOff','assets/virusOff.png')
+        // this.load.image('walker0','assets/walker0b.png')
+        // this.load.image('walker1','assets/walker1b.png')
+        // this.load.image('walker2','assets/walker2b.png')
+        // this.load.image('walker3','assets/walker3b.png')
+        // this.load.image('walker4','assets/walker4b.png')
+        // this.load.image('runner0','assets/runner0b.png')
+        // this.load.image('runner1','assets/runner1b.png')
+        // this.load.image('runner2','assets/runner2b.png')
+        // this.load.image('runner3','assets/runner3b.png')
+        // this.load.image('runner4','assets/runner4b.png')
+        // this.load.image('failed0','assets/failing0b.png')
+        // this.load.image('failed1','assets/fallen0b.png')
+        // this.load.image('granade','assets/granade0a.png')
+        // this.load.image('standStay','assets/standStay.png')
+        // this.load.image('sitStay','assets/sitStay.png')
+        // this.load.image('handStay','assets/handStay.png')
+        // this.load.image('stepStay','assets/stepStay.png')
+        // this.load.image('gunStay','assets/gunStay.png')
+
+        // this.load.image('blackRailway','assets/blackRailway1.png')
+        // this.load.image('explode1','assets/explode1.png')
+        // this.load.image('explode2','assets/explode2.png')
+        // this.load.image('explode3','assets/explode3.png')
+        // this.load.image('explode4','assets/explode4.png')
+        // this.load.image('explode5','assets/explode5.png')
+        // this.load.image('explode6','assets/explode6.png')
+        // this.load.image('explode7','assets/explode7.png')
+        // this.load.image('explode8','assets/explode8.png')
+        // this.load.image('explode9','assets/explode9.png')
+        // this.load.image('explode10','assets/explode10.png')
+        // this.load.image('explode11','assets/explode11.png')
+        // this.load.image('explode12','assets/explode12.png')
+        // this.load.image('explode13','assets/explode13.png')
+        // this.load.image('explode14','assets/explode14.png')
+        // this.load.image('explode15','assets/explode15.png')
+        // this.load.image('explode16','assets/explode16.png')
+        // this.load.image('explode17','assets/explode17.png')
+        // this.load.image('explode18','assets/explode18.png')
+        // this.load.image('explode19','assets/explode19.png')
+        // this.load.image('explode20','assets/explode20.png')
+        // this.load.image('explode21','assets/explode21.png')
+        // this.load.image('explode22','assets/explode22.png')
+        // this.load.image('explode23','assets/explode23.png')
+        // this.load.image('bigTree','assets/bigTree.png')
+        // this.load.image('midleTree','assets/midleTree.png')
+        // this.load.image('rogaBush','assets/rogaBush_B.png')
+        // this.load.image('rosaBush','assets/rosaBush_B.png')
+        // this.load.image('ovalBush','assets/ovalBush_B.png')
+        // this.load.image('rectBush','assets/rectBush.png')
+        // this.load.image('scheben1','assets/scheben11.png')
+
+        // this.load.image('bulletStrike0','assets/bulletStrike0a.png')
+        // this.load.image('bulletStrike1','assets/bulletStrike1a.png')
+        // this.load.image('bulletStrike2','assets/bulletStrike2a.png')
+        // this.load.image('bulletStrike3','assets/bulletStrike3a.png')
+        // this.load.image('bulletStrike4','assets/bulletStrike4a.png')
+        // this.load.image('bulletStrike5','assets/bulletStrike5a.png')
+        // this.load.image('blankShoot','assets/blankShoot.png')
+        // this.load.image('blankShoot2','assets/blankShoot2.png')
+
+        // this.load.image('empty','assets/empty.png')
+        // this.load.image('hand','assets/hand.png')
     }
 
     create(){

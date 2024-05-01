@@ -13,21 +13,21 @@ export class EnemiesF extends Phaser.Physics.Arcade.Group
         this.scene.anims.create({
             key : 'walkF',
             frames : [
-                { key: 'walkerF1' },
-                { key: 'walkerF2' },
-                { key: 'walkerF3' },
-                { key: 'walkerF4' },
-                { key: 'walkerF5' },
-                { key: 'walkerF4' },
-                { key: 'walkerF3' },
-                { key: 'walkerF2' }
+                {key:"atlas1", frame: 'walkerF1' },
+                {key:"atlas1", frame: 'walkerF2' },
+                {key:"atlas1", frame: 'walkerF3' },
+                {key:"atlas1", frame: 'walkerF4' },
+                {key:"atlas1", frame: 'walkerF5' },
+                {key:"atlas1", frame: 'walkerF4' },
+                {key:"atlas1", frame: 'walkerF3' },
+                {key:"atlas1", frame: 'walkerF2' }
             ],
             frameRate: 5,
             repeat: -1
         })
         
         this.createMultiple({
-            frameQuantity: 25,
+            frameQuantity: 60,
             key: 'enemyF',
             setXY: {x:-100,y: 0},
             active: false,
@@ -56,22 +56,35 @@ export class EnemiesF extends Phaser.Physics.Arcade.Group
             walkerF.setRotation(-alpha)
             walkerF.setData('offSide', true);
             walkerF.alpha = 0;
-            tmpArr.push(walkerF)
+            walkerF.play('walkF')
+            walkerF.state = ''
+            this.scene.physics.moveTo(walkerF,400,450,5)
+            this.scene.tweens.add({
+                targets:walkerF,
+                alpha: { value: 1 },
+                duration: 2000,
+                // onComplete: () => {
+                //     walkerF.setData('offSide', false);
+                //     walkerF.play('walkF')
+                    
+                // }
+            })
+            //tmpArr.push(walkerF)
             
         }
 
-        tmpArr.forEach((enemyF) => {
-            this.scene.tweens.add({
-                targets:enemyF,
-                alpha: { value: 1 },
-                duration: 2000,
-                onComplete: () => {
-                    enemyF.setData('offSide', false);
-                    enemyF.play('walkF')
-                    this.scene.physics.moveTo(enemyF,400,450,5)
-                }
-            })
-        })
+        // tmpArr.forEach((enemyF) => {
+        //     this.scene.tweens.add({
+        //         targets:enemyF,
+        //         alpha: { value: 1 },
+        //         duration: 2000,
+        //         onComplete: () => {
+        //             enemyF.setData('offSide', false);
+        //             enemyF.play('walkF')
+        //             this.scene.physics.moveTo(enemyF,400,450,5)
+        //         }
+        //     })
+        // })
     }
 
     stopEnemies(){
@@ -81,6 +94,17 @@ export class EnemiesF extends Phaser.Physics.Arcade.Group
             (enemy:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) => {
                 enemy.body.setVelocity(0);
                 enemy.anims.stop();
+        })
+    }
+
+    clearEnemies(){
+        let activeEnemyArr:Array<Phaser.Types.Physics.Arcade.SpriteWithDynamicBody> = 
+            this.getMatching("active",true);
+        activeEnemyArr.forEach(
+            (enemy:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) => {
+                enemy.setActive(false).setVisible(false);
+                enemy.state = ''
+                enemy.body.reset(-100,0)
         })
     }
 

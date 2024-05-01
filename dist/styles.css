@@ -8,8 +8,8 @@ body {background-image: url('./assets/bg5.png'); background-repeat: repeat;
 canvas {padding: 0; margin: 0;}
 #loaderCont {width: 1; height: 1; position: absolute; top:-10; left: -10;}
 #modalContainer {
-     /* display: none;
-     visibility: hidden; */
+     display: none;
+     visibility: hidden; 
      position: fixed;
      top: 0;
      left: 0;

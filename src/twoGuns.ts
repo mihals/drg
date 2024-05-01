@@ -200,16 +200,16 @@ export class TwoGuns extends Phaser.Scene
 
         this.indCounterArr = 0;
         
-        this.add.tileSprite(500,225,1000,450,'bg')
+        this.add.tileSprite(500,225,1000,450,'atlas0','bg')
 
         //this.blackBot = this.physics.add.image(400,418,'blackBot');
 
         this.shooterCont = this.add.container(400,418);
-        this.shooterCont.add(this.add.image(0,0,'gun'))
+        this.shooterCont.add(this.add.image(0,0,'atlas0','gun'))
         
-        this.leftBulletArs = this.add.image(-16,3,'bulletArs');
+        this.leftBulletArs = this.add.image(-16,3,'atlas0','bulletArs');
         this.shooterCont.add(this.leftBulletArs)
-        this.rightBulletArs = this.add.image(16,3,'bulletArs');
+        this.rightBulletArs = this.add.image(16,3,'atlas0','bulletArs');
         this.shooterCont.add(this.rightBulletArs)
         this.shooterCont.setSize(80,40)
         this.shooterContBody = this.physics.world.enableBody(this.shooterCont,
@@ -218,10 +218,10 @@ export class TwoGuns extends Phaser.Scene
         this.shooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
         
         this.bbShooterCont = this.add.container(400,418);
-        this.bbShooterCont.add(this.add.image(0,0,'blackBot'))
-        this.bbLeftBulletArs = this.add.image(-16,3,'bulletArs');
+        this.bbShooterCont.add(this.add.image(0,0,'atlas0','blackBot'))
+        this.bbLeftBulletArs = this.add.image(-16,3,'atlas0','bulletArs');
         this.bbShooterCont.add(this.bbLeftBulletArs)
-        this.bbRightBulletArs = this.add.image(16,3,'bulletArs');
+        this.bbRightBulletArs = this.add.image(16,3,'atlas0','bulletArs');
         this.bbShooterCont.add(this.bbRightBulletArs)
         this.bbShooterCont.setSize(80,40)
         this.bbShooterContBody = this.physics.world.enableBody(this.bbShooterCont,
@@ -263,13 +263,13 @@ export class TwoGuns extends Phaser.Scene
         this.anims.create({
             key: 'strike',
             frames: [
-                { key: 'bulletStrike0' },
-                { key: 'bulletStrike1' },
-                { key: 'bulletStrike2' },
-                { key: 'bulletStrike3' },
-                { key: 'bulletStrike4' },
-                { key: 'bulletStrike5' },
-                { key: 'empty' }
+                {key:"atlas0", frame: 'bulletStrike0' },
+                {key:"atlas0", frame: 'bulletStrike1' },
+                {key:"atlas0", frame: 'bulletStrike2' },
+                {key:"atlas0", frame: 'bulletStrike3' },
+                {key:"atlas0", frame: 'bulletStrike4' },
+                {key:"atlas0", frame: 'bulletStrike5' },
+                {key:"atlas0", frame: 'empty' }
             ],
             frameRate: 5,
             //repeat: -1
@@ -280,27 +280,27 @@ export class TwoGuns extends Phaser.Scene
 
         this.staticGrp = this.physics.add.staticGroup();
 
-        this.staticGrp.create(125,158,'ovalBush').
+        this.staticGrp.create(125,158,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(211,158,'ovalBush').
+        this.staticGrp.create(211,158,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(267,148,'ovalBush').
+        this.staticGrp.create(267,148,'atlas0','ovalBush').
             setBodySize(30,24).setOffset(4,2).setDepth(8);
-        this.staticGrp.create(400,201,'rogaBush').
+        this.staticGrp.create(400,201,'atlas0','rogaBush').
             setBodySize(34,24).setOffset(0,0).setDepth(10);
-        this.staticGrp.create(452,192,'rogaBush').
+        this.staticGrp.create(452,192,'atlas0','rogaBush').
             setBodySize(34,24).setOffset(0,0).setDepth(10);
-        this.staticGrp.create(708,196,'rosaBush').
+        this.staticGrp.create(708,196,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(750,202,'rosaBush').
+        this.staticGrp.create(750,202,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(846,199,'rosaBush').
+        this.staticGrp.create(846,199,'atlas0','rosaBush').
             setBodySize(42,16).setOffset(9,0).setDepth(10);
-        this.staticGrp.create(375,64,'bigTree').
+        this.staticGrp.create(375,64,'atlas0','bigTree').
             setBodySize(94,60).setOffset(0,0).setDepth(8);
-        this.staticGrp.create(621,50,'midleTree').
+        this.staticGrp.create(621,50,'atlas0','midleTree').
             setBodySize(92,60).setOffset(0,0).setDepth(5);
-        this.staticGrp.create(945,250,'rectBush').
+        this.staticGrp.create(945,250,'atlas0','rectBush').
             setBodySize(42,16).setOffset(0,0).setDepth(5);
 
         this.bulletsGrp = new Bullets(this)
@@ -340,15 +340,15 @@ export class TwoGuns extends Phaser.Scene
 
         this.enemies.createGroup('loner',0,0,0)
 
-        this.railway = this.physics.add.staticImage(44,225,'railway');
+        this.railway = this.physics.add.staticImage(44,225,'atlas1','railway');
         
         this.cursors = this.input.keyboard.createCursorKeys();
         this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
-        this.rwExplode = this.add.sprite(43,225,'empty');
+        this.rwExplode = this.add.sprite(43,225,'atlas0','empty');
 
-        this.fireGranade =  this.add.image(-100,-100,'fireGranade')
+        this.fireGranade =  this.add.image(-100,-100,'atlas0','fireGranade')
 
-        this.add.tileSprite(500,438,1000,24,'scheben1')
+        this.add.tileSprite(500,438,1000,24,'atlas0','scheben1')
         
         this.cameras.main.startFollow(this.shooterCont)
 
@@ -383,7 +383,7 @@ export class TwoGuns extends Phaser.Scene
         
         this.shootBullets = 100;
 
-        this.emptyAnchor =  this.physics.add.image(0,0,"empty")
+        this.emptyAnchor =  this.physics.add.image(0,0,'atlas0',"empty")
         this.emptyAnchor.body.setVelocity(6,0)
     }
 
@@ -490,7 +490,7 @@ export class TwoGuns extends Phaser.Scene
                 this.rwExplode.play({ key: 'rwExplode', startFrame: 0 })
                 this.rwExplode.setAlpha(1)
                 this.rwExplode.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                    this.railway.setTexture('blackRailway');
+                    this.railway.setTexture('atlas1','blackRailway');
                     this.explodeTween = this.tweens.add({
                         targets: this.rwExplode,
                         alpha: 0,

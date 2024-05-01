@@ -29,30 +29,30 @@ export class Enemies
 
         this.myScene.anims.create({
             key: 'rwExplode',
+            defaultTextureKey:'atlas0',
             frames: [
-                { key: 'explode1' },
-                { key: 'explode2' },
-                { key: 'explode3' },
-                { key: 'explode4' },
-                { key: 'explode5' },
-                { key: 'explode6' },
-                { key: 'explode7' },
-                { key: 'explode8' },
-                { key: 'explode9' },
-                { key: 'explode10' },
-                { key: 'explode11' },
-                { key: 'explode12' },
-                { key: 'explode13' },
-                { key: 'explode14' },
-                { key: 'explode15' },
-                { key: 'explode16' },
-                { key: 'explode17' },
-                { key: 'explode18' },
-                { key: 'explode19' },
-                { key: 'explode20' },
-                { key: 'explode21' },
-                { key: 'explode22' },
-                { key: 'explode23' }
+                { key: 'atlas0', frame:'explode1'  },
+                { key: 'atlas0', frame:'explode2'  },
+                { key: 'atlas0', frame:'explode3'  },
+                { key: 'atlas0', frame:'explode4'  },
+                { key: 'atlas0', frame:'explode5'  },
+                { key: 'atlas0', frame:'explode6'  },
+                { key: 'atlas1', frame:'explode7'  },
+                { key: 'atlas1', frame:'explode8'  },
+                { key: 'atlas1', frame:'explode9'  },
+                { key: 'atlas0', frame:'explode10'  },
+                { key: 'atlas0', frame:'explode11'  },
+                { key: 'atlas0', frame:'explode12'  },
+                { key: 'atlas0', frame:'explode13'  },
+                { key: 'atlas0', frame:'explode15'  },
+                { key: 'atlas0', frame:'explode16'  },
+                { key: 'atlas0', frame:'explode17'  },
+                { key: 'atlas0', frame:'explode18'  },
+                { key: 'atlas0', frame:'explode19'  },
+                { key: 'atlas0', frame:'explode20'  },
+                { key: 'atlas0', frame:'explode21'  },
+                { key: 'atlas0', frame:'explode22'  },
+                { key: 'atlas0', frame:'explode23'  }
             ],
             frameRate: 5,
         });
@@ -60,11 +60,11 @@ export class Enemies
         this.myScene.anims.create({
             key: 'walk',
             frames: [
-                { key: 'walker0' },
-                { key: 'walker1' },
-                { key: 'walker2' },
-                { key: 'walker3' },
-                { key: 'walker4' }
+                { key: 'atlas0', frame:'walker0' },
+                { key: 'atlas0', frame:'walker1' },
+                { key: 'atlas0', frame:'walker2' },
+                { key: 'atlas0', frame:'walker3' },
+                { key: 'atlas0', frame:'walker4' }
             ],
             frameRate: 5,
             repeat: -1
@@ -72,11 +72,11 @@ export class Enemies
         this.myScene.anims.create({
             key: 'run',
             frames: [
-                { key: 'runner0' },
-                { key: 'runner1' },
-                { key: 'runner2' },
-                { key: 'runner3' },
-                { key: 'runner4' }
+                { key: 'atlas0',frame: 'runner0' },
+                { key: 'atlas0',frame: 'runner1' },
+                { key: 'atlas0',frame: 'runner2' },
+                { key: 'atlas0',frame: 'runner3' },
+                { key: 'atlas0',frame: 'runner4' }
             ],
             frameRate: 5,
             repeat: -1
@@ -84,9 +84,9 @@ export class Enemies
         this.myScene.anims.create({
             key: 'fallen',
             frames: [
-                { key: 'failed0' },
-                { key: 'failed1' },
-                { key: 'empty' }
+                {key: 'atlas0', frame: 'failed0' },
+                {key: 'atlas0', frame: 'failed1' },
+                {key: 'atlas0', frame: 'empty' }
             ],
             frameRate: 5
         });
@@ -184,10 +184,10 @@ export class Enemies
                 column.getChildren().forEach((enemy: Phaser.GameObjects.Sprite, ind, arr) => {
                     enemy.anims.stop()
                     let num = Phaser.Math.RND.integerInRange(0, 4)
-                    enemy.setTexture(this.stayStrArray[num])
+                    enemy.setTexture('atlas0', this.stayStrArray[num])
                 })
             })
-            this.firstWalker.setTexture('granade')
+            this.firstWalker.setTexture('atlas0','granade')
             return new Phaser.Geom.Point(this.firstWalker.x, this.firstWalker.y)
         }
         if (result == GameState.Win){

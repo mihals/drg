@@ -4,7 +4,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite
 {
     constructor (scene, x, y)
     {
-        super(scene, x, y, 'bullet');
+        super(scene, x, y,'atlas0', 'bullet');
     }
 
     fire (x, y, velocityX)
@@ -50,10 +50,10 @@ export class Bullets extends Phaser.Physics.Arcade.Group
         let anim = scene.anims.create({
             key: 'blankShoot',
             frames: [
-                { key: 'empty' },
-                { key: 'blankShoot' },
-                { key: 'blankShoot2' },
-                { key: 'empty' }
+                {key:"atlas0", frame: 'empty' },
+                {key:"atlas0", frame: 'blankShoot' },
+                {key:"atlas0", frame: 'blankShoot2' },
+                {key:"atlas0", frame: 'empty' }
             ],
             frameRate: 10,
         });
@@ -82,7 +82,7 @@ export class BulletF extends Phaser.Physics.Arcade.Sprite
 {
     constructor (scene, x, y)
     {
-        super(scene, x, y, 'bulletF');
+        super(scene, x, y,'atlas1', 'bulletF');
     }
 
     fire (x, y, velocityX, velocityY)
@@ -130,10 +130,10 @@ export class BulletsF extends Phaser.Physics.Arcade.Group
         let anim = scene.anims.create({
             key: 'blankShoot',
             frames: [
-                { key: 'empty' },
-                { key: 'blankShoot' },
-                { key: 'blankShoot2' },
-                { key: 'empty' }
+                {key:"atlas0", frame: 'empty' },
+                {key:"atlas0", frame: 'blankShoot' },
+                {key:"atlas0", frame: 'blankShoot2' },
+                {key:"atlas0", frame: 'empty' }
             ],
             frameRate: 10,
         });
