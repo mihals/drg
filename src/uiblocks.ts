@@ -228,6 +228,7 @@ export class UIBlocks {
         // if(locAchievments[1] == -1) content = this.myPhrases.bodyContent[0];
         // if(locAchievments[1] == 0) content = this.myPhrases.bodyContent[1];
         
+        
 
         let modalWnd = `
         <div id="modalWnd">
@@ -403,7 +404,7 @@ export class UIBlocks {
                         summaryTopTxt = lang == "ru" ? "Вы прошли уровень 'Учебка'." :
                             "Level 'Tutorial' completed.";
                         // если следующий уровень "Одиночка" уже пройден
-                        if (global.achievments[1] == 1) {
+                        if (globalThis.achievments[1] == 1) {
                             bodySummary = lang == "ru" ? " Если Вы захотите заменить бота, " +
                                 "пройдите уровень 'Одиночка' ещё раз." :
                                 "If you need to replace the Black Bot, complete the " +
@@ -455,7 +456,7 @@ export class UIBlocks {
                     // если "Учебка" ранее уже проходилась
                     else {
                         // если уровень "Одиночка" уже пройден
-                        if (global.achievments[1] == 1) {
+                        if (globalThis.achievments[1] == 1) {
                             bodySummary = lang == "ru" ? " Если Вы захотите заменить бота, " +
                                 "пройдите уровень 'Одиночка' ещё раз." :
                                 "If you need to replace the Black Bot, complete the " +
@@ -593,37 +594,74 @@ export class UIBlocks {
                             localStorage.setItem("lvlsData", lvlsDataStr)
                         } catch (err) { }
                         
-                        bodySummary = lang == "ru" ? "Вы получили вторую звезду!" +
+                        bodySummary = lang == "ru" ? "Вы получаете вторую звезду!" +
                             " Пройдите учебный уровень 'В лесу.', чтобы познакомиться с новой локацией." :
                             "Excellent! You get your second star. Complete the training level " +
                             "'In the forest.'to get to know the new location.";
-
-                        leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
-
-                        leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
-                                                ${leftBtnTxt}</button>`;
-
-                        rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-
-                        rightBtn = `<button class="lvlBottom" onclick=` +
-                            `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
-                                                ${rightBtnTxt}</button>`;
                     }
                     // если уровень "В два ствола" уже проходился ранее
-                    else{
+                    else {
                         summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' пройден!" :
-                        " Level 'Two guns.' completed.";
+                            " Level 'Two guns.' completed.";
+
+                        bodySummary = lang == "ru" ? " Пройдите учебный уровень 'В лесу.',"+
+                            " чтобы познакомиться с новой локацией." :
+                            " Complete the training level " +
+                            "'In the forest.'to get to know the new location.";
                     }
+
+                    leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
+
+                    leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
+                                                ${leftBtnTxt}</button>`;
+
+                    rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+
+                    rightBtn = `<button class="lvlBottom" onclick=` +
+                        `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                                ${rightBtnTxt}</button>`;
                 }
                 // уровень "В два ствола" не пройден
                 else {
-                    
+                    // если уровень "В два ствола" и ранее не проходился
+                    if (globalThis.achievments[2] != 1) {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                            "The level  'Two guns.' is not passed.";
 
+                        bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                            "перейти на новую локацию 'В лесу.'" :
+                            " Complete this level to get to know the new location 'In the forest.'";
+                    }
+                    else {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                            "The level  'Two guns.' is not passed.";
+
+                        bodySummary = lang == "ru" ? "Уровень 'В два ствола'" +
+                            " вами уже проходился ранее!" :
+                            "Level 'In two barrels ' you have already passed before.";
+                    }
+
+                    leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+
+                    leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('twoGuns')">
+                                            ${leftBtnTxt}</button>`;
+
+                    rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+
+                    rightBtn = `<button class="lvlBottom" onclick=` +
+                        `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                            ${rightBtnTxt}</button>`;
                 }
                 break;
         }
+
+        let locNumStars = 0;
     
-        
+        for(let i=0; i< globalThis.achievments.length; i++){
+            if((globalThis.achievments[i] == 1) && (i!=0) && (i!=3)){
+                locNumStars++;
+            }
+        }
         // let summaryTopTxt = (result == GameState.Win)? this.myPhrases.capSummaryWin :
         //     this.myPhrases.capSummaryLost;
         let replanish = (numEnemies == 0) ? 0 : Math.round(numBullets * 100 / numEnemies) / 100;
@@ -633,7 +671,7 @@ export class UIBlocks {
                     <p>${summaryTopTxt}</p>
                 </div>
                 <div id="summaryResult" >
-                    <div style="margin: 5px;"><img src="assets/pogon.png" class="pogonImg"></div>
+                    <div style="margin: 5px;"><img src="assets/pogon${locNumStars}.png" class="pogonImg"></div>
                     <div>
                         <ul>
                         <li>${this.myPhrases.destEnemy}&nbsp;

@@ -179,6 +179,7 @@ export class TwoGuns extends Phaser.Scene
     create ()
     {
         globalThis.currentLevel = lvlNames.TwoGuns;
+        globalThis.currentSceneName = lvlNames.TwoGuns
         globalThis.currentScene = this;
 
         try{
@@ -385,6 +386,8 @@ export class TwoGuns extends Phaser.Scene
 
         this.emptyAnchor =  this.physics.add.image(0,0,'atlas0',"empty")
         this.emptyAnchor.body.setVelocity(6,0)
+        this.currentAnchInd = 0;
+        this.bbShootBullets =100
     }
 
     update(time: number, delta: number): void {

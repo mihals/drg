@@ -27,7 +27,7 @@ export class EnemiesF extends Phaser.Physics.Arcade.Group
         })
         
         this.createMultiple({
-            frameQuantity: 60,
+            frameQuantity: 90,
             key: 'enemyF',
             setXY: {x:-100,y: 0},
             active: false,

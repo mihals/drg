@@ -107,6 +107,7 @@ export class DemoF extends Phaser.Scene
 
     create(){
         globalThis.currentLevel = lvlNames.DemoF;
+        globalThis.currentSceneName = lvlNames.DemoF
         globalThis.currentScene = this;
 
         // this.numEnemiesBefore =0;

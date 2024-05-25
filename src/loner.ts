@@ -164,6 +164,7 @@ export class Loner extends Phaser.Scene
     create ()
     {
         globalThis.currentLevel = lvlNames.Loner;
+        globalThis.currentSceneName = lvlNames.Loner
         globalThis.currentScene = this;
 
         currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;

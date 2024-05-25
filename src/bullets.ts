@@ -104,6 +104,7 @@ export class BulletF extends Phaser.Physics.Arcade.Sprite
         {
             this.setActive(false);
             this.setVisible(false);
+            this.body.reset(0, -100);
         }
     }
 }

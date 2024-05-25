@@ -1416,6 +1416,8 @@ function addLoading(name, value) {
             locAchievments = [-1,-1,-1,-1,-1]
         }
 
+        if(locAchievments == null) locAchievments = [-1,-1,-1,-1,-1]
+
         for( let i=0; i < locAchievments.length; i++){
             if(locAchievments[i] > globalThis.achievments[i]){
                 globalThis.achievments = locAchievments;
@@ -1442,10 +1444,13 @@ function addLoading(name, value) {
         //testFunc([1,1,1,1,-1,-1],"en")
 
         // это надо закомментировать после создания Loner
-        globalThis.achievments = [0,-1,-1,-1,-1,-1]
-        globalThis.lang = 'ru'
-        globalThis.myUIBlocks.showSummary(20,19,GameState.Win)
-        //myGame.scene.start(lvlNames.DemoF)
+        // localStorage.clear()
+        // globalThis.achievments = [1,1,-1,-1,-1,-1]
+        // globalThis.currentLevel = lvlNames.Demo
+        // globalThis.currentSceneName = lvlNames.Demo
+        // globalThis.lang = 'ru'
+        // globalThis.myUIBlocks.showSummary(20,19,GameState.Lost)
+        myGame.scene.start(lvlNames.Forest)
         return;
         
         // если нулевой уровень (учебка) ещё не проходился, запускаем его
