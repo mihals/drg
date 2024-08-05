@@ -128,7 +128,7 @@ export class TwoGuns extends Phaser.Scene
     flyingGranad:Phaser.Tweens.Tween
     staticLayer:Phaser.GameObjects.Layer
     infoText:Phaser.GameObjects.Text
-    fpsText:Phaser.GameObjects.Text
+    //fpsText:Phaser.GameObjects.Text
     inputText:Phaser.GameObjects.Text
     inputText2:Phaser.GameObjects.Text
     numBullets:number = 0;
@@ -182,6 +182,10 @@ export class TwoGuns extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.TwoGuns
         globalThis.currentScene = this;
 
+        this.bbShootOn = false;
+
+        document.body.style.backgroundImage = "url(assets/bg5.png)"
+
         try{
             let botData:BotData = JSON.parse(localStorage.getItem("botData"))
             /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
@@ -219,7 +223,8 @@ export class TwoGuns extends Phaser.Scene
         this.shooterContBody.body.setBoundsRectangle(new Phaser.Geom.Rectangle(80, 0, 910, 450))
         
         this.bbShooterCont = this.add.container(400,418);
-        this.bbShooterCont.add(this.add.image(0,0,'atlas0','blackBot'))
+        //this.bbShooterCont.add(this.add.image(0,0,'atlas0','blackBot'))
+        this.bbShooterCont.add(this.add.image(0,0,'blackBotMark'));
         this.bbLeftBulletArs = this.add.image(-16,3,'atlas0','bulletArs');
         this.bbShooterCont.add(this.bbLeftBulletArs)
         this.bbRightBulletArs = this.add.image(16,3,'atlas0','bulletArs');
@@ -257,7 +262,7 @@ export class TwoGuns extends Phaser.Scene
         //{ fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center',
         this.infoText = this.add.text(694,4,'').setStyle({fontFamily: 'Arial, Roboto',
             fill:'black', fontSize: '14px'}).setDepth(21);
-        this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
+        //this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
         this.inputText = this.add.text(150,40,'').setStyle({fill:'black'});
         this.inputText2 = this.add.text(150,60,'').setStyle({fill:'black'});
 
@@ -473,7 +478,7 @@ export class TwoGuns extends Phaser.Scene
 
         this.infoText.setText(currentTexts.ammo +`: ${this.shootBullets}`)
         //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
-        this.fpsText.setText(` FPS:  ${1000/delta}`)
+        //this.fpsText.setText(` FPS:  ${1000/delta}`)
     }
 
     // метод создающий твин летящей гранаты, после которого начинается

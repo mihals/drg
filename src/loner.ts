@@ -113,7 +113,7 @@ export class Loner extends Phaser.Scene
     flyingGranad:Phaser.Tweens.Tween
     staticLayer:Phaser.GameObjects.Layer
     infoText:Phaser.GameObjects.Text
-    fpsText:Phaser.GameObjects.Text
+    //fpsText:Phaser.GameObjects.Text
     inputText:Phaser.GameObjects.Text
     inputText2:Phaser.GameObjects.Text
     numBullets:number = 0;
@@ -167,6 +167,8 @@ export class Loner extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.Loner
         globalThis.currentScene = this;
 
+        document.body.style.backgroundImage = "url(assets/bg5.png)"
+
         currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
         
         this.add.tileSprite(500,225,1000,450,'atlas0','bg')
@@ -204,7 +206,7 @@ export class Loner extends Phaser.Scene
         //{ fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center',
         this.infoText = this.add.text(694,4,'').setStyle({fontFamily: 'Arial, Roboto',
             fill:'black', fontSize: '14px'}).setDepth(21);
-        this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
+        //this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
         this.inputText = this.add.text(150,40,'').setStyle({fill:'black'});
         this.inputText2 = this.add.text(150,60,'').setStyle({fill:'black'});
 
@@ -468,7 +470,7 @@ export class Loner extends Phaser.Scene
 
         this.infoText.setText(currentTexts.ammo +`: ${this.shootBullets}`)
         //this.fpsText.setText(` fps:  ${Math.round(1000/delta)}`)
-        this.fpsText.setText(` FPS:  ${1000/delta}`)
+        //this.fpsText.setText(` FPS:  ${1000/delta}`)
     }
 
     // метод создающий твин летящей гранаты, после которого начинается
@@ -574,6 +576,8 @@ export class Loner extends Phaser.Scene
         try{
             localStorage.setItem("botData",botDataJSON)
         }
-        catch{}
+        catch{
+            console.log("set botData failure")
+        }
     }
 }

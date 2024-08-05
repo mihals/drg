@@ -82,8 +82,10 @@ const ruPhrases : phrases = {
 
     "Пройдите учебный уровень 'В лесу.', чтобы познакомиться с новой локацией.",
 
-    "На уровне 'Оборона' Вам придётся защищаться от наседающих врагов. Пройдите его, "+
-    "чтобы получить третью звезду.",
+    "Уничтожьте тысячу врагов, чтобы пройти уровень 'Оборона'. Вам даётся на это "+
+    "200 патронов и добавляется 15 за каждые 10 уничтоженных врагов. "+
+    "Пройдите его, чтобы получить третью звезду.",
+
     "Пройдите уровень 'До последнего.', чтобы получить свою четвёртую звезду. "],
 
     bodyMsg :{
@@ -140,8 +142,9 @@ const enPhrases : phrases = {
     " which will try to repeat all your actions at the 'Loner' level." +
     " If you want to replace the bot, go through the 'Loner' level again.",
     "Complete the training level 'In the forest.'to get to know the new location.",
-    "At the 'Defense' level You will have to defend yourself from the pressing enemies. "+
-    "Go through it, to get the third star.",
+    "Kill a thousand enemies to complete the 'Defense' level. You are given "+
+    " 200 bullets for this and 15 are added for every 10  enemies killed. "+
+    "Pass it to get the third star.",
     "Complete the 'Every last.' level to get your fourth star."],
 
     bodyMsg :{
@@ -268,11 +271,6 @@ export class UIBlocks {
             <button class="lvlBottom" onclick="MyGame.startLevel('forest')"`
             + (locAchievments[3] < 1? " disabled":"") + `>
               ${this.myPhrases.forestBtn}</button>
-          </div>
-          <div style="align-self: center;">
-            <button class="lvlBottom" onclick="MyGame.startLevel('everyLast')"`
-            + (locAchievments[4] != 1? " disabled":"") + `>
-              ${this.myPhrases.everyLast}</button>
           </div>
         </div>
       </div>`
@@ -593,7 +591,7 @@ export class UIBlocks {
                         try {
                             localStorage.setItem("lvlsData", lvlsDataStr)
                         } catch (err) { }
-                        
+
                         bodySummary = lang == "ru" ? "Вы получаете вторую звезду!" +
                             " Пройдите учебный уровень 'В лесу.', чтобы познакомиться с новой локацией." :
                             "Excellent! You get your second star. Complete the training level " +
@@ -604,7 +602,7 @@ export class UIBlocks {
                         summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' пройден!" :
                             " Level 'Two guns.' completed.";
 
-                        bodySummary = lang == "ru" ? " Пройдите учебный уровень 'В лесу.',"+
+                        bodySummary = lang == "ru" ? " Пройдите учебный уровень 'В лесу.'," +
                             " чтобы познакомиться с новой локацией." :
                             " Complete the training level " +
                             "'In the forest.'to get to know the new location.";
@@ -653,12 +651,145 @@ export class UIBlocks {
                                             ${rightBtnTxt}</button>`;
                 }
                 break;
+            case lvlNames.DemoF:
+                // уровень "В лесу" пройден
+                if (result == GameState.Win) {
+                    summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' пройден!" :
+                        "Congratulation! Level 'In the forest.' completed.";
+                    // если уровень "В лесу" пройден впервые
+                    if (globalThis.achievments[3] != 1) {
+                        globalThis.achievments[3] = 1;
+                        lvlsDataStr = JSON.stringify(globalThis.achievments)
+
+                        try {
+                            globalThis.gPlayer.setData({ lvlsData: lvlsDataStr }).
+                                then(() => { });
+                        } catch (err) { }
+
+                        try {
+                            localStorage.setItem("lvlsData", lvlsDataStr)
+                        } catch (err) { }
+
+                        bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
+                            " Вам придётся уничтожить 1000 врагов при лимите патронов." :
+                            "Excellent! Complete the next level 'Defence'. " +
+                            "You will have to destroy 1000 enemies with a limit of ammo.";
+                    }
+                    // если уровень "В лесу" уже проходился ранее
+                    else {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' пройден!" :
+                            " Level 'In the forest.' completed.";
+
+                        bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
+                            " Вам придётся уничтожить 1000 врагов при лимите патронов." :
+                            "Excellent! Complete the next level 'Defence'. " +
+                            "You will have to destroy 1000 enemies with a limit of ammo.";
+                    }
+
+                    leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
+
+                    leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('forest')">
+                                                    ${leftBtnTxt}</button>`;
+
+                    rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+
+                    rightBtn = `<button class="lvlBottom" onclick=` +
+                        `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                                    ${rightBtnTxt}</button>`;
+                }
+                // уровень "В лесу" не пройден
+                else {
+                    // если уровень "В лесу" и ранее не проходился
+                    if (globalThis.achievments[3] != 1) {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                            "The level  'In the forest.' is not passed.";
+
+                        bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                            "перейти на новую локацию 'Оборона.'" :
+                            " Complete this level to get to know the new location 'Defence.'";
+                    }
+                    else {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                            "The level  'In the forest.' is not passed.";
+
+                        bodySummary = lang == "ru" ? "Уровень 'В лесу'" +
+                            " вами уже проходился ранее!" :
+                            "Level 'In the forest ' you have already passed before.";
+                    }
+
+                    leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+
+                    leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
+                                                ${leftBtnTxt}</button>`;
+
+                    rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+
+                    rightBtn = `<button class="lvlBottom" onclick=` +
+                        `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                                ${rightBtnTxt}</button>`;
+                }
+                break;
+            case lvlNames.Forest:
+                // уровень "Оборона" пройден
+                if (result == GameState.Win) {
+                    summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' пройден!" :
+                        "Congratulation! Level 'Defence.' completed.";
+                    // если уровень "Оборона" пройден впервые
+                    if (globalThis.achievments[4] != 1) {
+                        globalThis.achievments[4] = 1;
+                        lvlsDataStr = JSON.stringify(globalThis.achievments)
+
+                        try {
+                            globalThis.gPlayer.setData({ lvlsData: lvlsDataStr }).
+                                then(() => { });
+                        } catch (err) { }
+
+                        try {
+                            localStorage.setItem("lvlsData", lvlsDataStr)
+                        } catch (err) { }
+
+                        bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
+                            " Вам придётся уничтожить 1000 врагов при лимите патронов." :
+                            "Excellent! Complete the next level 'Defence'. " +
+                            "You will have to destroy 1000 enemies with a limit of ammo.";
+                    }
+                    // если уровень "Оборона" уже проходился ранее
+                    else {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' пройден!" :
+                            " Level 'Defence.' completed.";
+
+                        bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
+                            " вами уже проходился ранее!" :
+                            "Level 'Defence ' you have already passed before.";
+                    }
+                }
+                // уровень "Оборона" не пройден
+                else {
+                    // если уровень "Оборона" и ранее не проходился
+                    if (globalThis.achievments[4] != 1) {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                            "The level  'Defence.' is not passed.";
+
+                        bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                            "получить свою третью звезду.'" :
+                            " Complete this level to get your third star.";
+                    }
+                    else {
+                        summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                            "The level  'Defence.' is not passed.";
+
+                        bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
+                            " вами уже проходился ранее!" :
+                            "Level 'Defence ' you have already passed before.";
+                    }
+                }
+                break;
         }
 
         let locNumStars = 0;
-    
-        for(let i=0; i< globalThis.achievments.length; i++){
-            if((globalThis.achievments[i] == 1) && (i!=0) && (i!=3)){
+
+        for (let i = 0; i < globalThis.achievments.length; i++) {
+            if ((globalThis.achievments[i] == 1) && (i != 0) && (i != 3)) {
                 locNumStars++;
             }
         }
@@ -694,7 +825,7 @@ export class UIBlocks {
                 </div>
             </div>`
 
-        
+
         document.getElementById('modalContainer').innerHTML = content
         // document.getElementById("modalContainer").innerHTML = content;
         document.getElementById("modalContainer").style.visibility = "visible";

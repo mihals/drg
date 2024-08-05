@@ -110,6 +110,8 @@ export class DemoF extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.DemoF
         globalThis.currentScene = this;
 
+        document.body.style.backgroundImage = "url(assetsF/forestBg.png)"
+
         // this.numEnemiesBefore =0;
         // this.issueArr.forEach((element) => {
         //     this.numEnemiesBefore+=element.issue.length;
@@ -200,7 +202,7 @@ export class DemoF extends Phaser.Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.shootOn =false;
         this.pointerDownOn =true;
-        this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
+        //this.fpsText = this.add.text(150,20,'').setStyle({fill:'black'});
 
         this.enemiesGrp = new EnemiesF(this)
         this.bulletsGrp = new BulletsF(this)
@@ -370,7 +372,7 @@ export class DemoF extends Phaser.Scene
                     this.gunTube.body.setAngularAcceleration(10)
             }
 
-            this.fpsText.setText(` Num Enemies:  ${this.numEnemiesAfter}`)
+            //this.fpsText.setText(` Num Enemies:  ${this.numEnemiesAfter}`)
         }
     }
 
