@@ -16,5 +16,6 @@ declare global{
      var myUIBlocks:UIBlocks;
      var currentScene:Phaser.Scene;
      var currentSceneName:string;
+     var myResizeObserver : ResizeObserver;
 }
 export {}

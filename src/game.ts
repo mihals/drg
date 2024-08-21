@@ -127,7 +127,6 @@ let lvlsAchives : Array<number>
 //             ],
 //             frameRate: 10,
 //         });
-//         //console.log(anim)
 //         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
 //     }
 
@@ -294,43 +293,43 @@ export class Demo extends Phaser.Scene
         globalThis.currentScene = this;
         globalThis.currentSceneName = lvlNames.Demo;
 
-        document.body.style.backgroundImage = "url(assets/bg5.png)"
+        document.body.style.backgroundImage = "url(bg5.png)"
 
         currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;        
         
-        if (this.gameState.autoPilot) {
-            this.gameState.waitAction = true
-            let response = fetch('http://localhost/drgServer/get_actions.php',
-                {
-                    method: 'post',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Origin': 'https://localhost/drg'
-                    },
-                    body: ('data=')
-                }).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                }).then((data : {a_time:string, id:string, is_shoot:string,
-                    key_code:string, update_cntr:string, v:string,x:string}) => {
-                    this.timeActionArr = data.a_time.split(',').
-                        map((val)=>Number(val))
-                    this.counterActionArr = data.update_cntr.split(',').
-                        map((val)=>Number(val))
-                    this.keyActionArr = data.key_code.split(',')
-                    this.shootActionArr = data.is_shoot.split(',').
-                        map((val)=>Number(val))
-                    this.vActionArr = data.v.split(',').map((val)=>Number(val))
-                    this.xActionArr = data.x.split(',').map((val)=>Number(val))
-                    if(this.keyActionArr.length != 0){
-                        this.gameState.waitAction = false
-                        this.indCounterArr = 0
-                    }
+        // if (this.gameState.autoPilot) {
+        //     this.gameState.waitAction = true
+        //     let response = fetch('http://localhost/drgServer/get_actions.php',
+        //         {
+        //             method: 'post',
+        //             headers: {
+        //                 'Content-Type': 'application/x-www-form-urlencoded',
+        //                 'Origin': 'https://localhost/drg'
+        //             },
+        //             body: ('data=')
+        //         }).then(response => {
+        //             if (response.ok) {
+        //                 return response.json();
+        //             }
+        //         }).then((data : {a_time:string, id:string, is_shoot:string,
+        //             key_code:string, update_cntr:string, v:string,x:string}) => {
+        //             this.timeActionArr = data.a_time.split(',').
+        //                 map((val)=>Number(val))
+        //             this.counterActionArr = data.update_cntr.split(',').
+        //                 map((val)=>Number(val))
+        //             this.keyActionArr = data.key_code.split(',')
+        //             this.shootActionArr = data.is_shoot.split(',').
+        //                 map((val)=>Number(val))
+        //             this.vActionArr = data.v.split(',').map((val)=>Number(val))
+        //             this.xActionArr = data.x.split(',').map((val)=>Number(val))
+        //             if(this.keyActionArr.length != 0){
+        //                 this.gameState.waitAction = false
+        //                 this.indCounterArr = 0
+        //             }
                     
-                    this.scene.resume()
-                })
-        }
+        //             this.scene.resume()
+        //         })
+        // }
         
         this.add.tileSprite(500,225,1000,450,'atlas0','bg')
 
@@ -477,7 +476,7 @@ export class Demo extends Phaser.Scene
             if(!this.pointerDownOn) return;
             if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                this.inputText.setText('left')
+                //this.inputText.setText('left')
                 return
             }
             else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
@@ -489,8 +488,8 @@ export class Demo extends Phaser.Scene
             if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                 (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                 this.shootOn = !this.shootOn
-                if (this.shootOn) this.inputText.setText('shootOn')
-                else this.inputText.setText('shootOff')
+                //if (this.shootOn) this.inputText.setText('shootOn')
+                //else this.inputText.setText('shootOff')
             }
         })
 
@@ -499,9 +498,9 @@ export class Demo extends Phaser.Scene
         this.currentGameState = GameState.Gone
         this.isPreview =true
 
-        // let fromAtlas1 = this.add.image(30,30,"myTexture",'bg1')
-        // let fromAtlas2 = this.add.image(30,30,"myTexture",'bulletArs')
-        // console.log(fromAtlas1.alpha,fromAtlas2.alpha)
+        try{
+            globalThis.gYsdk.features.GameplayAPI.start()
+        }catch{}
     }
 
     update(time: number, delta: number): void {
@@ -509,7 +508,6 @@ export class Demo extends Phaser.Scene
         let velocityX:number = 0;
 
         let nLst = this.input.listeners('pointerdown')
-        //console.log("numListeners "+this.input.listenerCount("pointerdown"))
 
         // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
         // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
@@ -541,6 +539,10 @@ export class Demo extends Phaser.Scene
                 })
                 numRemBullets += this.shootBullets;
                 
+                try{
+                    globalThis.gYsdk.features.GameplayAPI.stop()
+                }catch{}
+
                 /** номер сообщения, которое зависит от результата и достижений игрока */
                 globalThis.myUIBlocks.showSummary(200 - numRemBullets, 7, GameState.Win)
             }
@@ -653,6 +655,9 @@ export class Demo extends Phaser.Scene
                                 this.playLevel()
                             }
                             else {
+                                try{
+                                    globalThis.gYsdk.features.GameplayAPI.stop()
+                                }catch{}
                                 this.scene.pause("demo")
                                 let numRemBullets = 0;
                                 // считаем сколько осталось патронов в игре
@@ -783,7 +788,6 @@ export class Demo extends Phaser.Scene
           { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
         
         let txtBnd = leftBubbleTxt.getBounds()
-        //console.log(txtBnd)
         leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width/2 - 5,
             bubbleImg.y - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
@@ -1291,7 +1295,7 @@ export function startGame(){
     
     const config = {
     
-        type: Phaser.WEBGL,
+        type: Phaser.AUTO,
         //transparent: true,
         backgroundColor: '#bfc874',
         width: 800,
@@ -1311,6 +1315,37 @@ export function startGame(){
         //render :render,
     };
     myGame = new Phaser.Game(config);
+
+    globalThis.myResizeObserver = new ResizeObserver((entries, obs) =>
+        {
+            let mcWidth = entries.find((value) => {
+                if(value.target.id == "modalContainer") return true;
+                else return false;
+            }).borderBoxSize[0].inlineSize;
+
+            //console.log("modalContainer width = " + mcWidth);
+
+            let modalWnd = document.getElementById("modalWnd")
+            if(modalWnd){
+                if(mcWidth < 800){
+                    modalWnd.style.zoom = mcWidth/800;
+                }else{
+                    modalWnd.style.zoom = 1;
+                }
+                
+            }
+            //console.log("modalWnd zoom = " + modalWnd.style.zoom);
+        })
+    //         let el = entries.find((value) => {
+    //             if( (value as HTMLElement).id == "modalWnd"){
+    //                 return true;
+    //             }
+    //             return false;
+    //         })
+    //         console.log(el.id;)
+    //     } )
+    
+    myResizeObserver.observe(document.getElementById("modalContainer"));
 }
 
 export function startLevel(levelName:lvlNames){
@@ -1425,7 +1460,8 @@ function addLoading(name, value) {
                 globalThis.achievments = locAchievments;
                 try{
                     globalThis.gPlayer.setData({
-                        lvlsData:JSON.stringify(globalThis.achievments)})
+                        lvlsData:JSON.stringify(globalThis.achievments)}).
+                        then(() => {})
                 }
                 catch(err){
                     
@@ -1436,7 +1472,7 @@ function addLoading(name, value) {
 
         if(loadings.isPlayerData == 1){
             try{
-                let data = globalThis.gPlayer.getData()
+                let data = globalThis.gData
                 globalThis.achievments = data.achievments
             }catch(err){
 
@@ -1490,7 +1526,6 @@ export function initApp(YaGames) {
     YaGames
         .init()
         .then(ysdk => {
-            console.log('Yandex SDK initialized');
             globalThis.gYsdk = ysdk;
             try {
                 globalThis.lang = ysdk.environment.i18n.lang
@@ -1523,7 +1558,7 @@ export function initApp(YaGames) {
                 globalThis.gPlayer = player;
                 player.getData().then(data => {
                     try {
-                        gData = data;
+                        globalThis.gData = data;
                         globalThis.achievments = JSON.parse(data.lvlsData)
                         addLoading('isPlayerData', 1)
                     } catch (err) {
@@ -1540,7 +1575,7 @@ export function initApp(YaGames) {
             });
             
         })
-        .cath(err => {
+        .catch(err => {
             addLoading('isSDKLoaded', 0)
             addLoading('isPlayerData', 0)
             addLoading('isAdvFinish', 0)

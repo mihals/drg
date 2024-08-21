@@ -58,16 +58,14 @@ export class Loner extends Phaser.Scene
     /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
      *  клавиш 'up', 'left' или 'right' */
     counterActionArr:number[]
+
     /**показания часов в аргументе метода update time при воспроизведении
      * фрейма с номером, указанным в массиве counterActionArr
      */
     timeActionArr:number[]
     /**код клавиши, нажатой в соответствующем фрейме */
     keyActionArr:string[]
-    /**скорость шутера в соответствующем фрейме */
-    vActionArr:number[]
-    /**x-координата шутера в соответствующем фрейме */
-    xActionArr:number[]
+    
     /**состояние шутера(стреляет или нет) в соответствующем фрейме */
     shootActionArr:number[]
     /**x-координата якоря emptyAnchor */
@@ -147,8 +145,6 @@ export class Loner extends Phaser.Scene
         this.timeActionArr = []
         this.counterActionArr = []
         this.keyActionArr = []
-        this.vActionArr = []
-        this.xActionArr = []
         this.shootActionArr = []
         this.emptyAnchorArr = []
         this.currentGameState = GameState.Gone;
@@ -167,9 +163,14 @@ export class Loner extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.Loner
         globalThis.currentScene = this;
 
-        document.body.style.backgroundImage = "url(assets/bg5.png)"
+        document.body.style.backgroundImage = "url(bg5.png)"
 
         currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
+
+        this.counterActionArr = [];
+        this.keyActionArr = [];
+        this.shootActionArr = [];
+        this.emptyAnchorArr = [];
         
         this.add.tileSprite(500,225,1000,450,'atlas0','bg')
 
@@ -309,13 +310,11 @@ export class Loner extends Phaser.Scene
             if(!this.pointerDownOn) return;
             if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                this.inputText.setText('left')
+                //this.inputText.setText('left')
 
                 //this.timeActionArr.push(0)
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('l')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
                 return
@@ -327,8 +326,6 @@ export class Loner extends Phaser.Scene
                 //this.timeActionArr.push(0)
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('r')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
                 return
@@ -337,14 +334,12 @@ export class Loner extends Phaser.Scene
             if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                 (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                 this.shootOn = !this.shootOn
-                if (this.shootOn) this.inputText.setText('shootOn')
-                else this.inputText.setText('shootOff')
+                //if (this.shootOn) this.inputText.setText('shootOn')
+                //else this.inputText.setText('shootOff')
 
                 //this.timeActionArr.push(0)
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('u')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
@@ -357,6 +352,10 @@ export class Loner extends Phaser.Scene
         this.shootBullets = 100;
         this.emptyAnchor =  this.physics.add.image(0,0,'atlas0',"empty")
         this.emptyAnchor.body.setVelocity(6,0)
+
+        try{
+            globalThis.gYsdk.features.GameplayAPI.start()
+        }catch{}
     }
 
     update(time: number, delta: number): void {
@@ -365,7 +364,6 @@ export class Loner extends Phaser.Scene
         let numFrame = this.game.getFrame()
 
         let nLst = this.input.listeners('pointerdown')
-        console.log("numListeners "+this.input.listenerCount("pointerdown"))
 
         // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
         // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
@@ -392,11 +390,14 @@ export class Loner extends Phaser.Scene
                 this.enemies.stopEnemies(GameState.Win)
                 /** номер сообщения, которое зависит от результата и достижений игрока */
                 let numMsg;
-                
+                this.saveBotData()
+                try{
+                    globalThis.gYsdk.features.GameplayAPI.stop()
+                }catch{}
                 globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win)
             }
             this.enemiesIsStoped = true
-            this.saveBotData()
+            
         }
 
         // при демонстрации Preview и при завершении игры, управление 
@@ -410,8 +411,6 @@ export class Loner extends Phaser.Scene
                 //this.timeActionArr.push(Math.round(time))
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('u')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
@@ -421,8 +420,6 @@ export class Loner extends Phaser.Scene
                 //this.timeActionArr.push(Math.round(time))
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('l')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
@@ -432,8 +429,6 @@ export class Loner extends Phaser.Scene
                 //this.timeActionArr.push(Math.round(time))
                 this.counterActionArr.push(this.updateCounter)
                 this.keyActionArr.push('r')
-                //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                //this.xActionArr.push(this.shooterContBody.body.x)
                 this.shootActionArr.push(this.shootOn ? 1 : 0)
                 this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x*100)/100)
             }
@@ -506,6 +501,10 @@ export class Loner extends Phaser.Scene
                                 })
                                 numRemBullets += this.shootBullets;
                                 
+                                try{
+                                    globalThis.gYsdk.features.GameplayAPI.stop()
+                                }catch{}
+
                                 globalThis.myUIBlocks.showSummary(200 - numRemBullets,
                                     this.enemies.getNumKilledEnemies(),GameState.Lost)
                             }
@@ -553,8 +552,6 @@ export class Loner extends Phaser.Scene
         //     data.push(this.counterActionArr.join())
         //     data.push(this.keyActionArr.join())
         //     data.push(this.shootActionArr.join())
-        //     data.push(this.vActionArr.join())
-        //     data.push(this.xActionArr.join())
 
         //     // saveActions(JSON.stringify(data))
         //     // this.gameState.needToSave = false
@@ -563,12 +560,9 @@ export class Loner extends Phaser.Scene
 
     saveBotData(){
         let botData = {
-            //time : this.timeActionArr,
             counter: this.counterActionArr,
             key : this.keyActionArr,
             shoot : this.shootActionArr,
-            //vActionA : this.vActionArr,
-            //xAction : this.xActionArr,
             anchor : this.emptyAnchorArr
         }
 
@@ -577,7 +571,6 @@ export class Loner extends Phaser.Scene
             localStorage.setItem("botData",botDataJSON)
         }
         catch{
-            console.log("set botData failure")
         }
     }
 }

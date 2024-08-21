@@ -157,11 +157,9 @@ export class Enemies
         }
 
         this.oneColumnArr.forEach((item, index, array) => {
-            //console.log(index)
             if (ret == GameState.Gone) {
                 if (item.countActive() != 0) {
                     let falX = item.getFirstAlive()
-                    //console.log(falX.x)
                     if (item.getFirstAlive().x < 95) {
                         this.firstWalker = item.getFirstAlive()
                         ret = GameState.Lost;
@@ -213,7 +211,6 @@ export class Enemies
     }
 
     getNumKilledEnemies(){
-        console.log("killedEnemies " + this.enemiesReserve.countActive())
         return (68 - this.enemiesReserve.countActive())
     }
 }
@@ -301,7 +298,6 @@ class OneColumn extends Phaser.Physics.Arcade.Group
                     enemy.state = '';
                     this.remove(enemy);
                     let hasActive = reserve.countActive()
-                    console.log(hasActive)
                 }, this);
             }
         })

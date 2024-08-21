@@ -6,6 +6,7 @@ import { UIBlocks } from "./uiblocks";
 import { EnemiesF } from './enemiesF';
 import { EnemyF } from './enemiesF';
 
+
 type LocTexts = {
     touchControl: string
     leftTap: string
@@ -164,6 +165,11 @@ export class Forest extends Phaser.Scene
     */
     menuIsInit:boolean
 
+    /** число попыток пройти этот уровень, используется для того, чтобы
+     * снизить уровень сложности при увеличении попыток прохождения уровня
+     */
+    numAttempts:number
+
     constructor(){
         super("forest")
         this.walkersArr = []
@@ -184,6 +190,8 @@ export class Forest extends Phaser.Scene
         this.numShots = 0;
 
         this.koef = 0;
+
+        this.numAttempts = 0;
 
         this.menuIsInit = false
 
@@ -804,12 +812,37 @@ export class Forest extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.Forest;
         globalThis.currentScene = this;
 
-        document.body.style.backgroundImage = "url(assetsF/forestBg.png)"
+        currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
+
+        this.numAttempts++; 
+
+        document.body.style.backgroundImage = "url(forestBg.png)"
+
+        this.walkersArr = []
+        this.radDegreeCoef = Math.PI/180;
+
+        this.numTick = 0
+        this.nextTick = 0
+        //this.currentSeq = "t_t_t_tl"
+        this.indPntsGrp = 0
+
+        this.numIssue = 0
+        this.numKilled = 0
+        this.numIssuedEnemies = 0
+        /**количество оставшихся патронов */
+        this.numBullets = 200;
+
+        /**количество сделанных выстрелов */
+        this.numShots = 0;
+
+        this.koef = 0;
+
+        this.menuIsInit = false
 
         this.currentSeq = this.rangedMap.get("d0")[Phaser.Math.RND.between(0,1)];
 
-        this.fpsText = this.add.text(0,20,'').setStyle({color:'red'});
-        this.fpsText.text = this.currentSeq
+        //this.fpsText = this.add.text(0,20,'').setStyle({color:'red'});
+        //this.fpsText.text = this.currentSeq
 
         this.cameras.main.setBackgroundColor('#fafbfd')
 
@@ -919,9 +952,6 @@ export class Forest extends Phaser.Scene
 
         this.physics.add.collider(this.enemiesGrp,this.bulletsGrp,
             (enemyF:EnemyF, bulletF:BulletF) =>{
-                if(!enemyF.active){
-                    console.log(`enemy active = ${enemyF.active}`)
-                }
             bulletF.body.reset(0, -100);
             bulletF.setActive(false).setVisible(false);
             
@@ -929,7 +959,9 @@ export class Forest extends Phaser.Scene
             
             //enemyF.play("fallenF")
             if (enemyF.state != 'falling') {
-                this.numKilled++;
+                // если орудие уже взорвано
+                if(this.gameState != GameState.Lost) this.numKilled++;
+
                 this.numKilledEl.innerHTML = this.numKilled.toString();
                 // this.koef = Math.round(this.numShots*100/this.numKilled);
                 // this.fpsText.setText(`Koef: ${this.koef}`)
@@ -937,7 +969,7 @@ export class Forest extends Phaser.Scene
                     this.numBullets+=15;
                     this.numBulletEl.innerHTML = this.numBullets
                     this.koef = Math.round(100*this.numBullets/(1000 - this.numKilled)/0.2);
-                    this.fpsText.setText(`Koef: ${this.koef}`)
+                    //this.fpsText.setText(`Koef: ${this.koef}`)
                 } 
                 enemyF.setVelocity(0,0)
                 enemyF.state = 'falling'
@@ -946,9 +978,6 @@ export class Forest extends Phaser.Scene
                     enemyF.body.reset(-100, 0);
                     enemyF.setActive(false).setVisible(false);
                     enemyF.state = '';
-                    //this.remove(enemy);
-                    //let hasActive = reserve.countActive()
-                    //console.log(hasActive)
                 }, this);
             }
             if(this.numKilled >= 1000){
@@ -971,7 +1000,6 @@ export class Forest extends Phaser.Scene
                     enemyF.setTexture("atlas1",'walkerF10')
                     this.gameState = GameState.Lost;
                     this.playGransdExplodeTween(enemyF.x, enemyF.y)
-                    console.log(enemyF.state, gunBase.state);
                 }
             })
 
@@ -1036,20 +1064,20 @@ export class Forest extends Phaser.Scene
 
         this.scale.on('resize',()=>{
             let a : HTMLElement  = document.querySelector("#gameContainer canvas");
-            (document.querySelector("#textMsg") as HTMLElement).style.marginLeft = a.style.marginLeft;
-            (document.querySelector("#textMsg") as HTMLElement).style.width = a.style.width;
-            //console.log(a.style.marginLeft );
+            try {
+                (document.querySelector("#textMsg") as HTMLElement).style.marginLeft = a.style.marginLeft;
+                (document.querySelector("#textMsg") as HTMLElement).style.width = a.style.width;
+            }
+            catch{}
         })
 
         this.events.once(Phaser.Scenes.Events.DESTROY, () => {
             Phaser.Scenes.Events.DESTROY
         })
 
-        // a.
-        // innerHTML = `<div style="position: relative; top: 10; left: 10; z-index: 5;">
-        // <span>Relative text.</span>
-        // </div>`;
-        //this.fpsText.setText(`Pointer: ${this.pointerName}`)
+        try{
+            globalThis.gYsdk.features.GameplayAPI.start()
+        }catch{}
     }
 
     update(time: number, delta: number): void {
@@ -1076,6 +1104,7 @@ export class Forest extends Phaser.Scene
             this.gunTube.body.setAngularVelocity(0);
             this.shootOn = false;
             this.pointerDownOn = false;
+            document.getElementById("textMsg").remove()
             //globalThis.currentResult = this.gameState;
             //globalThis.currentLevel = lvlNames.Loner;
             
@@ -1180,7 +1209,6 @@ export class Forest extends Phaser.Scene
                     .displayOriginX;
                 let yOrg = (this.gunTube.body.gameObject as Phaser.GameObjects.Image)
                     .displayOriginY;
-                //console.log(`xOrg = ${xOrg}, ${yOrg}`)
                 //this.add.image(xCoord,yCoord,"bulletF")
 
                 this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180)
@@ -1205,22 +1233,22 @@ export class Forest extends Phaser.Scene
             if (this.numKilled == 0) {
                 this.currentSeq =
                     this.rangedMap.get("d0")[Phaser.Math.RND.between(0, 1)];
-                this.enemyText.setText(`Hardness: d0`)
-                this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
+                //this.enemyText.setText(`Hardness: d0`)
+                //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
             }
             else {
                 if (this.koef  <= 75){
                     this.currentSeq = this.rangedMap.get("d_50")[Phaser.Math.RND.between(0, 1)]
-                    this.enemyText.setText(`Hardness: d_50`)
-                    this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
+                    //this.enemyText.setText(`Hardness: d_50`)
+                    //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                 }
                 if(this.koef >= 120) {
                     this.currentSeq = this.rangedMap.get("d40")[Phaser.Math.RND.between(0, 1)];
-                    this.enemyText.setText(`Hardness: d40`)
-                    this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
+                    //this.enemyText.setText(`Hardness: d40`)
+                    //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                 }
                 else {
-                    switch (Math.floor((this.koef - 100)/5)) {
+                    switch (Math.floor((this.koef - 100 - this.numAttempts)/5)) {
                         case -5:
                             this.currentSeq =
                                 this.rangedMap.get("d_50")[Phaser.Math.RND.between(0, 1)];
@@ -1262,8 +1290,8 @@ export class Forest extends Phaser.Scene
                                 this.rangedMap.get("d40")[Phaser.Math.RND.between(0, 1)];
                             break;
                     }
-                    this.enemyText.setText(`Hardness: ${Math.floor(this.koef - 100)/5}`)
-                    this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
+                    //this.enemyText.setText(`Hardness: ${Math.floor(this.koef - 100)/5}`)
+                    //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                 }
             }
             //this.currentSeq = this.shortSeqMap.get(this.currentSeq).nextEasy
@@ -1310,7 +1338,7 @@ export class Forest extends Phaser.Scene
             startPntsName = this.shortSeqMap.get(this.currentSeq).
                 seq[this.indPntsGrp].startPntsName; 
 
-            this.fpsText.setText(`Hardness: ${Math.floor((this.koef - 100)/10)}`)
+            //this.fpsText.setText(`Hardness: ${Math.floor((this.koef - 100)/10)}`)
         }
         // переходим к следующему элементу в цепочке
         else{
@@ -1342,6 +1370,10 @@ export class Forest extends Phaser.Scene
                 this.fireGranade.play({ key: 'gunExplode', startFrame: 0 })
                 this.fireGranade.once(Phaser.Animations.Events.ANIMATION_COMPLETE,
                     () => {
+                        try{
+                            globalThis.gYsdk.features.GameplayAPI.stop()
+                        }catch{}
+
                         globalThis.myUIBlocks.showSummary(this.numShots,
                             this.numKilled,GameState.Lost)
                     })
@@ -1370,8 +1402,12 @@ export class Forest extends Phaser.Scene
                 text.setColor(`rgb(${r}, ${g}, ${b})`);
             },
             onComplete: () => {
+                try{
+                    globalThis.gYsdk.features.GameplayAPI.stop()
+                }catch{}
+
                 globalThis.myUIBlocks.showSummary(this.numShots,
-                    this.numKilled,GameState.Lost)
+                    this.numKilled,GameState.Win)
             }
         });
     }

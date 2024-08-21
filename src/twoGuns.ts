@@ -182,9 +182,11 @@ export class TwoGuns extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.TwoGuns
         globalThis.currentScene = this;
 
+        currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
+
         this.bbShootOn = false;
 
-        document.body.style.backgroundImage = "url(assets/bg5.png)"
+        document.body.style.backgroundImage = "url(bg5.png)"
 
         try{
             let botData:BotData = JSON.parse(localStorage.getItem("botData"))
@@ -365,7 +367,7 @@ export class TwoGuns extends Phaser.Scene
             if(!this.pointerDownOn) return;
             if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                 this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60)
-                this.inputText.setText('left')
+                //this.inputText.setText('left')
                 return
             }
             else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
@@ -377,8 +379,8 @@ export class TwoGuns extends Phaser.Scene
             if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                 (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                 this.shootOn = !this.shootOn
-                if (this.shootOn) this.inputText.setText('shootOn')
-                else this.inputText.setText('shootOff')
+                //if (this.shootOn) this.inputText.setText('shootOn')
+                //else this.inputText.setText('shootOff')
             }
         })
 
@@ -393,6 +395,10 @@ export class TwoGuns extends Phaser.Scene
         this.emptyAnchor.body.setVelocity(6,0)
         this.currentAnchInd = 0;
         this.bbShootBullets =100
+
+        try{
+            globalThis.gYsdk.features.GameplayAPI.start()
+        }catch{}
     }
 
     update(time: number, delta: number): void {
@@ -401,7 +407,6 @@ export class TwoGuns extends Phaser.Scene
         let numFrame = this.game.getFrame()
 
         let nLst = this.input.listeners('pointerdown')
-        console.log("numListeners "+this.input.listenerCount("pointerdown"))
 
         // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
         // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
@@ -429,6 +434,9 @@ export class TwoGuns extends Phaser.Scene
                 this.enemies.stopEnemies(GameState.Win)
                 /** номер сообщения, которое зависит от результата и достижений игрока */
                 
+                try{
+                    globalThis.gYsdk.features.GameplayAPI.stop()
+                }catch{}
                 globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win)
             }
             this.enemiesIsStoped = true
@@ -515,6 +523,10 @@ export class TwoGuns extends Phaser.Scene
                                 // })
                                 numRemBullets += this.shootBullets;
                                 
+                                try{
+                                    globalThis.gYsdk.features.GameplayAPI.stop()
+                                }catch{}
+
                                 globalThis.myUIBlocks.showSummary(200 - numRemBullets,
                                     this.enemies.getNumKilledEnemies(),GameState.Lost)
                             }

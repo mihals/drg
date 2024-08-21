@@ -241539,6 +241539,8 @@ var MyGame = (function (exports) {
   const DOWN = CONST.DOWN;
 
   })();
+
+  var __webpack_exports__AUTO = __webpack_exports__.B7;
   var __webpack_exports__Animations = __webpack_exports__.FK;
   var __webpack_exports__Game = __webpack_exports__.lA;
   var __webpack_exports__GameObjects = __webpack_exports__.hi;
@@ -241549,7 +241551,6 @@ var MyGame = (function (exports) {
   var __webpack_exports__Scale = __webpack_exports__.Ci;
   var __webpack_exports__Scene = __webpack_exports__.xs;
   var __webpack_exports__Scenes = __webpack_exports__._t;
-  var __webpack_exports__WEBGL = __webpack_exports__.$z;
 
   /** сообщения, которые выводятся по окончании игры */
   var numMsg;
@@ -241719,11 +241720,9 @@ var MyGame = (function (exports) {
               return GameState.Win;
           }
           this.oneColumnArr.forEach((item, index, array) => {
-              //console.log(index)
               if (ret == GameState.Gone) {
                   if (item.countActive() != 0) {
                       item.getFirstAlive();
-                      //console.log(falX.x)
                       if (item.getFirstAlive().x < 95) {
                           this.firstWalker = item.getFirstAlive();
                           ret = GameState.Lost;
@@ -241772,7 +241771,6 @@ var MyGame = (function (exports) {
           this.oneColumnArr.length = 0;
       }
       getNumKilledEnemies() {
-          console.log("killedEnemies " + this.enemiesReserve.countActive());
           return (68 - this.enemiesReserve.countActive());
       }
   }
@@ -241849,8 +241847,7 @@ var MyGame = (function (exports) {
                       enemy.setActive(false).setVisible(false);
                       enemy.state = '';
                       this.remove(enemy);
-                      let hasActive = reserve.countActive();
-                      console.log(hasActive);
+                      reserve.countActive();
                   }, this);
               }
           });
@@ -241935,7 +241932,7 @@ var MyGame = (function (exports) {
           "Уничтожьте тысячу врагов, чтобы пройти уровень 'Оборона'. Вам даётся на это " +
               "200 патронов и добавляется 15 за каждые 10 уничтоженных врагов. " +
               "Пройдите его, чтобы получить третью звезду.",
-          "Пройдите уровень 'До последнего.', чтобы получить свою четвёртую звезду. "],
+          "Выберите уровень для прохождения."],
       bodyMsg: {
           //** сообщение при впервые пройденной Учебке */
           tutorWinFirstTime: "Пройдите уровень 'Одиночка.' чтобы получить свою первую " +
@@ -241969,9 +241966,9 @@ var MyGame = (function (exports) {
               "presentation. Go through it to get your first star, and you will have a bot " +
               "partner for a two-gun level. Good luck!",
           "Complete the 'Loner' level to get your first star, and you will have a partner-bot " +
-              " for playing 'Two gun' level. Good luck!",
+              " for playing 'Two guns' level. Good luck!",
           "Excellent! You get your first star and you now have a bot partner," +
-              "with which you can complete the level 'Two barrels'." +
+              "with which you can complete the level 'Two guns'." +
               " The bot will try to repeat all your actions on the level you just passed." +
               " If you want to replace the bot, go through this level again.",
           "You have completed this level once again and now you have a new bot partner who will " +
@@ -241990,7 +241987,7 @@ var MyGame = (function (exports) {
           "Kill a thousand enemies to complete the 'Defense' level. You are given " +
               " 200 bullets for this and 15 are added for every 10  enemies killed. " +
               "Pass it to get the third star.",
-          "Complete the 'Every last.' level to get your fourth star."],
+          "Select a level to complete."],
       bodyMsg: {
           tutorWinFirstTime: "Click 'Loner' to go through it to get your first star, " +
               "and you will have a Black Bot partner for a two-gun level. Good luck!",
@@ -242067,7 +242064,7 @@ var MyGame = (function (exports) {
           <p>${this.myPhrases.gameName}</p>
         </div>
         <div id="summaryResult">
-          <div style="margin: 5px;"><img src="assets/pogon` + locNumStars +
+          <div style="margin: 5px;"><img src="pogon` + locNumStars +
               `.png" class="pogonImg"></div>
           <div  id="summaryMsg" >
             ${content}
@@ -242105,6 +242102,7 @@ var MyGame = (function (exports) {
           document.getElementById("modalContainer").innerHTML = modalWnd;
           document.getElementById("modalContainer").style.visibility = "visible";
           document.getElementById("modalContainer").style.display = "flex";
+          //document.getElementById("modalContainer").style.zoom = 0.3;
       }
       /** вставляет в контейнер набор кнопок с уровнями */
       showLevelsMenu(lang, lvlsAchives) {
@@ -242113,7 +242111,7 @@ var MyGame = (function (exports) {
               content =
                   `<div id="levelWnd">
                 <div id = "topLevelWnd">
-                    <img src="assets/pogon.png" class="pogonImg">
+                    <img src="pogon.png" class="pogonImg">
                     <p>ljdf[aligjoaagj] kdsfpoeurypormh [pgkp[ajoipajt]a</p>
                 </div>
                 <div id = "bottomLevelWnd">
@@ -242131,7 +242129,7 @@ var MyGame = (function (exports) {
               content =
                   `<div id="levelWnd">
                 <div id = "topLevelWnd">
-                    <img src="assets/pogon.png" class="pogonImg">
+                    <img src="pogon.png" class="pogonImg">
                     <p>ljdf[aligjoaagj] kdsfpoeurypormh [pgkp[ajoipajt]a</p>
                 </div>
                 <div id = "bottomLevelWnd">
@@ -242329,36 +242327,44 @@ var MyGame = (function (exports) {
                   }
                   // если попытка пройти уровень "Одиночка" неудачна
                   else {
-                      summaryTopTxt = lang == "ru" ? "Уровень не пройден." :
-                          "The level is not passed.";
-                      // если уровень "Одиночка" ещё не проходился
-                      if (globalThis.achievments[1] != 1) {
-                          bodySummary = lang == "ru" ? "Пройдите этот уровень чтобы получить" +
-                              " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола' ." +
-                              " Бот будет пытаться повторять все ваши действия на пройденном уровне." :
-                              "Complete this level to get your first star, " +
-                                  "and you will have a partner - a bot for the game 'Two gun'." +
-                                  " The bot will try to repeat all your actions at the completed level.";
-                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
-                                        ${leftBtnTxt}</button>`;
-                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                          rightBtn = `<button class="lvlBottom" onclick=` +
-                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
-                                        ${rightBtnTxt}</button>`;
+                      try {
+                          globalThis.gYsdk.adv.showFullscreenAdv();
                       }
-                      // если уровень "Одиночка" ранее уже был пройден
-                      else {
-                          bodySummary = lang == "ru" ? "Если Вам нужно заменить Чёрного Бота, пройдите уровень " +
-                              "'Одиночка.' ещё раз и у Вас появится другой напарник." :
-                              " If you want to replace the bot, go through this level again.";
-                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
+                      catch (err) {
+                          console.log("Одиночка adv " + err);
+                      }
+                      finally {
+                          summaryTopTxt = lang == "ru" ? "Уровень не пройден." :
+                              "The level is not passed.";
+                          // если уровень "Одиночка" ещё не проходился
+                          if (globalThis.achievments[1] != 1) {
+                              bodySummary = lang == "ru" ? "Пройдите этот уровень чтобы получить" +
+                                  " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола' ." +
+                                  " Бот будет пытаться повторять все ваши действия на пройденном уровне." :
+                                  "Complete this level to get your first star, " +
+                                      "and you will have a partner - a bot for the game 'Two gun'." +
+                                      " The bot will try to repeat all your actions at the completed level.";
+                              leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                              leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
+                                        ${leftBtnTxt}</button>`;
+                              rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                              rightBtn = `<button class="lvlBottom" onclick=` +
+                                  `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                        ${rightBtnTxt}</button>`;
+                          }
+                          // если уровень "Одиночка" ранее уже был пройден
+                          else {
+                              bodySummary = lang == "ru" ? "Если Вам нужно заменить Чёрного Бота, пройдите уровень " +
+                                  "'Одиночка.' ещё раз и у Вас появится другой напарник." :
+                                  " If you want to replace the bot, go through this level again.";
+                              leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                              leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
                                             ${leftBtnTxt}</button>`;
-                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                          rightBtn = `<button class="lvlBottom" onclick=` +
-                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                              rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                              rightBtn = `<button class="lvlBottom" onclick=` +
+                                  `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
                                             ${rightBtnTxt}</button>`;
+                          }
                       }
                   }
                   break;
@@ -242404,28 +242410,36 @@ var MyGame = (function (exports) {
                   }
                   // уровень "В два ствола" не пройден
                   else {
-                      // если уровень "В два ствола" и ранее не проходился
-                      if (globalThis.achievments[2] != 1) {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
-                              "The level  'Two guns.' is not passed.";
-                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                              "перейти на новую локацию 'В лесу.'" :
-                              " Complete this level to get to know the new location 'In the forest.'";
+                      try {
+                          globalThis.gYsdk.adv.showFullscreenAdv();
                       }
-                      else {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
-                              "The level  'Two guns.' is not passed.";
-                          bodySummary = lang == "ru" ? "Уровень 'В два ствола'" +
-                              " вами уже проходился ранее!" :
-                              "Level 'In two barrels ' you have already passed before.";
+                      catch (err) {
+                          console.log("Одиночка adv " + err);
                       }
-                      leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                      leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('twoGuns')">
+                      finally {
+                          // если уровень "В два ствола" и ранее не проходился
+                          if (globalThis.achievments[2] != 1) {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                                  "The level  'Two guns.' is not passed.";
+                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                                  "перейти на новую локацию 'В лесу.'" :
+                                  " Complete this level to get to know the new location 'In the forest.'";
+                          }
+                          else {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                                  "The level  'Two guns.' is not passed.";
+                              bodySummary = lang == "ru" ? "Уровень 'В два ствола'" +
+                                  " вами уже проходился ранее!" :
+                                  "Level 'In two barrels ' you have already passed before.";
+                          }
+                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('twoGuns')">
                                             ${leftBtnTxt}</button>`;
-                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                      rightBtn = `<button class="lvlBottom" onclick=` +
-                          `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
                                             ${rightBtnTxt}</button>`;
+                      }
                   }
                   break;
               case lvlNames.DemoF:
@@ -242447,18 +242461,26 @@ var MyGame = (function (exports) {
                           }
                           catch (err) { }
                           bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
-                              " Вам придётся уничтожить 1000 врагов при лимите патронов." :
+                              " Вам придётся уничтожить 1000 врагов при лимите патронов." +
+                              "Вам даётся 200 патронов и добавляется 15 за каждые 10" +
+                              " уничтоженных врагов." :
                               "Excellent! Complete the next level 'Defence'. " +
-                                  "You will have to destroy 1000 enemies with a limit of ammo.";
+                                  "You will have to destroy 1000 enemies with a limit of ammo." +
+                                  "You are given 200 bullets for this" +
+                                  " and 15 are added for every 10  enemies killed.";
                       }
                       // если уровень "В лесу" уже проходился ранее
                       else {
                           summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' пройден!" :
                               " Level 'In the forest.' completed.";
                           bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
-                              " Вам придётся уничтожить 1000 врагов при лимите патронов." :
+                              " Вам придётся уничтожить 1000 врагов при лимите патронов." +
+                              "Вам даётся 200 патронов и добавляется 15 за каждые 10" +
+                              " уничтоженных врагов." :
                               "Excellent! Complete the next level 'Defence'. " +
-                                  "You will have to destroy 1000 enemies with a limit of ammo.";
+                                  "You will have to destroy 1000 enemies with a limit of ammo." +
+                                  "You are given 200 bullets for this" +
+                                  " and 15 are added for every 10  enemies killed.";
                       }
                       leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
                       leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('forest')">
@@ -242470,28 +242492,36 @@ var MyGame = (function (exports) {
                   }
                   // уровень "В лесу" не пройден
                   else {
-                      // если уровень "В лесу" и ранее не проходился
-                      if (globalThis.achievments[3] != 1) {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
-                              "The level  'In the forest.' is not passed.";
-                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                              "перейти на новую локацию 'Оборона.'" :
-                              " Complete this level to get to know the new location 'Defence.'";
+                      try {
+                          globalThis.gYsdk.adv.showFullscreenAdv();
                       }
-                      else {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
-                              "The level  'In the forest.' is not passed.";
-                          bodySummary = lang == "ru" ? "Уровень 'В лесу'" +
-                              " вами уже проходился ранее!" :
-                              "Level 'In the forest ' you have already passed before.";
+                      catch (err) {
+                          console.log("В лесу adv " + err);
                       }
-                      leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                      leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
+                      finally {
+                          // если уровень "В лесу" и ранее не проходился
+                          if (globalThis.achievments[3] != 1) {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                                  "The level  'In the forest.' is not passed.";
+                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                                  "перейти на новую локацию 'Оборона.'" :
+                                  " Complete this level to get to know the new location 'Defence.'";
+                          }
+                          else {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                                  "The level  'In the forest.' is not passed.";
+                              bodySummary = lang == "ru" ? "Уровень 'В лесу'" +
+                                  " вами уже проходился ранее!" :
+                                  "Level 'In the forest ' you have already passed before.";
+                          }
+                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
                                                 ${leftBtnTxt}</button>`;
-                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                      rightBtn = `<button class="lvlBottom" onclick=` +
-                          `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
                                                 ${rightBtnTxt}</button>`;
+                      }
                   }
                   break;
               case lvlNames.Forest:
@@ -242512,39 +242542,65 @@ var MyGame = (function (exports) {
                               localStorage.setItem("lvlsData", lvlsDataStr);
                           }
                           catch (err) { }
-                          bodySummary = lang == "ru" ? "Пройдите уровень 'Оборона'!" +
-                              " Вам придётся уничтожить 1000 врагов при лимите патронов." :
-                              "Excellent! Complete the next level 'Defence'. " +
-                                  "You will have to destroy 1000 enemies with a limit of ammo.";
+                          bodySummary = lang == "ru" ? "Вы получаете третью звезду!" +
+                              " Вы можете улучшить свой результат на этом уровне." :
+                              "You get a third star!" +
+                                  "You can improve your score at this level.";
                       }
                       // если уровень "Оборона" уже проходился ранее
                       else {
                           summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' пройден!" :
                               " Level 'Defence.' completed.";
                           bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
-                              " вами уже проходился ранее!" :
-                              "Level 'Defence ' you have already passed before.";
+                              " вами уже проходился ранее, но можно улучшить" +
+                              " свой результат!" :
+                              "Level 'Defence' you have already passed before, " +
+                                  " but you can improve your result.";
                       }
+                      leftBtnTxt = lang == "ru" ? "Продолжить." : "Continue.";
+                      leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('forest')">
+                                                    ${leftBtnTxt}</button>`;
+                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                      rightBtn = `<button class="lvlBottom" onclick=` +
+                          `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                                    ${rightBtnTxt}</button>`;
                   }
                   // уровень "Оборона" не пройден
                   else {
-                      // если уровень "Оборона" и ранее не проходился
-                      if (globalThis.achievments[4] != 1) {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
-                              "The level  'Defence.' is not passed.";
-                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                              "получить свою третью звезду.'" :
-                              " Complete this level to get your third star.";
+                      try {
+                          globalThis.gYsdk.adv.showFullscreenAdv();
                       }
-                      else {
-                          summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
-                              "The level  'Defence.' is not passed.";
-                          bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
-                              " вами уже проходился ранее!" :
-                              "Level 'Defence ' you have already passed before.";
+                      catch (err) {
+                          console.log("Оборона adv " + err);
                       }
+                      finally {
+                          // если уровень "Оборона" и ранее не проходился
+                          if (globalThis.achievments[4] != 1) {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                                  "The level  'Defence.' is not passed.";
+                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                                  "получить свою третью звезду.'" :
+                                  " Complete this level to get your third star.";
+                          }
+                          else {
+                              summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                                  "The level  'Defence.' is not passed.";
+                              bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
+                                  " вами уже проходился ранее, но можно улучшить" +
+                                  " свой результат!" :
+                                  "Level 'Defence' you have already passed before, " +
+                                      " but you can improve your result.";
+                          }
+                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('forest')">
+                                                ${leftBtnTxt}</button>`;
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                                                ${rightBtnTxt}</button>`;
+                      }
+                      break;
                   }
-                  break;
           }
           let locNumStars = 0;
           for (let i = 0; i < globalThis.achievments.length; i++) {
@@ -242561,7 +242617,7 @@ var MyGame = (function (exports) {
                     <p>${summaryTopTxt}</p>
                 </div>
                 <div id="summaryResult" >
-                    <div style="margin: 5px;"><img src="assets/pogon${locNumStars}.png" class="pogonImg"></div>
+                    <div style="margin: 5px;"><img src="pogon${locNumStars}.png" class="pogonImg"></div>
                     <div>
                         <ul>
                         <li>${this.myPhrases.destEnemy}&nbsp;
@@ -242630,7 +242686,6 @@ var MyGame = (function (exports) {
               ],
               frameRate: 10,
           });
-          //console.log(anim)
           this.blankShot = scene.physics.add.sprite(-100, -100, 'empty').setDepth(12);
       }
       fireBullet(x, y, velocityX) {
@@ -242688,7 +242743,6 @@ var MyGame = (function (exports) {
               ],
               frameRate: 10,
           });
-          //console.log(anim)
           this.blankShot = scene.physics.add.sprite(-100, -100, 'empty').setDepth(12);
       }
       fireBullet(x, y, velocityX, velocityY) {
@@ -242704,7 +242758,7 @@ var MyGame = (function (exports) {
       }
   }
 
-  const enTexts$3 = {
+  const enTexts$4 = {
       ammo: "Ammo"
   };
   const ruTexts$4 = {
@@ -242736,8 +242790,6 @@ var MyGame = (function (exports) {
           this.timeActionArr = [];
           this.counterActionArr = [];
           this.keyActionArr = [];
-          this.vActionArr = [];
-          this.xActionArr = [];
           this.shootActionArr = [];
           this.emptyAnchorArr = [];
           this.currentGameState = GameState.Gone;
@@ -242750,8 +242802,12 @@ var MyGame = (function (exports) {
           globalThis.currentLevel = lvlNames.Loner;
           globalThis.currentSceneName = lvlNames.Loner;
           globalThis.currentScene = this;
-          document.body.style.backgroundImage = "url(assets/bg5.png)";
-          currentTexts$4 = globalThis.lang == "en" ? enTexts$3 : ruTexts$4;
+          document.body.style.backgroundImage = "url(bg5.png)";
+          currentTexts$4 = globalThis.lang == "en" ? enTexts$4 : ruTexts$4;
+          this.counterActionArr = [];
+          this.keyActionArr = [];
+          this.shootActionArr = [];
+          this.emptyAnchorArr = [];
           this.add.tileSprite(500, 225, 1000, 450, 'atlas0', 'bg');
           this.shooterCont = this.add.container(400, 418);
           this.shooterCont.add(this.add.image(0, 0, 'atlas0', 'gun'));
@@ -242863,12 +242919,10 @@ var MyGame = (function (exports) {
                   return;
               if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                   this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
-                  this.inputText.setText('left');
+                  //this.inputText.setText('left')
                   //this.timeActionArr.push(0)
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('l');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
                   return;
@@ -242879,8 +242933,6 @@ var MyGame = (function (exports) {
                   //this.timeActionArr.push(0)
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('r');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
                   return;
@@ -242888,15 +242940,11 @@ var MyGame = (function (exports) {
               if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                   (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                   this.shootOn = !this.shootOn;
-                  if (this.shootOn)
-                      this.inputText.setText('shootOn');
-                  else
-                      this.inputText.setText('shootOff');
+                  //if (this.shootOn) this.inputText.setText('shootOn')
+                  //else this.inputText.setText('shootOff')
                   //this.timeActionArr.push(0)
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('u');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
@@ -242908,11 +242956,14 @@ var MyGame = (function (exports) {
           this.shootBullets = 100;
           this.emptyAnchor = this.physics.add.image(0, 0, 'atlas0', "empty");
           this.emptyAnchor.body.setVelocity(6, 0);
+          try {
+              globalThis.gYsdk.features.GameplayAPI.start();
+          }
+          catch (_a) { }
       }
       update(time, delta) {
           this.game.getFrame();
           this.input.listeners('pointerdown');
-          console.log("numListeners " + this.input.listenerCount("pointerdown"));
           // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
           // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
           if ((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
@@ -242933,10 +242984,14 @@ var MyGame = (function (exports) {
               }
               if (this.currentGameState == GameState.Win) {
                   this.enemies.stopEnemies(GameState.Win);
+                  this.saveBotData();
+                  try {
+                      globalThis.gYsdk.features.GameplayAPI.stop();
+                  }
+                  catch (_a) { }
                   globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
               }
               this.enemiesIsStoped = true;
-              this.saveBotData();
           }
           // при демонстрации Preview и при завершении игры, управление 
           // отключается (pointerDownOn=false)?, если управление не отключено,
@@ -242948,8 +243003,6 @@ var MyGame = (function (exports) {
                   //this.timeActionArr.push(Math.round(time))
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('u');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
@@ -242958,8 +243011,6 @@ var MyGame = (function (exports) {
                   //this.timeActionArr.push(Math.round(time))
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('l');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
@@ -242968,8 +243019,6 @@ var MyGame = (function (exports) {
                   //this.timeActionArr.push(Math.round(time))
                   this.counterActionArr.push(this.updateCounter);
                   this.keyActionArr.push('r');
-                  //this.vActionArr.push(this.shooterContBody.body.velocity.x)
-                  //this.xActionArr.push(this.shooterContBody.body.x)
                   this.shootActionArr.push(this.shootOn ? 1 : 0);
                   this.emptyAnchorArr.push(Math.round(this.emptyAnchor.body.x * 100) / 100);
               }
@@ -243040,6 +243089,10 @@ var MyGame = (function (exports) {
                                       numRemBullets += 50;
                               });
                               numRemBullets += this.shootBullets;
+                              try {
+                                  globalThis.gYsdk.features.GameplayAPI.stop();
+                              }
+                              catch (_a) { }
                               globalThis.myUIBlocks.showSummary(200 - numRemBullets, this.enemies.getNumKilledEnemies(), GameState.Lost);
                           }
                       });
@@ -243082,20 +243135,15 @@ var MyGame = (function (exports) {
           //     data.push(this.counterActionArr.join())
           //     data.push(this.keyActionArr.join())
           //     data.push(this.shootActionArr.join())
-          //     data.push(this.vActionArr.join())
-          //     data.push(this.xActionArr.join())
           //     // saveActions(JSON.stringify(data))
           //     // this.gameState.needToSave = false
           // }
       }
       saveBotData() {
           let botData = {
-              //time : this.timeActionArr,
               counter: this.counterActionArr,
               key: this.keyActionArr,
               shoot: this.shootActionArr,
-              //vActionA : this.vActionArr,
-              //xAction : this.xActionArr,
               anchor: this.emptyAnchorArr
           };
           let botDataJSON = JSON.stringify(botData);
@@ -243103,11 +243151,13 @@ var MyGame = (function (exports) {
               localStorage.setItem("botData", botDataJSON);
           }
           catch (_a) {
-              console.log("set botData failure");
           }
       }
   }
 
+  const enTexts$3 = {
+      ammo: "Ammo"
+  };
   const ruTexts$3 = {
       ammo: "Патронов"
   };
@@ -243143,8 +243193,9 @@ var MyGame = (function (exports) {
           globalThis.currentLevel = lvlNames.TwoGuns;
           globalThis.currentSceneName = lvlNames.TwoGuns;
           globalThis.currentScene = this;
+          currentTexts$3 = globalThis.lang == "en" ? enTexts$3 : ruTexts$3;
           this.bbShootOn = false;
-          document.body.style.backgroundImage = "url(assets/bg5.png)";
+          document.body.style.backgroundImage = "url(bg5.png)";
           try {
               let botData = JSON.parse(localStorage.getItem("botData"));
               /**массив с номерами фрейма, в котором произошло событие-нажатие одной из
@@ -243291,7 +243342,7 @@ var MyGame = (function (exports) {
                   return;
               if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                   this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
-                  this.inputText.setText('left');
+                  //this.inputText.setText('left')
                   return;
               }
               else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
@@ -243302,10 +243353,8 @@ var MyGame = (function (exports) {
               if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                   (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                   this.shootOn = !this.shootOn;
-                  if (this.shootOn)
-                      this.inputText.setText('shootOn');
-                  else
-                      this.inputText.setText('shootOff');
+                  //if (this.shootOn) this.inputText.setText('shootOn')
+                  //else this.inputText.setText('shootOff')
               }
           });
           this.pointerDownOn = true;
@@ -243317,11 +243366,14 @@ var MyGame = (function (exports) {
           this.emptyAnchor.body.setVelocity(6, 0);
           this.currentAnchInd = 0;
           this.bbShootBullets = 100;
+          try {
+              globalThis.gYsdk.features.GameplayAPI.start();
+          }
+          catch (_b) { }
       }
       update(time, delta) {
           this.game.getFrame();
           this.input.listeners('pointerdown');
-          console.log("numListeners " + this.input.listenerCount("pointerdown"));
           // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
           // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
           if ((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
@@ -243343,6 +243395,10 @@ var MyGame = (function (exports) {
               if (this.currentGameState == GameState.Win) {
                   this.enemies.stopEnemies(GameState.Win);
                   /** номер сообщения, которое зависит от результата и достижений игрока */
+                  try {
+                      globalThis.gYsdk.features.GameplayAPI.stop();
+                  }
+                  catch (_a) { }
                   globalThis.myUIBlocks.showSummary(200 - this.shootBullets, 68, GameState.Win);
               }
               this.enemiesIsStoped = true;
@@ -243419,6 +243475,10 @@ var MyGame = (function (exports) {
                               //     if(child.getData("isFull")) numRemBullets += 50;
                               // })
                               numRemBullets += this.shootBullets;
+                              try {
+                                  globalThis.gYsdk.features.GameplayAPI.stop();
+                              }
+                              catch (_a) { }
                               globalThis.myUIBlocks.showSummary(200 - numRemBullets, this.enemies.getNumKilledEnemies(), GameState.Lost);
                           }
                       });
@@ -243633,7 +243693,25 @@ var MyGame = (function (exports) {
           globalThis.currentLevel = lvlNames.DemoF;
           globalThis.currentSceneName = lvlNames.DemoF;
           globalThis.currentScene = this;
-          document.body.style.backgroundImage = "url(assetsF/forestBg.png)";
+          currentTexts$2 = globalThis.lang == "en" ? enTexts$2 : ruTexts$2;
+          document.body.style.backgroundImage = "url(forestBg.png)";
+          this.isPreview = true;
+          this.walkersArr = [];
+          this.radDegreeCoef = Math.PI / 180;
+          this.numTick = 0;
+          this.pointerDownOn = false;
+          this.isPreview = true;
+          this.numIssue = 0;
+          this.issueArr = [{ numTick: 0, issue: [{ x: 700, y: 50 }, { x: 700, y: 120 }, { x: 700, y: 180 },
+                      { x: 60, y: 160 }, { x: 60, y: 260 }, { x: 650, y: 150 }] },
+              { numTick: 50, issue: [{ x: 700, y: 50 }, { x: 700, y: 120 }, { x: 700, y: 180 },
+                      { x: 60, y: 160 }, { x: 60, y: 260 }, { x: 650, y: 150 }] }];
+          //{x:290,y:290},
+          this.numEnemiesBefore = 0;
+          this.issueArr.forEach((element) => {
+              this.numEnemiesBefore += element.issue.length;
+          });
+          this.numEnemiesAfter = this.numEnemiesBefore;
           // this.numEnemiesBefore =0;
           // this.issueArr.forEach((element) => {
           //     this.numEnemiesBefore+=element.issue.length;
@@ -243730,7 +243808,6 @@ var MyGame = (function (exports) {
                       enemyF.state = '';
                       //this.remove(enemy);
                       //let hasActive = reserve.countActive()
-                      //console.log(hasActive)
                   }, this);
               }
               if (this.numEnemiesAfter == 0) {
@@ -243750,7 +243827,6 @@ var MyGame = (function (exports) {
                   enemyF.state = '';
                   this.gameState = GameState.Lost;
                   this.playGransdExplodeTween(enemyF.x, enemyF.y);
-                  console.log(enemyF.state, gunBase.state);
               }
           });
           //this.gunBase.setCircle(100);
@@ -243780,6 +243856,10 @@ var MyGame = (function (exports) {
           });
           this.myStrikeGrp = new StrikeGrp$1(this);
           this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
+          try {
+              globalThis.gYsdk.features.GameplayAPI.start();
+          }
+          catch (_a) { }
       }
       update(time, delta) {
           if ((this.gameState == GameState.Win || this.gameState == GameState.Lost)
@@ -243803,6 +243883,10 @@ var MyGame = (function (exports) {
               }
               if (this.gameState == GameState.Win) {
                   this.scene.pause(lvlNames.DemoF);
+                  try {
+                      globalThis.gYsdk.features.GameplayAPI.stop();
+                  }
+                  catch (_a) { }
                   globalThis.myUIBlocks.showSummary(this.shootBullets, this.numEnemiesBefore, GameState.Win);
               }
               this.enemiesIsStoped = true;
@@ -243866,7 +243950,6 @@ var MyGame = (function (exports) {
               //     .displayOriginX;
               // let yOrg = (this.gunTube.body.gameObject as Phaser.GameObjects.Image)
               //     .displayOriginY;
-              //console.log(`xOrg = ${xOrg}, ${yOrg}`)
               let xProection = Math.sin(this.gunTube.body.rotation * this.radDegreeCoef);
               let yProection = Math.cos(this.gunTube.body.rotation * this.radDegreeCoef);
               let xCoord = 400 + 54 * xProection;
@@ -243931,7 +244014,6 @@ var MyGame = (function (exports) {
           const bubbleImg = this.add.image(186, 148, 'bubble').setDepth(21).setAlpha(0);
           const leftBubbleTxt = this.add.text(0, 0, currentTexts$2.leftTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           let txtBnd = leftBubbleTxt.getBounds();
-          //console.log(txtBnd)
           leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width / 2 - 5, bubbleImg.y - txtBnd.height / 2 - 5).setDepth(22).setAlpha(0);
           const rightBubbleTxt = this.add.text(0, 0, currentTexts$2.rightTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           txtBnd = rightBubbleTxt.getBounds();
@@ -244388,6 +244470,10 @@ var MyGame = (function (exports) {
                       }
                       else {
                           this.scene.pause(lvlNames.DemoF);
+                          try {
+                              globalThis.gYsdk.features.GameplayAPI.stop();
+                          }
+                          catch (_a) { }
                           globalThis.myUIBlocks.showSummary(this.shootBullets, (this.numEnemiesBefore - this.numEnemiesAfter), GameState.Lost);
                       }
                   }, this);
@@ -244474,6 +244560,7 @@ var MyGame = (function (exports) {
           /**количество сделанных выстрелов */
           this.numShots = 0;
           this.koef = 0;
+          this.numAttempts = 0;
           this.menuIsInit = false;
           // точки входа для верхних деревьев
           // [{ x: 30, y: 50 }, { x: 40, y: 50 }, { x: 50, y: 50 }, { x: 130, y: 60 }, { x: 170, y: 30 },
@@ -245027,10 +245114,27 @@ var MyGame = (function (exports) {
           globalThis.currentLevel = lvlNames.Forest;
           globalThis.currentSceneName = lvlNames.Forest;
           globalThis.currentScene = this;
-          document.body.style.backgroundImage = "url(assetsF/forestBg.png)";
+          currentTexts$1 = globalThis.lang == "en" ? enTexts$1 : ruTexts$1;
+          this.numAttempts++;
+          document.body.style.backgroundImage = "url(forestBg.png)";
+          this.walkersArr = [];
+          this.radDegreeCoef = Math.PI / 180;
+          this.numTick = 0;
+          this.nextTick = 0;
+          //this.currentSeq = "t_t_t_tl"
+          this.indPntsGrp = 0;
+          this.numIssue = 0;
+          this.numKilled = 0;
+          this.numIssuedEnemies = 0;
+          /**количество оставшихся патронов */
+          this.numBullets = 200;
+          /**количество сделанных выстрелов */
+          this.numShots = 0;
+          this.koef = 0;
+          this.menuIsInit = false;
           this.currentSeq = this.rangedMap.get("d0")[__webpack_exports__Math.RND.between(0, 1)];
-          this.fpsText = this.add.text(0, 20, '').setStyle({ color: 'red' });
-          this.fpsText.text = this.currentSeq;
+          //this.fpsText = this.add.text(0,20,'').setStyle({color:'red'});
+          //this.fpsText.text = this.currentSeq
           this.cameras.main.setBackgroundColor('#fafbfd');
           this.anims.create({
               key: 'fallenF',
@@ -245109,15 +245213,14 @@ var MyGame = (function (exports) {
               bullet.setActive(false).setVisible(false);
           });
           this.physics.add.collider(this.enemiesGrp, this.bulletsGrp, (enemyF, bulletF) => {
-              if (!enemyF.active) {
-                  console.log(`enemy active = ${enemyF.active}`);
-              }
               bulletF.body.reset(0, -100);
               bulletF.setActive(false).setVisible(false);
               //if(enemyF.getData("offSide")) return;
               //enemyF.play("fallenF")
               if (enemyF.state != 'falling') {
-                  this.numKilled++;
+                  // если орудие уже взорвано
+                  if (this.gameState != GameState.Lost)
+                      this.numKilled++;
                   this.numKilledEl.innerHTML = this.numKilled.toString();
                   // this.koef = Math.round(this.numShots*100/this.numKilled);
                   // this.fpsText.setText(`Koef: ${this.koef}`)
@@ -245125,7 +245228,7 @@ var MyGame = (function (exports) {
                       this.numBullets += 15;
                       this.numBulletEl.innerHTML = this.numBullets;
                       this.koef = Math.round(100 * this.numBullets / (1000 - this.numKilled) / 0.2);
-                      this.fpsText.setText(`Koef: ${this.koef}`);
+                      //this.fpsText.setText(`Koef: ${this.koef}`)
                   }
                   enemyF.setVelocity(0, 0);
                   enemyF.state = 'falling';
@@ -245134,9 +245237,6 @@ var MyGame = (function (exports) {
                       enemyF.body.reset(-100, 0);
                       enemyF.setActive(false).setVisible(false);
                       enemyF.state = '';
-                      //this.remove(enemy);
-                      //let hasActive = reserve.countActive()
-                      //console.log(hasActive)
                   }, this);
               }
               if (this.numKilled >= 1000) {
@@ -245156,7 +245256,6 @@ var MyGame = (function (exports) {
                   enemyF.setTexture("atlas1", 'walkerF10');
                   this.gameState = GameState.Lost;
                   this.playGransdExplodeTween(enemyF.x, enemyF.y);
-                  console.log(enemyF.state, gunBase.state);
               }
           });
           //this.gunBase.setCircle(100);
@@ -245213,18 +245312,19 @@ var MyGame = (function (exports) {
           this.numBulletEl.innerHTML = "200";
           this.scale.on('resize', () => {
               let a = document.querySelector("#gameContainer canvas");
-              document.querySelector("#textMsg").style.marginLeft = a.style.marginLeft;
-              document.querySelector("#textMsg").style.width = a.style.width;
-              //console.log(a.style.marginLeft );
+              try {
+                  document.querySelector("#textMsg").style.marginLeft = a.style.marginLeft;
+                  document.querySelector("#textMsg").style.width = a.style.width;
+              }
+              catch (_a) { }
           });
           this.events.once(__webpack_exports__Scenes.Events.DESTROY, () => {
               __webpack_exports__Scenes.Events.DESTROY;
           });
-          // a.
-          // innerHTML = `<div style="position: relative; top: 10; left: 10; z-index: 5;">
-          // <span>Relative text.</span>
-          // </div>`;
-          //this.fpsText.setText(`Pointer: ${this.pointerName}`)
+          try {
+              globalThis.gYsdk.features.GameplayAPI.start();
+          }
+          catch (_a) { }
       }
       update(time, delta) {
           // let a = document.querySelector("#modalContainer");
@@ -245248,6 +245348,7 @@ var MyGame = (function (exports) {
               this.gunTube.body.setAngularVelocity(0);
               this.shootOn = false;
               this.pointerDownOn = false;
+              document.getElementById("textMsg").remove();
               //globalThis.currentResult = this.gameState;
               //globalThis.currentLevel = lvlNames.Loner;
               this.enemiesIsStoped = true;
@@ -245331,7 +245432,6 @@ var MyGame = (function (exports) {
                       .displayOriginX;
                   this.gunTube.body.gameObject
                       .displayOriginY;
-                  //console.log(`xOrg = ${xOrg}, ${yOrg}`)
                   //this.add.image(xCoord,yCoord,"bulletF")
                   this.bulletsGrp.fireBullet(xCoord, yCoord, xProection * 180, -yProection * 180);
                   this.numBullets--;
@@ -245354,22 +245454,22 @@ var MyGame = (function (exports) {
               if (this.numKilled == 0) {
                   this.currentSeq =
                       this.rangedMap.get("d0")[__webpack_exports__Math.RND.between(0, 1)];
-                  this.enemyText.setText(`Hardness: d0`);
-                  this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`);
+                  //this.enemyText.setText(`Hardness: d0`)
+                  //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
               }
               else {
                   if (this.koef <= 75) {
                       this.currentSeq = this.rangedMap.get("d_50")[__webpack_exports__Math.RND.between(0, 1)];
-                      this.enemyText.setText(`Hardness: d_50`);
-                      this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`);
+                      //this.enemyText.setText(`Hardness: d_50`)
+                      //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                   }
                   if (this.koef >= 120) {
                       this.currentSeq = this.rangedMap.get("d40")[__webpack_exports__Math.RND.between(0, 1)];
-                      this.enemyText.setText(`Hardness: d40`);
-                      this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`);
+                      //this.enemyText.setText(`Hardness: d40`)
+                      //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                   }
                   else {
-                      switch (Math.floor((this.koef - 100) / 5)) {
+                      switch (Math.floor((this.koef - 100 - this.numAttempts) / 5)) {
                           case -5:
                               this.currentSeq =
                                   this.rangedMap.get("d_50")[__webpack_exports__Math.RND.between(0, 1)];
@@ -245411,8 +245511,8 @@ var MyGame = (function (exports) {
                                   this.rangedMap.get("d40")[__webpack_exports__Math.RND.between(0, 1)];
                               break;
                       }
-                      this.enemyText.setText(`Hardness: ${Math.floor(this.koef - 100) / 5}`);
-                      this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`);
+                      //this.enemyText.setText(`Hardness: ${Math.floor(this.koef - 100)/5}`)
+                      //this.bulletsText.setText(`Curr Seq: ${this.currentSeq}`)
                   }
               }
               //this.currentSeq = this.shortSeqMap.get(this.currentSeq).nextEasy
@@ -245459,7 +245559,7 @@ var MyGame = (function (exports) {
               //    seq[this.indPntsGrp].interval;
               startPntsName = this.shortSeqMap.get(this.currentSeq).
                   seq[this.indPntsGrp].startPntsName;
-              this.fpsText.setText(`Hardness: ${Math.floor((this.koef - 100) / 10)}`);
+              //this.fpsText.setText(`Hardness: ${Math.floor((this.koef - 100)/10)}`)
           }
           // переходим к следующему элементу в цепочке
           else {
@@ -245487,6 +245587,10 @@ var MyGame = (function (exports) {
               onComplete: () => {
                   this.fireGranade.play({ key: 'gunExplode', startFrame: 0 });
                   this.fireGranade.once(__webpack_exports__Animations.Events.ANIMATION_COMPLETE, () => {
+                      try {
+                          globalThis.gYsdk.features.GameplayAPI.stop();
+                      }
+                      catch (_a) { }
                       globalThis.myUIBlocks.showSummary(this.numShots, this.numKilled, GameState.Lost);
                   });
               }
@@ -245511,7 +245615,11 @@ var MyGame = (function (exports) {
                   text.setColor(`rgb(${r}, ${g}, ${b})`);
               },
               onComplete: () => {
-                  globalThis.myUIBlocks.showSummary(this.numShots, this.numKilled, GameState.Lost);
+                  try {
+                      globalThis.gYsdk.features.GameplayAPI.stop();
+                  }
+                  catch (_a) { }
+                  globalThis.myUIBlocks.showSummary(this.numShots, this.numKilled, GameState.Win);
               }
           });
       }
@@ -245622,7 +245730,6 @@ var MyGame = (function (exports) {
   //             ],
   //             frameRate: 10,
   //         });
-  //         //console.log(anim)
   //         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
   //     }
   //     fireBullet (x, y, velocityX)
@@ -245678,38 +245785,40 @@ var MyGame = (function (exports) {
       create() {
           globalThis.currentScene = this;
           globalThis.currentSceneName = lvlNames.Demo;
-          document.body.style.backgroundImage = "url(assets/bg5.png)";
+          document.body.style.backgroundImage = "url(bg5.png)";
           currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
-          if (this.gameState.autoPilot) {
-              this.gameState.waitAction = true;
-              fetch('http://localhost/drgServer/get_actions.php', {
-                  method: 'post',
-                  headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded',
-                      'Origin': 'https://localhost/drg'
-                  },
-                  body: ('data=')
-              }).then(response => {
-                  if (response.ok) {
-                      return response.json();
-                  }
-              }).then((data) => {
-                  this.timeActionArr = data.a_time.split(',').
-                      map((val) => Number(val));
-                  this.counterActionArr = data.update_cntr.split(',').
-                      map((val) => Number(val));
-                  this.keyActionArr = data.key_code.split(',');
-                  this.shootActionArr = data.is_shoot.split(',').
-                      map((val) => Number(val));
-                  this.vActionArr = data.v.split(',').map((val) => Number(val));
-                  this.xActionArr = data.x.split(',').map((val) => Number(val));
-                  if (this.keyActionArr.length != 0) {
-                      this.gameState.waitAction = false;
-                      this.indCounterArr = 0;
-                  }
-                  this.scene.resume();
-              });
-          }
+          // if (this.gameState.autoPilot) {
+          //     this.gameState.waitAction = true
+          //     let response = fetch('http://localhost/drgServer/get_actions.php',
+          //         {
+          //             method: 'post',
+          //             headers: {
+          //                 'Content-Type': 'application/x-www-form-urlencoded',
+          //                 'Origin': 'https://localhost/drg'
+          //             },
+          //             body: ('data=')
+          //         }).then(response => {
+          //             if (response.ok) {
+          //                 return response.json();
+          //             }
+          //         }).then((data : {a_time:string, id:string, is_shoot:string,
+          //             key_code:string, update_cntr:string, v:string,x:string}) => {
+          //             this.timeActionArr = data.a_time.split(',').
+          //                 map((val)=>Number(val))
+          //             this.counterActionArr = data.update_cntr.split(',').
+          //                 map((val)=>Number(val))
+          //             this.keyActionArr = data.key_code.split(',')
+          //             this.shootActionArr = data.is_shoot.split(',').
+          //                 map((val)=>Number(val))
+          //             this.vActionArr = data.v.split(',').map((val)=>Number(val))
+          //             this.xActionArr = data.x.split(',').map((val)=>Number(val))
+          //             if(this.keyActionArr.length != 0){
+          //                 this.gameState.waitAction = false
+          //                 this.indCounterArr = 0
+          //             }
+          //             this.scene.resume()
+          //         })
+          // }
           this.add.tileSprite(500, 225, 1000, 450, 'atlas0', 'bg');
           this.shooterCont = this.add.container(400, 418);
           this.shooterCont.add(this.add.image(0, 0, 'atlas0', 'gun'));
@@ -245826,7 +245935,7 @@ var MyGame = (function (exports) {
                   return;
               if (pointer.x < this.shooterCont.x - this.cameras.main.scrollX - 50) {
                   this.shooterContBody.body.setAcceleration(-60, 0).setMaxVelocity(60);
-                  this.inputText.setText('left');
+                  //this.inputText.setText('left')
                   return;
               }
               else if (pointer.x > this.shooterCont.x - this.cameras.main.scrollX + 50) {
@@ -245837,23 +245946,21 @@ var MyGame = (function (exports) {
               if ((pointer.x <= this.shooterCont.x - this.cameras.main.scrollX + 50) &&
                   (pointer.x >= this.shooterCont.x - this.cameras.main.scrollX - 50)) {
                   this.shootOn = !this.shootOn;
-                  if (this.shootOn)
-                      this.inputText.setText('shootOn');
-                  else
-                      this.inputText.setText('shootOff');
+                  //if (this.shootOn) this.inputText.setText('shootOn')
+                  //else this.inputText.setText('shootOff')
               }
           });
           this.shootBullets = 100;
           globalThis.currentResult = GameState.Gone;
           this.currentGameState = GameState.Gone;
           this.isPreview = true;
-          // let fromAtlas1 = this.add.image(30,30,"myTexture",'bg1')
-          // let fromAtlas2 = this.add.image(30,30,"myTexture",'bulletArs')
-          // console.log(fromAtlas1.alpha,fromAtlas2.alpha)
+          try {
+              globalThis.gYsdk.features.GameplayAPI.start();
+          }
+          catch (_a) { }
       }
       update(time, delta) {
           this.input.listeners('pointerdown');
-          //console.log("numListeners "+this.input.listenerCount("pointerdown"))
           // если все враги уничтожены (GameState.Win) или состав взорван (GameState.Lost),
           // но игра ещё не остановлена (!this.enemiesIsStoped), завершаем её
           if ((this.currentGameState == GameState.Win || this.currentGameState == GameState.Lost)
@@ -245881,6 +245988,10 @@ var MyGame = (function (exports) {
                           numRemBullets += 50;
                   });
                   numRemBullets += this.shootBullets;
+                  try {
+                      globalThis.gYsdk.features.GameplayAPI.stop();
+                  }
+                  catch (_a) { }
                   /** номер сообщения, которое зависит от результата и достижений игрока */
                   globalThis.myUIBlocks.showSummary(200 - numRemBullets, 7, GameState.Win);
               }
@@ -245989,6 +246100,10 @@ var MyGame = (function (exports) {
                                   this.playLevel();
                               }
                               else {
+                                  try {
+                                      globalThis.gYsdk.features.GameplayAPI.stop();
+                                  }
+                                  catch (_a) { }
                                   this.scene.pause("demo");
                                   let numRemBullets = 0;
                                   // считаем сколько осталось патронов в игре
@@ -246099,7 +246214,6 @@ var MyGame = (function (exports) {
           const bubbleImg = this.add.image(186, 148, 'bubble').setDepth(21).setAlpha(0);
           const leftBubbleTxt = this.add.text(0, 0, currentTexts.leftTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           let txtBnd = leftBubbleTxt.getBounds();
-          //console.log(txtBnd)
           leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width / 2 - 5, bubbleImg.y - txtBnd.height / 2 - 5).setDepth(22).setAlpha(0);
           const rightBubbleTxt = this.add.text(0, 0, currentTexts.rightTap, { fontFamily: 'Arial, Roboto', fontStyle: 'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
           txtBnd = rightBubbleTxt.getBounds();
@@ -246582,7 +246696,7 @@ var MyGame = (function (exports) {
   /** запускаем игру и загружаем ассеты в сцене Preload */
   function startGame() {
       const config = {
-          type: __webpack_exports__WEBGL,
+          type: __webpack_exports__AUTO,
           //transparent: true,
           backgroundColor: '#bfc874',
           width: 800,
@@ -246602,6 +246716,34 @@ var MyGame = (function (exports) {
           //render :render,
       };
       myGame = new __webpack_exports__Game(config);
+      globalThis.myResizeObserver = new ResizeObserver((entries, obs) => {
+          let mcWidth = entries.find((value) => {
+              if (value.target.id == "modalContainer")
+                  return true;
+              else
+                  return false;
+          }).borderBoxSize[0].inlineSize;
+          //console.log("modalContainer width = " + mcWidth);
+          let modalWnd = document.getElementById("modalWnd");
+          if (modalWnd) {
+              if (mcWidth < 800) {
+                  modalWnd.style.zoom = mcWidth / 800;
+              }
+              else {
+                  modalWnd.style.zoom = 1;
+              }
+          }
+          //console.log("modalWnd zoom = " + modalWnd.style.zoom);
+      });
+      //         let el = entries.find((value) => {
+      //             if( (value as HTMLElement).id == "modalWnd"){
+      //                 return true;
+      //             }
+      //             return false;
+      //         })
+      //         console.log(el.id;)
+      //     } )
+      myResizeObserver.observe(document.getElementById("modalContainer"));
   }
   function startLevel(levelName) {
       globalThis.myUIBlocks.hideModal();
@@ -246679,7 +246821,8 @@ var MyGame = (function (exports) {
                   try {
                       globalThis.gPlayer.setData({
                           lvlsData: JSON.stringify(globalThis.achievments)
-                      });
+                      }).
+                          then(() => { });
                   }
                   catch (err) {
                   }
@@ -246688,7 +246831,7 @@ var MyGame = (function (exports) {
           }
           if (loadings.isPlayerData == 1) {
               try {
-                  let data = globalThis.gPlayer.getData();
+                  let data = globalThis.gData;
                   globalThis.achievments = data.achievments;
               }
               catch (err) {
@@ -246734,7 +246877,6 @@ var MyGame = (function (exports) {
       YaGames
           .init()
           .then(ysdk => {
-          console.log('Yandex SDK initialized');
           globalThis.gYsdk = ysdk;
           try {
               globalThis.lang = ysdk.environment.i18n.lang;
@@ -246769,7 +246911,7 @@ var MyGame = (function (exports) {
               globalThis.gPlayer = player;
               player.getData().then(data => {
                   try {
-                      gData = data;
+                      globalThis.gData = data;
                       globalThis.achievments = JSON.parse(data.lvlsData);
                       addLoading('isPlayerData', 1);
                   }
@@ -246786,7 +246928,7 @@ var MyGame = (function (exports) {
               addLoading('isPlayerData', 0);
           });
       })
-          .cath(err => {
+          .catch(err => {
           addLoading('isSDKLoaded', 0);
           addLoading('isPlayerData', 0);
           addLoading('isAdvFinish', 0);

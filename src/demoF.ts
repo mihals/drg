@@ -110,7 +110,28 @@ export class DemoF extends Phaser.Scene
         globalThis.currentSceneName = lvlNames.DemoF
         globalThis.currentScene = this;
 
-        document.body.style.backgroundImage = "url(assetsF/forestBg.png)"
+        currentTexts = globalThis.lang == "en" ? enTexts : ruTexts;
+
+        document.body.style.backgroundImage = "url(forestBg.png)"
+        this.isPreview = true
+
+        this.walkersArr = []
+        this.radDegreeCoef = Math.PI/180;
+        this.numTick = 0
+        this.pointerDownOn = false
+        this.isPreview = true
+        this.numIssue = 0
+        this.issueArr = [{numTick:0,issue:[{x:700,y:50},{x:700,y:120},{x:700,y:180},
+            {x:60,y:160},{x:60,y:260},{x:650,y:150}]},
+            {numTick:50,issue:[{x:700,y:50},{x:700,y:120},{x:700,y:180},
+                {x:60,y:160},{x:60,y:260},{x:650,y:150}]}];
+                //{x:290,y:290},
+        this.numEnemiesBefore =0;
+        this.issueArr.forEach((element) => {
+            this.numEnemiesBefore+=element.issue.length;
+        })
+
+        this.numEnemiesAfter = this.numEnemiesBefore;
 
         // this.numEnemiesBefore =0;
         // this.issueArr.forEach((element) => {
@@ -242,7 +263,6 @@ export class DemoF extends Phaser.Scene
                     enemyF.state = '';
                     //this.remove(enemy);
                     //let hasActive = reserve.countActive()
-                    //console.log(hasActive)
                 }, this);
             }
             if(this.numEnemiesAfter == 0){
@@ -265,7 +285,6 @@ export class DemoF extends Phaser.Scene
                     enemyF.state = ''
                     this.gameState = GameState.Lost;
                     this.playGransdExplodeTween(enemyF.x, enemyF.y)
-                    console.log(enemyF.state, gunBase.state);
                 }
             })
 
@@ -300,6 +319,10 @@ export class DemoF extends Phaser.Scene
 
         this.myStrikeGrp = new StrikeGrp(this);
         this.time.addEvent({ delay: 500, callback: () => this.checkBullet(), loop: true });
+
+        try{
+            globalThis.gYsdk.features.GameplayAPI.start()
+        }catch{}
     }
 
     update(time: number, delta: number): void {
@@ -325,7 +348,11 @@ export class DemoF extends Phaser.Scene
                 // this.playGransdExplodeTween()
             }
             if (this.gameState == GameState.Win) {
-                this.scene.pause(lvlNames.DemoF)
+                this.scene.pause(lvlNames.DemoF);
+                try{
+                    globalThis.gYsdk.features.GameplayAPI.stop()
+                }catch{}
+
                 globalThis.myUIBlocks.showSummary(this.shootBullets, this.numEnemiesBefore,
                     GameState.Win)
             }
@@ -402,7 +429,6 @@ export class DemoF extends Phaser.Scene
                 // let yOrg = (this.gunTube.body.gameObject as Phaser.GameObjects.Image)
                 //     .displayOriginY;
 
-                //console.log(`xOrg = ${xOrg}, ${yOrg}`)
 
                 let xProection = Math.sin(this.gunTube.body.rotation*this.radDegreeCoef)
                 let yProection = Math.cos(this.gunTube.body.rotation*this.radDegreeCoef)
@@ -483,7 +509,6 @@ export class DemoF extends Phaser.Scene
           { fontFamily: 'Arial, Roboto', fontStyle:'bold', fontSize: '24px', color: '#000000', align: 'center', wordWrap: { width: 278 } });
         
         let txtBnd = leftBubbleTxt.getBounds()
-        //console.log(txtBnd)
         leftBubbleTxt.setPosition(bubbleImg.x - leftBubbleTxt.width/2 - 5,
             bubbleImg.y - txtBnd.height/2 - 5).setDepth(22).setAlpha(0)
 
@@ -960,6 +985,11 @@ export class DemoF extends Phaser.Scene
                             this.playLevel();
                         }else{
                             this.scene.pause(lvlNames.DemoF);
+                            
+                            try{
+                                globalThis.gYsdk.features.GameplayAPI.stop()
+                            }catch{}
+
                             globalThis.myUIBlocks.showSummary(this.shootBullets,
                                 (this.numEnemiesBefore-this.numEnemiesAfter),
                                 GameState.Lost)

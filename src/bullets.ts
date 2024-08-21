@@ -57,7 +57,6 @@ export class Bullets extends Phaser.Physics.Arcade.Group
             ],
             frameRate: 10,
         });
-        //console.log(anim)
         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
     }
 
@@ -138,7 +137,6 @@ export class BulletsF extends Phaser.Physics.Arcade.Group
             ],
             frameRate: 10,
         });
-        //console.log(anim)
         this.blankShot = scene.physics.add.sprite(-100,-100,'empty').setDepth(12)
     }
 
