@@ -242102,6 +242102,7 @@ var MyGame = (function (exports) {
           document.getElementById("modalContainer").innerHTML = modalWnd;
           document.getElementById("modalContainer").style.visibility = "visible";
           document.getElementById("modalContainer").style.display = "flex";
+          document.getElementsByClassName("lvlBottom")[0].scrollIntoView();
           //document.getElementById("modalContainer").style.zoom = 0.3;
       }
       /** вставляет в контейнер набор кнопок с уровнями */
@@ -242142,6 +242143,7 @@ var MyGame = (function (exports) {
               document.getElementById("modalContainer").innerHTML = content;
               document.getElementById("modalContainer").style.visibility = "visible";
               document.getElementById("modalContainer").style.display = "flex";
+              document.getElementsByClassName("lvlBottom")[0].scrollIntoView();
           }
       }
       /** обрабатывает нажатие кнопки уровня и удаляет окно с кнопками с уровнями
@@ -242327,44 +242329,36 @@ var MyGame = (function (exports) {
                   }
                   // если попытка пройти уровень "Одиночка" неудачна
                   else {
-                      try {
-                          globalThis.gYsdk.adv.showFullscreenAdv();
-                      }
-                      catch (err) {
-                          console.log("Одиночка adv " + err);
-                      }
-                      finally {
-                          summaryTopTxt = lang == "ru" ? "Уровень не пройден." :
-                              "The level is not passed.";
-                          // если уровень "Одиночка" ещё не проходился
-                          if (globalThis.achievments[1] != 1) {
-                              bodySummary = lang == "ru" ? "Пройдите этот уровень чтобы получить" +
-                                  " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола' ." +
-                                  " Бот будет пытаться повторять все ваши действия на пройденном уровне." :
-                                  "Complete this level to get your first star, " +
-                                      "and you will have a partner - a bot for the game 'Two gun'." +
-                                      " The bot will try to repeat all your actions at the completed level.";
-                              leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                              leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
+                      summaryTopTxt = lang == "ru" ? "Уровень не пройден." :
+                          "The level is not passed.";
+                      // если уровень "Одиночка" ещё не проходился
+                      if (globalThis.achievments[1] != 1) {
+                          bodySummary = lang == "ru" ? "Пройдите этот уровень чтобы получить" +
+                              " свою первую звезду, и у вас появится напарник-бот для игры 'В два ствола' ." +
+                              " Бот будет пытаться повторять все ваши действия на пройденном уровне." :
+                              "Complete this level to get your first star, " +
+                                  "and you will have a partner - a bot for the game 'Two gun'." +
+                                  " The bot will try to repeat all your actions at the completed level.";
+                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                          leftBtn = `<button class="lvlBottom" onclick="globalThis.myUIBlocks.showAdv('loner'); ">
                                         ${leftBtnTxt}</button>`;
-                              rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                              rightBtn = `<button class="lvlBottom" onclick=` +
-                                  `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showAdv(null); ">
                                         ${rightBtnTxt}</button>`;
-                          }
-                          // если уровень "Одиночка" ранее уже был пройден
-                          else {
-                              bodySummary = lang == "ru" ? "Если Вам нужно заменить Чёрного Бота, пройдите уровень " +
-                                  "'Одиночка.' ещё раз и у Вас появится другой напарник." :
-                                  " If you want to replace the bot, go through this level again.";
-                              leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                              leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('loner')">
+                      }
+                      // если уровень "Одиночка" ранее уже был пройден
+                      else {
+                          bodySummary = lang == "ru" ? "Если Вам нужно заменить Чёрного Бота, пройдите уровень " +
+                              "'Одиночка.' ещё раз и у Вас появится другой напарник." :
+                              " If you want to replace the bot, go through this level again.";
+                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                          leftBtn = `<button class="lvlBottom" onclick="globalThis.myUIBlocks.showAdv('loner'); ">
                                             ${leftBtnTxt}</button>`;
-                              rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                              rightBtn = `<button class="lvlBottom" onclick=` +
-                                  `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                          rightBtn = `<button class="lvlBottom" onclick=` +
+                              `"globalThis.myUIBlocks.showAdv(null); ">
                                             ${rightBtnTxt}</button>`;
-                          }
                       }
                   }
                   break;
@@ -242410,36 +242404,28 @@ var MyGame = (function (exports) {
                   }
                   // уровень "В два ствола" не пройден
                   else {
-                      try {
-                          globalThis.gYsdk.adv.showFullscreenAdv();
+                      // если уровень "В два ствола" и ранее не проходился
+                      if (globalThis.achievments[2] != 1) {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                              "The level  'Two guns.' is not passed.";
+                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                              "перейти на новую локацию 'В лесу.'" :
+                              " Complete this level to get to know the new location 'In the forest.'";
                       }
-                      catch (err) {
-                          console.log("Одиночка adv " + err);
+                      else {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
+                              "The level  'Two guns.' is not passed.";
+                          bodySummary = lang == "ru" ? "Уровень 'В два ствола'" +
+                              " вами уже проходился ранее!" :
+                              "Level 'In two barrels ' you have already passed before.";
                       }
-                      finally {
-                          // если уровень "В два ствола" и ранее не проходился
-                          if (globalThis.achievments[2] != 1) {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
-                                  "The level  'Two guns.' is not passed.";
-                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                                  "перейти на новую локацию 'В лесу.'" :
-                                  " Complete this level to get to know the new location 'In the forest.'";
-                          }
-                          else {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'В два ствола' не пройден!" :
-                                  "The level  'Two guns.' is not passed.";
-                              bodySummary = lang == "ru" ? "Уровень 'В два ствола'" +
-                                  " вами уже проходился ранее!" :
-                                  "Level 'In two barrels ' you have already passed before.";
-                          }
-                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('twoGuns')">
+                      leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                      leftBtn = `<button class="lvlBottom" onclick="globalThis.myUIBlocks.showAdv('twoGuns'); ">
                                             ${leftBtnTxt}</button>`;
-                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                          rightBtn = `<button class="lvlBottom" onclick=` +
-                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                      rightBtn = `<button class="lvlBottom" onclick=` +
+                          `"globalThis.myUIBlocks.showAdv(null); ">
                                             ${rightBtnTxt}</button>`;
-                      }
                   }
                   break;
               case lvlNames.DemoF:
@@ -242492,36 +242478,28 @@ var MyGame = (function (exports) {
                   }
                   // уровень "В лесу" не пройден
                   else {
-                      try {
-                          globalThis.gYsdk.adv.showFullscreenAdv();
+                      // если уровень "В лесу" и ранее не проходился
+                      if (globalThis.achievments[3] != 1) {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                              "The level  'In the forest.' is not passed.";
+                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                              "перейти на новую локацию 'Оборона.'" :
+                              " Complete this level to get to know the new location 'Defence.'";
                       }
-                      catch (err) {
-                          console.log("В лесу adv " + err);
+                      else {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
+                              "The level  'In the forest.' is not passed.";
+                          bodySummary = lang == "ru" ? "Уровень 'В лесу'" +
+                              " вами уже проходился ранее!" :
+                              "Level 'In the forest ' you have already passed before.";
                       }
-                      finally {
-                          // если уровень "В лесу" и ранее не проходился
-                          if (globalThis.achievments[3] != 1) {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
-                                  "The level  'In the forest.' is not passed.";
-                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                                  "перейти на новую локацию 'Оборона.'" :
-                                  " Complete this level to get to know the new location 'Defence.'";
-                          }
-                          else {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'В лесу' не пройден!" :
-                                  "The level  'In the forest.' is not passed.";
-                              bodySummary = lang == "ru" ? "Уровень 'В лесу'" +
-                                  " вами уже проходился ранее!" :
-                                  "Level 'In the forest ' you have already passed before.";
-                          }
-                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('demoF')">
+                      leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                      leftBtn = `<button class="lvlBottom" onclick="globalThis.myUIBlocks.showAdv('demoF'); ">
                                                 ${leftBtnTxt}</button>`;
-                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                          rightBtn = `<button class="lvlBottom" onclick=` +
-                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                      rightBtn = `<button class="lvlBottom" onclick=` +
+                          `"globalThis.myUIBlocks.showAdv(null); ">
                                                 ${rightBtnTxt}</button>`;
-                      }
                   }
                   break;
               case lvlNames.Forest:
@@ -242567,40 +242545,32 @@ var MyGame = (function (exports) {
                   }
                   // уровень "Оборона" не пройден
                   else {
-                      try {
-                          globalThis.gYsdk.adv.showFullscreenAdv();
+                      // если уровень "Оборона" и ранее не проходился
+                      if (globalThis.achievments[4] != 1) {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                              "The level  'Defence.' is not passed.";
+                          bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
+                              "получить свою третью звезду.'" :
+                              " Complete this level to get your third star.";
                       }
-                      catch (err) {
-                          console.log("Оборона adv " + err);
+                      else {
+                          summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
+                              "The level  'Defence.' is not passed.";
+                          bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
+                              " вами уже проходился ранее, но можно улучшить" +
+                              " свой результат!" :
+                              "Level 'Defence' you have already passed before, " +
+                                  " but you can improve your result.";
                       }
-                      finally {
-                          // если уровень "Оборона" и ранее не проходился
-                          if (globalThis.achievments[4] != 1) {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
-                                  "The level  'Defence.' is not passed.";
-                              bodySummary = lang == "ru" ? " Пройдите этот уровень, чтобы " +
-                                  "получить свою третью звезду.'" :
-                                  " Complete this level to get your third star.";
-                          }
-                          else {
-                              summaryTopTxt = lang == "ru" ? "Уровень 'Оборона' не пройден!" :
-                                  "The level  'Defence.' is not passed.";
-                              bodySummary = lang == "ru" ? "Уровень 'Оборона'" +
-                                  " вами уже проходился ранее, но можно улучшить" +
-                                  " свой результат!" :
-                                  "Level 'Defence' you have already passed before, " +
-                                      " but you can improve your result.";
-                          }
-                          leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
-                          leftBtn = `<button class="lvlBottom" onclick="MyGame.startLevel('forest')">
+                      leftBtnTxt = lang == "ru" ? "Повторить." : "Retry.";
+                      leftBtn = `<button class="lvlBottom" onclick=" globalThis.myUIBlocks.showAdv('forest'); ">
                                                 ${leftBtnTxt}</button>`;
-                          rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
-                          rightBtn = `<button class="lvlBottom" onclick=` +
-                              `"globalThis.myUIBlocks.showBaseWnd(globalThis.achievments,globalThis.lang)">
+                      rightBtnTxt = lang == "ru" ? "Отмена." : "Cancel.";
+                      rightBtn = `<button class="lvlBottom" onclick=` +
+                          `"globalThis.myUIBlocks.showAdv(null); ">
                                                 ${rightBtnTxt}</button>`;
-                      }
-                      break;
                   }
+                  break;
           }
           let locNumStars = 0;
           for (let i = 0; i < globalThis.achievments.length; i++) {
@@ -242643,6 +242613,43 @@ var MyGame = (function (exports) {
           // document.getElementById("modalContainer").innerHTML = content;
           document.getElementById("modalContainer").style.visibility = "visible";
           document.getElementById("modalContainer").style.display = "flex";
+          document.getElementsByClassName("lvlBottom")[0].scrollIntoView();
+      }
+      /** показывает полноэкранную рекламу
+       *  lvlName - имя уровня, который нужно запустить, если == null,
+       *  выводим окно с уровнями
+       */
+      showAdv(lvlName) {
+          try {
+              globalThis.gYsdk.adv.showFullscreenAdv({
+                  callbacks: {
+                      onClose: () => {
+                          if (!lvlName) {
+                              globalThis.myUIBlocks.showBaseWnd(globalThis.achievments, globalThis.lang);
+                          }
+                          else {
+                              MyGame.startLevel(lvlName);
+                          }
+                      },
+                      onError: (e) => {
+                          if (!lvlName) {
+                              globalThis.myUIBlocks.showBaseWnd(globalThis.achievments, globalThis.lang);
+                          }
+                          else {
+                              MyGame.startLevel(lvlName);
+                          }
+                      }
+                  }
+              });
+          }
+          catch (err) {
+              if (!lvlName) {
+                  globalThis.myUIBlocks.showBaseWnd(globalThis.achievments, globalThis.lang);
+              }
+              else {
+                  MyGame.startLevel(lvlName);
+              }
+          }
       }
   }
 
