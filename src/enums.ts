@@ -14,6 +14,10 @@ export enum numMsg {
     AnotherAloneLost
 }
 
-export enum lvlNames {Preview, Alone, TwoGuns}
+export enum lvlNames {Demo = "demo", Loner = "loner", TwoGuns = "twoGuns",
+    DemoF ="demoF", Forest = "forest", EveryLast ="everyLast"}
 
 export  enum GameState{Gone, Win, Lost}
+
+/** состояние уровня: не проходился, пройден неудачно, пройден успешно */
+export enum LvlState{NonAttempted = -1, Failed =0, Completed = 1}

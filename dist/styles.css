@@ -1,15 +1,31 @@
+* {
+     -webkit-touch-callout: none;
+     /* iOS Safari */
+     -webkit-user-select: none;
+     /* Safari */
+     -khtml-user-select: none;
+     /* Konqueror HTML */
+     -moz-user-select: none;
+     /* Old versions of Firefox */
+     -ms-user-select: none;
+     /* Internet Explorer/Edge */
+     user-select: none;
+     /* Non-prefixed version, currently
+                                     supported by Chrome, Edge, Opera and Firefox */
+}
+
 .flexContainer {display: flex;}
 .gameEditor {display: flex; flex-direction: column;  }
 .activeTool {display: flex; justify-content: space-evenly; align-items: center;}
 .gameEditor div {padding-top: 10px;}
-body {background-image: url('./assets/bg5.png'); background-repeat: repeat;
+body {background-image: url('./bg5.png'); background-repeat: repeat;
      padding: 0; margin: 0;} */
 /* body{background-color: rgb(184,183,8);padding: 0; margin: 0;}  */
 canvas {padding: 0; margin: 0;}
 #loaderCont {width: 1; height: 1; position: absolute; top:-10; left: -10;}
 #modalContainer {
-     /* display: none;
-     visibility: hidden; */
+     display: none;
+     visibility: hidden; 
      position: fixed;
      top: 0;
      left: 0;
